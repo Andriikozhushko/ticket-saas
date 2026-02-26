@@ -67,18 +67,36 @@ export async function POST(
       const eventTitle = (orderWithTickets.event as { title: string }).title ?? "Подія";
       const myTicketsUrl = `${baseUrl.replace(/\/$/, "")}/my-tickets`;
       const qrSize = 200;
-      const reasonLabel = { gift: "Подарок", issuance: "Видача", purchase: "Покупка" }[reason];
       const qrImages = orderWithTickets.tickets
         .map(
           (t) =>
             `<div style="margin:12px 0;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(`${baseUrl.replace(/\/$/, "")}/api/public/tickets/verify/${t.id}`)}&bgcolor=FFFFFF&color=000000" alt="QR квитка" width="${qrSize}" height="${qrSize}" style="display:block;border-radius:8px;" /></div>`
         )
         .join("");
-      const htmlContent = `<p>Вам видано квиток(и) на подію <strong>${eventTitle}</strong> (${reasonLabel}).</p><p>QR-коди для входу:</p>${qrImages}<p><a href="${myTicketsUrl}">Переглянути мої квитки</a> (увійдіть з email ${email}).</p>`;
-      const textContent = `Вам видано квиток(и) на подію «${eventTitle}». Переглянути: ${myTicketsUrl}`;
+      const linkBlock = `<p><a href="${myTicketsUrl}">Переглянути мої квитки</a> (увійдіть з email ${email}).</p>`;
+      const qrBlock = `<p>QR-коди для входу:</p>${qrImages}`;
+
+      let subject: string;
+      let htmlContent: string;
+      let textContent: string;
+
+      if (reason === "gift") {
+        subject = `Вам подарували квиток на подію «${eventTitle}»`;
+        htmlContent = `<p>Вам подарували квиток(и) на подію <strong>${eventTitle}</strong>.</p>${qrBlock}${linkBlock}`;
+        textContent = `Вам подарували квиток(и) на подію «${eventTitle}». Переглянути: ${myTicketsUrl}`;
+      } else if (reason === "issuance") {
+        subject = `Вам видано квиток на подію «${eventTitle}»`;
+        htmlContent = `<p>Вам видано квиток(и) на подію <strong>${eventTitle}</strong>.</p>${qrBlock}${linkBlock}`;
+        textContent = `Вам видано квиток(и) на подію «${eventTitle}». Переглянути: ${myTicketsUrl}`;
+      } else {
+        subject = `Ваші квитки на подію «${eventTitle}»`;
+        htmlContent = `<p>Ваші квитки на подію <strong>${eventTitle}</strong> (покупка/оформлення).</p>${qrBlock}${linkBlock}`;
+        textContent = `Ваші квитки на подію «${eventTitle}». Переглянути: ${myTicketsUrl}`;
+      }
+
       await sendEmail({
         to: email,
-        subject: `Ваш квиток — ${eventTitle}`,
+        subject,
         textContent,
         htmlContent,
       });
