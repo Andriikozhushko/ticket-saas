@@ -59,17 +59,16 @@ export async function PATCH(
     const organizerPhotoUrl = typeof body?.organizerPhotoUrl === "string" ? body.organizerPhotoUrl.trim() || null : undefined;
     const description = typeof body?.description === "string" ? body.description.trim() || null : undefined;
     const rawTicketTypes = Array.isArray(body?.ticketTypes) ? body.ticketTypes : undefined;
-    const ticketTypes =
-      rawTicketTypes &&
-      rawTicketTypes
-        .map((t: unknown) => {
-          if (!t || typeof t !== "object") return null;
-          const name = typeof (t as { name?: string }).name === "string" ? (t as { name: string }).name.trim() : "";
-          const priceCents = Math.round(Number((t as { priceCents?: number }).priceCents));
-          if (!name || !Number.isFinite(priceCents) || priceCents < 0) return null;
-          return { name, priceCents };
-        })
-        .filter((t): t is { name: string; priceCents: number } => t !== null);
+    type TicketTypeRow = { name: string; priceCents: number };
+    const mappedTicketTypes: (TicketTypeRow | null)[] | undefined =
+      rawTicketTypes?.map((t: unknown): TicketTypeRow | null => {
+        if (!t || typeof t !== "object") return null;
+        const name = typeof (t as { name?: string }).name === "string" ? (t as { name: string }).name.trim() : "";
+        const priceCents = Math.round(Number((t as { priceCents?: number }).priceCents));
+        if (!name || !Number.isFinite(priceCents) || priceCents < 0) return null;
+        return { name, priceCents };
+      });
+    const ticketTypes = mappedTicketTypes?.filter((t): t is TicketTypeRow => t !== null);
 
     const updateData: Parameters<typeof prisma.event.update>[0]["data"] = {};
     if (title !== undefined) updateData.title = title;
@@ -81,10 +80,10 @@ export async function PATCH(
     if (description !== undefined) updateData.description = description;
 
     if (ticketTypes && ticketTypes.length > 0) {
-      updateData.priceCents = Math.min(...ticketTypes.map((t) => t.priceCents));
+      updateData.priceCents = Math.min(...ticketTypes.map((t: { name: string; priceCents: number }) => t.priceCents));
       await prisma.ticketType.deleteMany({ where: { eventId } });
       await prisma.ticketType.createMany({
-        data: ticketTypes.map((t, i) => ({
+        data: ticketTypes.map((t: { name: string; priceCents: number }, i: number) => ({
           eventId,
           name: t.name,
           priceCents: t.priceCents,
@@ -127,7 +126,7 @@ export async function DELETE(
       prisma.order.deleteMany({ where: { eventId } }),
       ...(db.ticketierEvent ? [db.ticketierEvent.deleteMany({ where: { eventId } })] : []),
       prisma.event.delete({ where: { id: eventId } }),
-    ];
+    ] as unknown as Parameters<typeof prisma.$transaction>[0];
     await prisma.$transaction(tx);
     return NextResponse.json({ ok: true });
   } catch (e) {
