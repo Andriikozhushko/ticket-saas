@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Box, Button, Card, Select, Stack, Table, Text, TextInput, Title } from "@mantine/core";
 
-type UserRow = { id: string; email: string; role: string; createdAt: string };
+export type UserRow = { id: string; email: string; role: string; createdAt: string };
 
 export default function AdminUsersClient({ users }: { users: UserRow[] }) {
   const router = useRouter();
