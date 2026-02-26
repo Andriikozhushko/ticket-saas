@@ -23,7 +23,7 @@ function extractTicketIdFromUrl(url: string): string | null {
 
 /** Пропускаємо "код не знайдено" — це нормально для кожного кадру без QR. Показуємо лише справжні помилки (камера, доступ). */
 function isScanFailureOnly(err: unknown): boolean {
-  const s = typeof err === "string" ? err : err instanceof Error ? err.message : String(err ?? "");
+  const s = typeof err === "string" ? err : (err as Error)?.message ?? String(err ?? "");
   if (!s) return true;
   const lower = s.toLowerCase();
   return (
@@ -107,14 +107,14 @@ export default function QRScanner({ onScan }: Props) {
           (err) => {
             if (!mounted) return;
             if (isScanFailureOnly(err)) return;
-            const msg = typeof err === "string" ? err : err instanceof Error ? err.message : "Немає доступу до камери";
+            const msg = typeof err === "string" ? err : (err as Error)?.message ?? "Немає доступу до камери";
             setCameraError(msg);
           }
         );
         startedRef.current = true;
         if (mounted) setCameraError("");
       } catch (e) {
-        if (mounted) setCameraError(e instanceof Error ? e.message : "Помилка камери");
+        if (mounted) setCameraError((e as Error)?.message ?? "Помилка камери");
       }
     })();
     return () => {
