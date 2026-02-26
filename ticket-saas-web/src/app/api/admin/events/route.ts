@@ -19,15 +19,14 @@ export async function POST(req: Request) {
     const orgId = typeof body?.orgId === "string" ? body.orgId : "";
     const title = typeof body?.title === "string" ? body.title.trim() : "";
     const rawTicketTypes = Array.isArray(body?.ticketTypes) ? body.ticketTypes : [];
-    const ticketTypes: TicketTypeInput[] = rawTicketTypes
-      .map((t: unknown) => {
-        if (!t || typeof t !== "object") return null;
-        const name = typeof (t as { name?: string }).name === "string" ? (t as { name: string }).name.trim() : "";
-        const priceCents = Math.round(Number((t as { priceCents?: number }).priceCents));
-        if (!name || !Number.isFinite(priceCents) || priceCents < 0) return null;
-        return { name, priceCents };
-      })
-      .filter((t): t is TicketTypeInput => t !== null);
+    const mappedTicketTypes: (TicketTypeInput | null)[] = rawTicketTypes.map((t: unknown): TicketTypeInput | null => {
+      if (!t || typeof t !== "object") return null;
+      const name = typeof (t as { name?: string }).name === "string" ? (t as { name: string }).name.trim() : "";
+      const priceCents = Math.round(Number((t as { priceCents?: number }).priceCents));
+      if (!name || !Number.isFinite(priceCents) || priceCents < 0) return null;
+      return { name, priceCents };
+    });
+    const ticketTypes: TicketTypeInput[] = mappedTicketTypes.filter((t): t is TicketTypeInput => t !== null);
     if (!orgId || !title) return NextResponse.json({ error: "orgId, title required" }, { status: 400 });
     if (ticketTypes.length === 0) return NextResponse.json({ error: "Додайте хоча б один вид квитка" }, { status: 400 });
     const jarId = typeof body?.jarId === "string" ? body.jarId.trim() : "";
