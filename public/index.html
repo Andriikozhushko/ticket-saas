@@ -1,0 +1,379 @@
+<!-- public/index.html -->
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ticket SaaS (dev UI)</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui; margin: 24px; }
+    .card { border:1px solid #ddd; padding:16px; border-radius:12px; margin-bottom:16px; }
+    input, select, button, textarea { padding:8px; border-radius:8px; border:1px solid #ccc; font: inherit; }
+    button { background:#111; color:white; cursor:pointer; }
+    button.secondary { background:white; color:#111; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    code { background:#f5f5f5; padding:4px 8px; border-radius:6px; }
+    pre { background:#0b1020; color:#fff; padding:12px; border-radius:12px; overflow:auto; }
+    .ok { color:green; font-weight:bold; }
+    .err { color:red; font-weight:bold; }
+    .muted { color:#666; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  </style>
+</head>
+
+<body>
+
+<h1>Ticket SaaS (dev UI)</h1>
+
+<div class="card">
+  <h3>1) User</h3>
+  <button id="btnUser">Create test user</button>
+  <div>Email: <code id="userEmail">—</code></div>
+  <div>User ID: <code id="userId">—</code></div>
+</div>
+
+<div class="card">
+  <h3>2) Organization</h3>
+  <div class="row">
+    <input id="orgName" value="Test Org" />
+    <button id="btnOrg">Create org</button>
+  </div>
+  <div>Org ID: <code id="orgId">—</code></div>
+</div>
+
+<div class="card">
+  <h3>2.5) Monobank</h3>
+  <div class="row">
+    <input id="monoToken" placeholder="Mono personal token" style="width:520px"/>
+    <button id="btnMonoConnect">Connect mono</button>
+  </div>
+
+  <br>
+
+  <div class="row">
+    <select id="monoJarSelect" disabled style="min-width:420px">
+      <option value="">(connect first)</option>
+    </select>
+    <button id="btnSetJar" class="secondary" disabled>Set jar for event</button>
+  </div>
+
+  <div>Selected jar: <code id="jarTitle">—</code></div>
+  <div>Jar ID: <code id="jarId">—</code></div>
+  <div>Send ID: <code id="jarSendId">—</code></div>
+
+  <div style="margin-top:8px;">
+    Pay link:
+    <a id="payLinkA" href="#" target="_blank">—</a>
+    <div class="muted">Если на телефоне mono-приложение не подставит сумму — ок, просто введи сумму вручную.</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>3) Event</h3>
+  <div class="row">
+    <input id="eventTitle" value="Test Event" />
+    <input id="eventPrice" value="1000" style="width:120px" />
+    <button id="btnEvent">Create event</button>
+  </div>
+  <div>Event ID: <code id="eventId">—</code></div>
+</div>
+
+<div class="card">
+  <h3>4) Order</h3>
+  <div class="row">
+    <input id="buyerEmail" value="a@a.com" />
+    <button id="btnOrder">Create order</button>
+    <button id="btnCheck" class="secondary" disabled>Check</button>
+    <button id="btnForceMono" class="secondary" disabled>Force mono check</button>
+    <button id="btnGetQr" class="secondary" disabled>Get QR</button>
+    <button id="btnDevPay" class="secondary" disabled>DEV: mark paid</button>
+    <button id="btnDevReset" class="secondary" disabled>DEV: reset</button>
+  </div>
+
+  <div>Order ID: <code id="orderId">—</code></div>
+  <div>Amount: <code id="amountHuman">—</code> <span class="muted">(pay EXACT)</span></div>
+  <div>Status: <span id="statusLine">—</span></div>
+
+  <div style="margin-top:10px;">
+    Ticket ID: <code id="ticketId">—</code>
+  </div>
+  <div style="margin-top:6px;">
+    QR text: <code id="qrTextInline">—</code>
+  </div>
+</div>
+
+<div class="card">
+  <h3>5) Scan</h3>
+  <div class="row">
+    <input id="usedBy" value="door-1" placeholder="usedBy" />
+    <input id="scannerToken" value="dev_scanner_token" placeholder="x-scanner-token" style="width:260px" />
+    <button id="btnScan">Scan</button>
+  </div>
+  <div style="margin-top:10px;">
+    <textarea id="qrInput" rows="3" style="width:100%;" placeholder="qrText here"></textarea>
+  </div>
+  <div style="margin-top:10px;" id="scanResult" class="muted">Scan result: —</div>
+</div>
+
+<div class="card">
+  <h3>Logs</h3>
+  <pre id="logs">{}</pre>
+</div>
+
+<script>
+  const state = { user:null, org:null, event:null, order:null, jars:[], selectedJar:null };
+
+  const $ = (id) => document.getElementById(id);
+
+  function log(o){
+    $("logs").textContent = JSON.stringify(o,null,2) + "\n\n" + $("logs").textContent;
+  }
+
+  async function api(path, method="GET", body=null, extraHeaders={}){
+    const headers = { ...extraHeaders };
+    const hasBody = body !== null && body !== undefined;
+    if (hasBody) headers["Content-Type"] = "application/json";
+
+    const res = await fetch(path, {
+      method,
+      headers,
+      body: hasBody ? JSON.stringify(body) : undefined
+    });
+
+    const text = await res.text();
+    let data = {};
+    try { data = text ? JSON.parse(text) : {}; }
+    catch { data = { raw:text }; }
+
+    if(!res.ok) {
+      const msg = (data && (data.error || data.message)) ? JSON.stringify(data) : `HTTP ${res.status}: ${text}`;
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  function buildJarUrl(sendId){
+    const s = String(sendId || "").trim().replace(/^\/+/, "");
+    if (!s) return null;
+    if (s.startsWith("jar/")) return "https://send.monobank.ua/" + s;
+    return "https://send.monobank.ua/jar/" + s;
+  }
+
+  function refreshJarUI(){
+    const j = state.selectedJar;
+    $("jarTitle").textContent  = j?.title ?? "—";
+    $("jarId").textContent     = j?.id ?? "—";
+    $("jarSendId").textContent = j?.sendId ?? "—";
+
+    const url = buildJarUrl(j?.sendId);
+    const a = $("payLinkA");
+    if (!url) {
+      a.textContent = "—";
+      a.href = "#";
+    } else {
+      a.textContent = url;
+      a.href = url;
+    }
+  }
+
+  async function refreshOrderStatus(){
+    if(!state.order?.orderId) return;
+    const o = await api("/orders/" + state.order.orderId);
+    $("statusLine").textContent = o.status;
+    $("ticketId").textContent = o.ticket?.id ?? "—";
+    log({ status:o });
+
+    if (o.status === "paid") $("btnGetQr").disabled = false;
+  }
+
+  // 1) USER
+  $("btnUser").onclick = async()=> {
+    const u = await api("/test-user","POST");
+    state.user = u;
+    $("userEmail").textContent = u.email;
+    $("userId").textContent = u.id;
+    log({ user:u });
+  };
+
+  // 2) ORG
+  $("btnOrg").onclick = async()=> {
+    if(!state.user?.email) return alert("Create user first");
+    const org = await api("/orgs/create-by-email","POST",{
+      ownerEmail: state.user.email,
+      name: $("orgName").value.trim()
+    });
+    state.org = org;
+    $("orgId").textContent = org.id;
+    log({ org });
+  };
+
+  // 2.5) MONO CONNECT
+  $("btnMonoConnect").onclick = async()=> {
+    if(!state.org?.id) return alert("Create org first");
+
+    const token = $("monoToken").value.trim();
+    if(!token) return alert("Paste mono token");
+
+    const out = await api("/mono/connect","POST",{ orgId: state.org.id, token });
+
+    state.jars = out.jars || [];
+    const sel = $("monoJarSelect");
+    sel.innerHTML = "";
+
+    if(!state.jars.length){
+      sel.disabled = true;
+      sel.innerHTML = "<option value=''>No jars</option>";
+      state.selectedJar = null;
+      refreshJarUI();
+      $("btnSetJar").disabled = true;
+      log({ monoConnect: out });
+      return;
+    }
+
+    sel.disabled = false;
+
+    for(const j of state.jars){
+      const opt = document.createElement("option");
+      opt.value = j.id;
+      opt.textContent = j.title || j.id;
+      sel.appendChild(opt);
+    }
+
+    sel.value = state.jars[0].id;
+    state.selectedJar = state.jars[0];
+    refreshJarUI();
+
+    $("btnSetJar").disabled = !state.event?.id;
+    log({ monoConnect: out });
+  };
+
+  $("monoJarSelect").onchange = ()=> {
+    const id = $("monoJarSelect").value;
+    state.selectedJar = state.jars.find(x => x.id === id) || null;
+    refreshJarUI();
+    $("btnSetJar").disabled = !state.event?.id || !state.selectedJar?.id;
+  };
+
+  // 3) EVENT
+  $("btnEvent").onclick = async()=> {
+    if(!state.org?.id) return alert("Create org first");
+
+    const priceCents = Number($("eventPrice").value);
+    if(!Number.isFinite(priceCents)) return alert("Bad price");
+
+    const ev = await api("/events/create","POST",{
+      orgId: state.org.id,
+      title: $("eventTitle").value.trim(),
+      priceCents
+    });
+
+    state.event = ev;
+    $("eventId").textContent = ev.id;
+    log({ event: ev });
+
+    $("btnSetJar").disabled = !state.selectedJar?.id;
+  };
+
+  // link jar to event
+  $("btnSetJar").onclick = async()=> {
+    if(!state.event?.id) return alert("Create event first");
+    if(!state.selectedJar?.id) return alert("Select jar first");
+
+    const out = await api("/events/set-mono-jar","POST",{
+      eventId: state.event.id,
+      jarId: state.selectedJar.id
+    });
+
+    alert("Jar linked to event ✅");
+    log({ setJarForEvent: out });
+  };
+
+  // 4) ORDER
+  $("btnOrder").onclick = async()=> {
+    if(!state.event?.id) return alert("Create event first");
+
+    const out = await api("/orders/create","POST",{
+      eventId: state.event.id,
+      buyerEmail: $("buyerEmail").value.trim()
+    });
+
+    state.order = out;
+    $("orderId").textContent = out.orderId;
+    $("amountHuman").textContent = out.amountHuman;
+    $("statusLine").textContent = "awaiting_payment";
+    $("ticketId").textContent = "—";
+    $("qrTextInline").textContent = "—";
+    $("qrInput").value = "";
+
+    $("btnCheck").disabled = false;
+    $("btnForceMono").disabled = false;
+    $("btnGetQr").disabled = true;
+    $("btnDevPay").disabled = false;     // ✅ важная правка
+    $("btnDevReset").disabled = false;   // ✅ важная правка
+
+    log({ order: out });
+    log({ hint: `Pay EXACT amount ${out.amountHuman} UAH into selected jar.` });
+  };
+
+  $("btnCheck").onclick = async()=> {
+    if(!state.order?.orderId) return alert("Create order first");
+    await refreshOrderStatus();
+  };
+
+  $("btnForceMono").onclick = async()=> {
+    if(!state.order?.orderId) return alert("Create order first");
+    const out = await api("/dev/check-order-mono", "POST", { orderId: state.order.orderId });
+    log({ forceMono: out });
+    await refreshOrderStatus();
+  };
+
+  $("btnGetQr").onclick = async()=> {
+    if(!state.order?.orderId) return alert("Create order first");
+    const out = await api(`/orders/${state.order.orderId}/qr`, "GET");
+    $("qrTextInline").textContent = out.qrText;
+    $("qrInput").value = out.qrText;
+    log({ qr: out });
+  };
+
+  $("btnDevPay").onclick = async()=> {
+    if(!state.order?.orderId) return alert("Create order first");
+    const out = await api("/dev/mark-paid", "POST", { orderId: state.order.orderId });
+    log({ devPay: out });
+    await refreshOrderStatus();
+    if (out.qrText) {
+      $("qrTextInline").textContent = out.qrText;
+      $("qrInput").value = out.qrText;
+    }
+  };
+
+  $("btnDevReset").onclick = async()=> {
+    if(!state.order?.orderId) return alert("Create order first");
+    const out = await api("/dev/reset-order", "POST", { orderId: state.order.orderId });
+    log({ devReset: out });
+    await refreshOrderStatus();
+    $("qrTextInline").textContent = "—";
+    $("qrInput").value = "";
+  };
+
+  // 5) SCAN
+  $("btnScan").onclick = async()=> {
+    const qrText = $("qrInput").value.trim();
+    if (!qrText) return alert("Paste QR first");
+
+    const usedBy = $("usedBy").value.trim() || "dev-scanner";
+    const scannerToken = $("scannerToken").value.trim();
+
+    try {
+      const out = await api("/scan", "POST", { qrText, usedBy }, { "x-scanner-token": scannerToken });
+      $("scanResult").innerHTML = `<span class="ok">OK</span>: ${out.usedAt} (${out.usedBy})`;
+      log({ scan: out });
+    } catch (e) {
+      $("scanResult").innerHTML = `<span class="err">ERR</span>: ${e.message}`;
+    }
+  };
+
+  refreshJarUI();
+</script>
+
+</body>
+</html>

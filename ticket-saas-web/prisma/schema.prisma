@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @default("email_code_auth")
+  role         String   @default("user")
+  createdAt    DateTime @default(now())
+  organizations Organization[]
+  sessions      Session[]
+}
+
+model AuthCode {
+  id        String   @id @default(uuid())
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model Session {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  @@index([userId])
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+
+  events    Event[]
+  mono      MonoConnection?
+  ticketiers Ticketier[]
+}
+
+model Ticketier {
+  id           String   @id @default(uuid())
+  orgId        String
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  login        String   @unique
+  passwordHash String
+  displayName  String?
+  createdById  String
+  createdAt    DateTime @default(now())
+
+  events   TicketierEvent[]
+  sessions TicketierSession[]
+}
+
+model TicketierEvent {
+  ticketierId String
+  ticketier   Ticketier @relation(fields: [ticketierId], references: [id], onDelete: Cascade)
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([ticketierId, eventId])
+  @@index([eventId])
+}
+
+model TicketierSession {
+  id         String    @id @default(uuid())
+  ticketierId String
+  ticketier   Ticketier @relation(fields: [ticketierId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+
+  @@index([ticketierId])
+}
+
+model Event {
+  id    String       @id @default(uuid())
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id])
+
+  title      String
+  priceCents Int      // legacy / min price for display
+  currency   String   @default("UAH")
+
+  // mono
+  monoAccountId String?
+  monoJarId     String?
+
+  // афиша
+  startsAt          DateTime?
+  venue             String?
+  city              String?
+  posterUrl         String?
+  organizerPhotoUrl String?
+  description       String?
+
+  status    String   @default("approved") // pending_approval | approved
+  createdAt DateTime @default(now())
+  orders    Order[]
+  ticketTypes TicketType[]
+  ticketierEvents TicketierEvent[]
+}
+
+model TicketType {
+  id         String   @id @default(uuid())
+  eventId    String
+  event      Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name       String  // "VIP", "Platinum", "Standard"...
+  priceCents Int
+  sortOrder  Int     @default(0)
+
+  orders Order[]
+
+  @@index([eventId])
+}
+
+model Order {
+  id      String @id @default(uuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+  ticketTypeId String?
+  ticketType   TicketType? @relation(fields: [ticketTypeId], references: [id])
+
+  buyerEmail          String
+  quantity            Int      @default(1)
+  amountExpectedCents Int
+  status              String   // awaiting_payment | paid | expired
+  expiresAt           DateTime
+  createdAt           DateTime @default(now())
+
+  payment Payment?
+  tickets Ticket[]
+
+  @@unique([eventId, amountExpectedCents])
+  @@index([eventId, status])
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  monoOperationId String   @unique
+  amountCents     Int
+  occurredAt      DateTime
+  rawJson         Json
+
+  orderId String? @unique
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Ticket {
+  id      String @id @default(uuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+
+  qrSecretVersion Int       @default(1)
+  usedAt          DateTime?
+  usedBy          String?
+
+  createdAt DateTime @default(now())
+}
+
+model MonoConnection {
+  id    String       @id @default(uuid())
+  orgId String       @unique
+  org   Organization @relation(fields: [orgId], references: [id])
+
+  token     String
+  accountId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
