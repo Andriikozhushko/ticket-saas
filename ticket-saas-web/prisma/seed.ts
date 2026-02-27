@@ -69,13 +69,14 @@ async function main() {
   // Тестовий білетник з доступом до сканування всіх подій у системі
   try {
     const allEvents = await prisma.event.findMany({ select: { id: true } });
-    const ticketier = await (prisma as unknown as {
+    const prismaExtended = prisma as unknown as {
       ticketier: { upsert: (p: {
         where: { login: string };
         create: { orgId: string; login: string; passwordHash: string; displayName: string; createdById: string };
         update: { passwordHash: string };
       }) => Promise<{ id: string }>;
-    }).ticketier.upsert({
+    }};
+    const ticketierRow = await prismaExtended.ticketier.upsert({
       where: { login: "ticketier" },
       create: {
         orgId: org.id,
@@ -86,16 +87,17 @@ async function main() {
       },
       update: { passwordHash: hashTicketierPassword("test1234") },
     });
+    const prismaWithTicketierEvent = prisma as unknown as {
+      ticketierEvent: { upsert: (p: {
+        where: { ticketierId_eventId: { ticketierId: string; eventId: string } };
+        create: { ticketierId: string; eventId: string };
+        update: Record<string, never>;
+      }) => Promise<unknown>;
+    }};
     for (const event of allEvents) {
-      await (prisma as unknown as {
-        ticketierEvent: { upsert: (p: {
-          where: { ticketierId_eventId: { ticketierId: string; eventId: string } };
-          create: { ticketierId: string; eventId: string };
-          update: Record<string, never>;
-        }) => Promise<unknown>;
-      }).ticketierEvent.upsert({
-        where: { ticketierId_eventId: { ticketierId: ticketier.id, eventId: event.id } },
-        create: { ticketierId: ticketier.id, eventId: event.id },
+      await prismaWithTicketierEvent.ticketierEvent.upsert({
+        where: { ticketierId_eventId: { ticketierId: ticketierRow.id, eventId: event.id } },
+        create: { ticketierId: ticketierRow.id, eventId: event.id },
         update: {},
       });
     }

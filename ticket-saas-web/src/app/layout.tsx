@@ -9,14 +9,22 @@ import Providers from "./providers";
 import Shell from "./shell";
 
 export const metadata: Metadata = {
-  title: "Lizard.red",
-  description: "Квитки на події — швидко та безпечно",
+  title: {
+    default: "Lizard.red — Квитки на події за хвилину. Безпечно та зручно",
+    template: "%s | Lizard.red",
+  },
+  description:
+    "Купуйте квитки на концерти, вечірки та події онлайн. Митлива оплата, квиток на пошту та у «Мої квитки». Без комісій та черг.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

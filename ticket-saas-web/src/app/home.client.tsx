@@ -216,7 +216,7 @@ function EventCard({ e }: { e: EventVM }) {
               </Group>
             )}
             <Group justify="space-between" align="center" mt={4}>
-              <Text size="md" fw={700} style={{ color: "var(--accent)", letterSpacing: "0.02em" }}>
+              <Text size="md" fw={700} style={{ color: "var(--text)", letterSpacing: "0.02em" }}>
                 {priceLabel}
               </Text>
               <Text

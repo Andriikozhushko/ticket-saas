@@ -8,6 +8,7 @@
     "dev:turbo": "next dev",
     "build": "next build",
     "start": "next start",
+    "prod": "next build && next start",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

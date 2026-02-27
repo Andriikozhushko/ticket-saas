@@ -1,6 +1,6 @@
-# Production: run after pulling images from GHCR.
+# Production: Next.js monolith only. Run after pulling image from GHCR.
 # On VPS: copy .env, then: docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d
-# Set GITHUB_OWNER in .env (e.g. your GitHub username or org) so image names resolve.
+# Set GITHUB_OWNER in .env (e.g. your GitHub username or org).
 
 services:
   db:
@@ -18,17 +18,6 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
-    image: ghcr.io/${GITHUB_OWNER}/ticket-saas-backend:latest
-    restart: always
-    ports:
-      - "3000:3000"
-    env_file: .env
-    environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/tickets?schema=public
-    depends_on:
-      db: { condition: service_healthy }
-
   web:
     image: ghcr.io/${GITHUB_OWNER}/ticket-saas-web:latest
     restart: always
@@ -37,9 +26,8 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/tickets?schema=public
-      TICKET_BACKEND_URL: http://backend:3000
     depends_on:
-      - backend
+      db: { condition: service_healthy }
 
 volumes:
   postgres_data:

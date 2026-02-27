@@ -84,8 +84,14 @@ export async function getSessionFromCookie(): Promise<{ userId: string; email: s
     include: { user: { select: { id: true, email: true, role: true } } },
   });
   if (!session || session.revokedAt || session.expiresAt < new Date()) return null;
-  const role = (session.user.role === "admin" || session.user.role === "organizer" ? session.user.role : "user") as UserRole;
-  return { userId: session.user.id, email: session.user.email, isAdmin: session.user.role === "admin", role };
+  const emailLower = session.user.email.trim().toLowerCase();
+  const isAdminEmail = ADMIN_EMAIL && emailLower === ADMIN_EMAIL;
+  const effectiveRole: UserRole =
+    isAdminEmail ? "admin" : (session.user.role === "admin" || session.user.role === "organizer" ? session.user.role : "user") as UserRole;
+  if (isAdminEmail && session.user.role !== "admin") {
+    await prisma.user.update({ where: { id: session.user.id }, data: { role: "admin" } });
+  }
+  return { userId: session.user.id, email: session.user.email, isAdmin: effectiveRole === "admin", role: effectiveRole };
 }
 
 export async function setSessionCookie(sessionId: string): Promise<void> {
