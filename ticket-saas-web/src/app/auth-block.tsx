@@ -8,7 +8,9 @@ import { useAuthOpen } from "./auth-open-context";
 const CODE_LENGTH = 6;
 const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 const TURNSTILE_SITEKEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "1x00000000000000000000AA";
+  process.env.NODE_ENV === "development"
+    ? (process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "1x00000000000000000000AA")
+    : (process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "");
 
 declare global {
   interface Window {

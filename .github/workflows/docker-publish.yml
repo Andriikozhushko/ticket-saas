@@ -35,3 +35,5 @@ jobs:
           file: ./ticket-saas-web/Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/ticket-saas-web:latest
+          build-args: |
+            NEXT_PUBLIC_TURNSTILE_SITEKEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITEKEY }}

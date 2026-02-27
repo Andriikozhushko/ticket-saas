@@ -9,6 +9,8 @@ RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit
 # ─── build ────────────────────────────────────────────────────────────────
 FROM node:20-alpine AS build
 WORKDIR /app
+ARG NEXT_PUBLIC_TURNSTILE_SITEKEY
+ENV NEXT_PUBLIC_TURNSTILE_SITEKEY=$NEXT_PUBLIC_TURNSTILE_SITEKEY
 COPY package.json package-lock.json* ./
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 COPY prisma ./prisma/
