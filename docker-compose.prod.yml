@@ -1,11 +1,14 @@
 # Production: Next.js monolith only. Run after pulling image from GHCR.
-# On VPS: copy .env, then: docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d
+# On VPS: create /srv/lizard/uploads, set ownership (see DEPLOY.md), copy .env, then docker compose up.
 # Set GITHUB_OWNER in .env (e.g. your GitHub username or org).
+# Uploads: host bind mount so files persist outside the container; nginx serves /uploads/ directly from host.
 
 services:
   db:
     image: postgres:15-alpine
     restart: always
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -27,10 +30,9 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/tickets?schema=public
     volumes:
-      - uploads_data:/app/public/uploads
+      - /srv/lizard/uploads:/app/public/uploads
     depends_on:
       db: { condition: service_healthy }
 
 volumes:
   postgres_data:
-  uploads_data:

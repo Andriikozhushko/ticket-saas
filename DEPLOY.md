@@ -58,16 +58,28 @@ If the image is private, log in to GHCR once:
 echo $GITHUB_TOKEN | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
 ```
 
-## 3. Pull and run
+## 3. Create uploads directory (host bind mount)
 
-From the repo root (after clone and `.env` are in place):
+Uploaded files (posters, organizer photos) are stored on the host at `/srv/lizard/uploads` and mounted into the container. Create it once and set ownership so the app can write and nginx can read:
+
+```bash
+sudo mkdir -p /srv/lizard/uploads
+sudo chown -R 1001:1001 /srv/lizard/uploads
+sudo chmod -R 755 /srv/lizard/uploads
+```
+
+(UID 1001 is the `nextjs` user inside the web container. Nginx will serve `/uploads/` directly from this path; see step 5.)
+
+## 4. Pull and run
+
+From the repo root (after clone, `.env`, and `/srv/lizard/uploads` are in place):
 
 ```bash
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-**Minimal workflow** on an already-configured VPS (no manual SQL, no global Prisma):
+**Minimal workflow** on an already-configured VPS (no manual SQL, no file-copying):
 
 ```bash
 git pull
@@ -75,17 +87,22 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-Migrations run automatically when the web container starts (project-local Prisma 6.19.2; no global install). If all migrations are already applied, startup does not crash. Uploaded posters are stored in the `uploads_data` volume and persist across restarts.
+Migrations run automatically when the web container starts (project-local Prisma 6.19.2). Upload subdirs (`posters`, `organizers`, `org-photos`) are created on first start if missing. Uploads persist on the host at `/srv/lizard/uploads` across restarts.
 
-## 4. Verify
+## 5. Nginx and verify
+
+Copy `nginx.conf.example` to your nginx config (e.g. `/etc/nginx/sites-available/lizard`), enable the site, reload nginx. The example config:
+
+- Serves **`/uploads/`** directly from **`/srv/lizard/uploads/`** on the host (alias; 30d cache). Do not proxy `/uploads/` to Next.
+- Proxies all other traffic to Next.js on **127.0.0.1:3001**.
+
+Verify:
 
 - Homepage: `curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/` → `200`
 - Session API: `curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/api/auth/session` → `200`
-- Uploaded poster (after at least one upload): e.g. `http://localhost:3001/uploads/posters/<filename>` → `200`
+- Uploaded file (after at least one upload): e.g. `https://your-domain.com/uploads/posters/<filename>` → `200` (served by nginx from `/srv/lizard/uploads/`).
 
-Put Nginx (or another reverse proxy) in front of port 3001 and point your domain to the server. See `nginx.conf.example` for a minimal config.
-
-## 5. Updates
+## 6. Updates
 
 ```bash
 cd /opt/ticket-saas
@@ -94,4 +111,4 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-Uploaded posters and other files under `/app/public/uploads` are persisted in the `uploads_data` volume and survive restarts.
+Uploads remain on the host at `/srv/lizard/uploads` and survive container updates.
