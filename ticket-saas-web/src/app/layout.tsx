@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     "Купуйте квитки на концерти, вечірки та події онлайн. Митлива оплата, квиток на пошту та у «Мої квитки». Без комісій та черг.",
   icons: {
     icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
   },
 };
 
@@ -36,6 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="uk" {...mantineHtmlProps}>
       <head>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
       <body>

@@ -8,7 +8,7 @@ import { useAuthOpen } from "./auth-open-context";
 const CODE_LENGTH = 6;
 const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 const TURNSTILE_SITEKEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "0x4AAAAAACiEnS0val9j2Prd";
+  process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "1x00000000000000000000AA";
 
 declare global {
   interface Window {
@@ -44,6 +44,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [error, setError] = useState("");
   const codeRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const codeSingleRef = useRef<HTMLInputElement>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
   const turnstileWidgetIdRef = useRef<string | null>(null);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
@@ -357,7 +358,8 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
               <Text size="sm" c="dimmed">Код надіслано на <Text span fw={600} c="var(--text)">{email}</Text></Text>
               <Box>
                 <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Введіть 6 цифр</Text>
-                <Group gap={8} justify="center" wrap="nowrap" onPaste={handleCodePaste}>
+                {/* Десктоп: 6 окремих полів */}
+                <Group gap={8} justify="center" wrap="nowrap" onPaste={handleCodePaste} className="auth-code-row auth-code-desktop">
                   {Array.from({ length: CODE_LENGTH }, (_, i) => (
                     <input
                       key={i}
@@ -371,9 +373,25 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
                       onKeyDown={(e) => handleCodeKeyDown(i, e)}
                       className="otp-cell auth-form-input"
                       aria-label={`Цифра ${i + 1}`}
+                      style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                     />
                   ))}
                 </Group>
+                {/* Мобільний: одне поле на 6 цифр */}
+                <Box className="auth-code-mobile" onPaste={(e) => { e.preventDefault(); const t = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, CODE_LENGTH); if (t) setCode(t); }}>
+                  <input
+                    ref={codeSingleRef}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={CODE_LENGTH}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
+                    className="auth-form-input otp-single"
+                    aria-label="Код з 6 цифр"
+                    style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
+                  />
+                </Box>
               </Box>
               {needCaptchaOnCodeStep && (
                 <>

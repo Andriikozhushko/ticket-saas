@@ -8,6 +8,9 @@ export async function verifyTurnstile(
 ): Promise<TurnstileVerifyResult> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) {
+    if (process.env.NODE_ENV === "development") {
+      return { success: true };
+    }
     console.error("[turnstile] TURNSTILE_SECRET_KEY is not set");
     return { success: false, error: "Captcha not configured" };
   }

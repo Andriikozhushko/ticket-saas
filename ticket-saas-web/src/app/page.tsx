@@ -1,23 +1,41 @@
 import { prisma } from "../lib/prisma";
 import HomeClient from "./home.client";
 
+type HomeEventRow = {
+  id: string;
+  title: string;
+  priceCents: number;
+  currency: string;
+  startsAt: Date | null;
+  city: string | null;
+  venue: string | null;
+  posterUrl: string | null;
+  org: { name: string | null } | null;
+  _count: { orders: number; ticketTypes: number };
+};
+
 export default async function HomePage() {
-  const rows = await prisma.event.findMany({
-    orderBy: [{ startsAt: "asc" }, { createdAt: "desc" }],
-    take: 60,
-    select: {
-      id: true,
-      title: true,
-      priceCents: true,
-      currency: true,
-      startsAt: true,
-      city: true,
-      venue: true,
-      posterUrl: true,
-      org: { select: { name: true } },
-      _count: { select: { orders: true, ticketTypes: true } },
-    },
-  });
+  let rows: HomeEventRow[];
+  try {
+    rows = await prisma.event.findMany({
+      orderBy: [{ startsAt: "asc" }, { createdAt: "desc" }],
+      take: 60,
+      select: {
+        id: true,
+        title: true,
+        priceCents: true,
+        currency: true,
+        startsAt: true,
+        city: true,
+        venue: true,
+        posterUrl: true,
+        org: { select: { name: true } },
+        _count: { select: { orders: true, ticketTypes: true } },
+      },
+    });
+  } catch {
+    rows = [];
+  }
 
   const events = rows.map((e) => ({
     id: e.id,

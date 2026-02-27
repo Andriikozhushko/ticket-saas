@@ -2101,18 +2101,23 @@ body {
 a { color: inherit; text-decoration: none; }
 ::selection { background: var(--accent-dim); color: #fff; }
 
-/* Auth code cells */
+/* Auth code cells — явний колір тексту для мобільних (iOS/Safari інакше можуть успадкувати transparent) */
 .otp-cell {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 3rem;
+  height: 3rem;
+  min-width: 3rem;
   text-align: center;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   border-radius: 12px;
   border: 2px solid var(--border);
   background: var(--panel);
-  color: var(--text);
+  color: #f4f4f6;
+  -webkit-text-fill-color: #f4f4f6;
+  caret-color: #f4f4f6;
+  -webkit-appearance: none;
+  appearance: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .otp-cell:focus {
@@ -2120,10 +2125,52 @@ a { color: inherit; text-decoration: none; }
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim), 0 0 20px -4px rgba(239,68,68,.4);
   background: rgba(255,255,255,0.06);
+  color: #f4f4f6;
+  -webkit-text-fill-color: #f4f4f6;
 }
 .otp-cell::placeholder {
   color: var(--muted);
   opacity: 0.6;
+}
+/* Мобільні: примусово показати текст у полях коду (iOS/Safari) */
+@media (max-width: 768px) {
+  .otp-cell,
+  .otp-cell:focus {
+    color: #f4f4f6 !important;
+    -webkit-text-fill-color: #f4f4f6 !important;
+  }
+}
+
+/* Мобільний: одне поле для коду замість шести (щоб вмістилось на екрані) */
+.auth-code-mobile {
+  display: none;
+}
+@media (max-width: 480px) {
+  .auth-code-desktop {
+    display: none !important;
+  }
+  .auth-code-mobile {
+    display: block !important;
+  }
+  .otp-single {
+    width: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: #f4f4f6 !important;
+    -webkit-text-fill-color: #f4f4f6 !important;
+    caret-color: #f4f4f6;
+  }
+  .otp-single:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
 }
 
 /* Turnstile — центрування + масштаб, щоб на вузьких екранах віджет повністю влазив (без обрізання) */
@@ -2225,6 +2272,8 @@ a { color: inherit; text-decoration: none; }
   border: 2px solid rgba(255,255,255,0.08);
   background: rgba(255,255,255,0.04);
   color: var(--text);
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
   font-size: 15px;
   font-weight: 500;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -2417,9 +2466,9 @@ a { color: inherit; text-decoration: none; }
     align-self: center;
   }
   .otp-cell {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.1rem;
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.35rem;
   }
 }
 .qty-btn:hover:not(:disabled) {

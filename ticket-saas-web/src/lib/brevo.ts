@@ -18,6 +18,12 @@ export async function sendEmail(options: SendEmailOptions): Promise<{ ok: true }
   const senderName = process.env.BREVO_SENDER_NAME ?? "Lizard.red";
 
   if (!apiKey) {
+    if (process.env.NODE_ENV === "development") {
+      const text = options.textContent ?? options.htmlContent?.replace(/<[^>]*>/g, "") ?? "";
+      console.log("[brevo] DEV (no API key): письмо не відправлено. Отримувач:", options.to);
+      console.log("[brevo] DEV: код/текст у консолі:", text.trim());
+      return { ok: true };
+    }
     console.error("[brevo] BREVO_API_KEY is not set");
     return { ok: false, error: "Email not configured" };
   }
