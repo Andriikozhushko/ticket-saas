@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: Tk7mN2xQ4wR9pL5
       POSTGRES_DB: tickets
     ports:
       - "5432:5432"

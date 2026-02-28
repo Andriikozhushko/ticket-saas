@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Tk7mN2xQ4wR9pL5}
       POSTGRES_DB: tickets
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -28,7 +28,7 @@ services:
       - "3001:3001"
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/tickets?schema=public
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-Tk7mN2xQ4wR9pL5}@db:5432/tickets?schema=public
     volumes:
       - /srv/lizard/uploads:/app/public/uploads
     depends_on:
