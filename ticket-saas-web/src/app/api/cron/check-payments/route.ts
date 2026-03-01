@@ -35,6 +35,14 @@ export async function POST(req: Request) {
 async function runCheckPayments() {
   try {
     const now = new Date();
+    // Позначити прострочені замовлення як expired у БД
+    const expired = await prisma.order.updateMany({
+      where: { status: "awaiting_payment", expiresAt: { lt: now } },
+      data: { status: "expired" },
+    });
+    if (expired.count > 0) {
+      console.log("[cron/check-payments] marked expired count=%s", expired.count);
+    }
     const orders = await prisma.order.findMany({
       where: {
         status: "awaiting_payment",

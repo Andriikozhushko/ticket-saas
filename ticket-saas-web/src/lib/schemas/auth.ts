@@ -4,7 +4,7 @@ const emailSchema = z.string().trim().email("Невірний формат email
 
 export const sendCodeBodySchema = z.object({
   email: emailSchema,
-  token: z.string().trim().min(1, "Підтвердіть, що ви не робот (капча)"),
+  token: z.string().trim().optional(),
 });
 
 export const verifyBodySchema = z.object({

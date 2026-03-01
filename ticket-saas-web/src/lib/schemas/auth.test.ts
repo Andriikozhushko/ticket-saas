@@ -23,12 +23,9 @@ describe("auth schemas", () => {
       expect(result.success).toBe(false);
     });
 
-    it("rejects empty token", () => {
-      const result = sendCodeBodySchema.safeParse({
-        email: "user@example.com",
-        token: "",
-      });
-      expect(result.success).toBe(false);
+    it("accepts empty or missing token (used in dev when captcha is skipped)", () => {
+      expect(sendCodeBodySchema.safeParse({ email: "user@example.com", token: "" }).success).toBe(true);
+      expect(sendCodeBodySchema.safeParse({ email: "user@example.com" }).success).toBe(true);
     });
   });
 

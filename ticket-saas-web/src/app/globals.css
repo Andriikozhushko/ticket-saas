@@ -2484,11 +2484,6 @@ a { color: inherit; text-decoration: none; }
   .ticket-card-layout .ticket-qr-wrap {
     align-self: center;
   }
-  .otp-cell {
-    width: 3rem;
-    height: 3rem;
-    font-size: 1.35rem;
-  }
 }
 .qty-btn:hover:not(:disabled) {
   transform: scale(1.08);

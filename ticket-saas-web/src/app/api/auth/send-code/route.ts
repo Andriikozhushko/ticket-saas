@@ -15,13 +15,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     const { email, token } = parsed.data;
+    if (!token?.trim() && process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Підтвердіть капчу" }, { status: 400 });
+    }
 
     const rate = checkLoginRateLimit(ip, email);
     if (!rate.allowed) {
       return NextResponse.json({ error: rate.error ?? "Забагато спроб" }, { status: 429 });
     }
 
-    const turnstile = await verifyTurnstile(token, ip);
+    const turnstile = await verifyTurnstile(token ?? "", ip);
     if (!turnstile.success) {
       const isNotConfigured = turnstile.error === "Captcha not configured";
       return NextResponse.json(

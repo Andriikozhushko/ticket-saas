@@ -87,7 +87,10 @@ function PosterFallback({ seed, title }: { seed: string; title: string }) {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, expiresAt }: { status: string; expiresAt?: Date }) {
+  const now = new Date();
+  const isExpired = expiresAt && expiresAt < now;
+  const displayStatus = status === "awaiting_payment" && isExpired ? "expired" : status;
   const labels: Record<string, string> = {
     paid: "Оплачено",
     awaiting_payment: "Очікує оплати",
@@ -99,8 +102,8 @@ function StatusBadge({ status }: { status: string }) {
     expired: "red",
   };
   return (
-    <Badge variant="outline" color={colorMap[status] ?? "gray"} size="sm" style={{ textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>
-      {labels[status] ?? status}
+    <Badge variant="outline" color={colorMap[displayStatus] ?? "gray"} size="sm" style={{ textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>
+      {labels[displayStatus] ?? displayStatus}
     </Badge>
   );
 }
@@ -159,7 +162,7 @@ type EventPageData = {
   org: { name: string };
   ticketTypes: { id: string; name: string; priceCents: number }[];
   _count?: { orders: number };
-  orders?: { id: string; buyerEmail: string; amountExpectedCents: number; status: string; createdAt: Date }[];
+  orders?: { id: string; buyerEmail: string; amountExpectedCents: number; status: string; createdAt: Date; expiresAt: Date }[];
 };
 
 export default async function EventPage(props: { params: Promise<{ id: string }> }) {
@@ -189,7 +192,7 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
             orders: {
               orderBy: { createdAt: "desc" },
               take: 12,
-              select: { id: true, buyerEmail: true, amountExpectedCents: true, status: true, createdAt: true },
+              select: { id: true, buyerEmail: true, amountExpectedCents: true, status: true, createdAt: true, expiresAt: true },
             },
           }
         : {}),
@@ -350,7 +353,7 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
                       <Text size="sm" fw={600}>{order.buyerEmail}</Text>
                       <Text size="xs" c="dimmed">{formatDateShort(order.createdAt)} · {money(order.amountExpectedCents)} {e.currency}</Text>
                     </Box>
-                    <StatusBadge status={order.status} />
+                    <StatusBadge status={order.status} expiresAt={order.expiresAt} />
                   </Group>
                 ))}
               </Stack>

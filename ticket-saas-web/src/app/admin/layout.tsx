@@ -18,7 +18,7 @@ export default async function AdminLayout({
         <div className="admin-sidebar-title">Lizard.red · Адмін</div>
       </div>
       <nav className="admin-sidebar-nav">
-        <AdminNav />
+        <AdminNav isAdmin={!!session?.isAdmin} />
       </nav>
     </>
   );
