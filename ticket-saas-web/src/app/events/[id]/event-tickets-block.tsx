@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Box, Button, Card, Group, Stack, Text, Modal, TextInput } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
+import { useAuthOpen } from "@/app/auth-open-context";
 import QuantitySelector from "./quantity-selector";
 
 type TicketType = { id: string; name: string; priceCents: number };
@@ -39,6 +40,8 @@ export default function EventTicketsBlock({
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const narrow = useMediaQuery("(max-width: 420px)");
   const isMobile = useMediaQuery("(max-width: 560px)");
+  const { openAuth } = useAuthOpen();
+  const sessionPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const getQty = (id: string) => quantities[id] ?? 1;
   const priceLabel = (cents: number) =>
@@ -63,6 +66,25 @@ export default function EventTicketsBlock({
   useEffect(() => {
     refreshSessionEmail();
   }, []);
+
+  // Після підтвердження email у auth-модалці — підтягуємо сесію в цьому модалі
+  useEffect(() => {
+    if (!open) {
+      if (sessionPollRef.current) {
+        clearInterval(sessionPollRef.current);
+        sessionPollRef.current = null;
+      }
+      return;
+    }
+    if (emailFromSession && email) return;
+    sessionPollRef.current = setInterval(refreshSessionEmail, 2000);
+    return () => {
+      if (sessionPollRef.current) {
+        clearInterval(sessionPollRef.current);
+        sessionPollRef.current = null;
+      }
+    };
+  }, [open, emailFromSession, email]);
 
   const handleBuy = (t: TicketType, quantity: number) => {
     setActiveTicketsFromBar(null);
@@ -172,25 +194,32 @@ export default function EventTicketsBlock({
                     : `${activeTicket.name}, ${activeTicket.quantity} шт. — ${(activeTicket.priceCents * activeTicket.quantity / 100).toFixed(2)} ${currency}`}
                 </Text>
                 {emailFromSession && email ? (
-                  <Text size="sm" c="dimmed">
-                    Квиток надішлемо на <strong style={{ color: "var(--text)" }}>{email}</strong>
-                  </Text>
+                  <>
+                    <Text size="sm" c="dimmed">
+                      Квиток надішлемо на <strong style={{ color: "var(--text)" }}>{email}</strong>
+                    </Text>
+                    <Button
+                      onClick={handleSubmit}
+                      loading={loading}
+                      className="event-ticket-buy-btn"
+                    >
+                      Підтвердити
+                    </Button>
+                  </>
                 ) : (
-                  <TextInput
-                    label="Email для квитка(ів)"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => { setEmail(e.currentTarget.value); setEmailFromSession(false); }}
-                    type="email"
-                  />
+                  <>
+                    <Text size="sm" c="dimmed">
+                      Без входу потрібно підтвердити email: на пошту надійде код.
+                    </Text>
+                    <Button
+                      onClick={() => openAuth()}
+                      variant="light"
+                      className="event-ticket-buy-btn"
+                    >
+                      Підтвердити email (код з пошти)
+                    </Button>
+                  </>
                 )}
-                <Button
-                  onClick={handleSubmit}
-                  loading={loading}
-                  className="event-ticket-buy-btn"
-                >
-                  Підтвердити
-                </Button>
               </>
             )}
           </Stack>
@@ -296,25 +325,32 @@ export default function EventTicketsBlock({
           {((activeTicketsFromBar?.length ?? 0) > 0 || activeTicket) && (
             <>
               {emailFromSession && email ? (
-                <Text size="sm" c="dimmed">
-                  Квиток надішлемо на <strong style={{ color: "var(--text)" }}>{email}</strong>
-                </Text>
+                <>
+                  <Text size="sm" c="dimmed">
+                    Квиток надішлемо на <strong style={{ color: "var(--text)" }}>{email}</strong>
+                  </Text>
+                  <Button
+                    onClick={handleSubmit}
+                    loading={loading}
+                    className="event-ticket-buy-btn"
+                  >
+                    Підтвердити
+                  </Button>
+                </>
               ) : (
-                <TextInput
-                  label="Email для квитка(ів)"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => { setEmail(e.currentTarget.value); setEmailFromSession(false); }}
-                  type="email"
-                />
+                <>
+                  <Text size="sm" c="dimmed">
+                    Без входу потрібно підтвердити email: на пошту надійде код.
+                  </Text>
+                  <Button
+                    onClick={() => openAuth()}
+                    variant="light"
+                    className="event-ticket-buy-btn"
+                  >
+                    Підтвердити email (код з пошти)
+                  </Button>
+                </>
               )}
-              <Button
-                onClick={handleSubmit}
-                loading={loading}
-                className="event-ticket-buy-btn"
-              >
-                Підтвердити
-              </Button>
             </>
           )}
         </Stack>

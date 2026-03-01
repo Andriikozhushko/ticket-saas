@@ -19,6 +19,10 @@ export default function RefreshOrderButton({ orderId }: { orderId: string }) {
         setError(typeof data?.error === "string" ? data.error : "Не вдалося перевірити оплату");
         return;
       }
+      if (data.checkError) {
+        setError("Перевірка оплати тимчасово недоступна. Спробуйте пізніше.");
+      }
+      if (data.stillChecking) setError(null);
       await router.refresh();
     } catch {
       setError("Не вдалося перевірити оплату");

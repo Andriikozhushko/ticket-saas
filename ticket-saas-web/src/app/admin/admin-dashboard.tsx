@@ -141,14 +141,14 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
     }
   };
 
-  const handleSetJar = async (eventId: string, jarId: string, sendId: string | null) => {
+  const handleSetJar = async (eventId: string, jarId: string, sendId: string | null, jarTitle: string | null) => {
     if (!jarId) return;
     setJarLoading((prev) => ({ ...prev, [eventId]: true }));
     try {
       const res = await fetch("/api/admin/events/set-mono-jar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, jarId, sendId }),
+        body: JSON.stringify({ eventId, jarId, sendId, jarTitle }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Помилка");
@@ -248,7 +248,7 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
                           size="xs"
                           style={{ minWidth: 0, flex: "1 1 140px" }}
                         />
-                        <Button size="xs" loading={jarLoading[e.id]} disabled={!jarEventId[e.id]} onClick={() => { const j = orgJars[org.id]?.find((x) => x.id === (jarEventId[e.id] ?? "")); handleSetJar(e.id, jarEventId[e.id] ?? "", j?.sendId ?? null); }}>Привʼязати</Button>
+                        <Button size="xs" loading={jarLoading[e.id]} disabled={!jarEventId[e.id]} onClick={() => { const j = orgJars[org.id]?.find((x) => x.id === (jarEventId[e.id] ?? "")); handleSetJar(e.id, jarEventId[e.id] ?? "", j?.sendId ?? null, j?.title ?? null); }}>Привʼязати</Button>
                       </Group>
                     )}
                   </Group>

@@ -865,6 +865,25 @@ body {
   align-items: center;
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
+}
+/* На вузьких телефонах QR завжди вміщується по ширині */
+.my-tickets-page .my-tickets-qr-wrap {
+  max-width: min(220px, 100%);
+}
+@media (max-width: 360px) {
+  .my-tickets-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .my-tickets-page .my-tickets-qr-wrap {
+    max-width: 100%;
+    padding: 10px;
+  }
+  .my-tickets-page .my-tickets-qr-wrap img {
+    width: 100%;
+    height: auto;
+  }
 }
 .my-tickets-container {
   width: 100%;

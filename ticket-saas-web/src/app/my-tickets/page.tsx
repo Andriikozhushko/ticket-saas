@@ -147,7 +147,7 @@ export default async function MyTicketsPage() {
                     </Box>
                   </Box>
 
-                  {/* Блок квитків (QR) — нижче */}
+                  {/* Блок квитків (QR) — нижче; на вузьких екранах QR вміщується по ширині */}
                   <Box>
                     <Text size="xs" fw={700} tt="uppercase" c="dimmed" mb="xs" style={{ letterSpacing: "0.05em" }}>Квитки</Text>
                     {ticketList.length > 0 ? (
@@ -155,7 +155,20 @@ export default async function MyTicketsPage() {
                         {ticketList.map((ticket, i) => {
                           const verifyUrl = origin ? `${origin}/api/public/tickets/verify/${ticket.id}` : "";
                           return verifyUrl ? (
-                            <Box key={ticket.id} style={{ flexShrink: 0, padding: 14, background: "white", borderRadius: 12, border: "1px solid var(--border)" }}>
+                            <Box
+                              key={ticket.id}
+                              className="my-tickets-qr-wrap"
+                              style={{
+                                padding: 14,
+                                background: "white",
+                                borderRadius: 12,
+                                border: "1px solid var(--border)",
+                                width: "100%",
+                                maxWidth: 220,
+                                minWidth: 0,
+                                boxSizing: "border-box",
+                              }}
+                            >
                               {ticketList.length > 1 && (
                                 <Text size="xs" fw={600} c="dimmed" mb={4}>Квиток {i + 1}</Text>
                               )}
@@ -165,7 +178,13 @@ export default async function MyTicketsPage() {
                                 alt={ticketList.length > 1 ? `QR квитка ${i + 1}` : "QR квитка"}
                                 width={200}
                                 height={200}
-                                style={{ display: "block", maxWidth: "100%", height: "auto" }}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  height: "auto",
+                                  maxWidth: "100%",
+                                  minWidth: 0,
+                                }}
                               />
                             </Box>
                           ) : null;

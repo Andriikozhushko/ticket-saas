@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const POLL_INTERVAL_MS = 20_000; // 20 секунд
+const POLL_INTERVAL_MS = 30_000; // Спільний опрос по джерелу раз на 30 с; сторінка оновлюється без «Я оплатив»
 
 export default function OrderStatusPoller({
   orderId,

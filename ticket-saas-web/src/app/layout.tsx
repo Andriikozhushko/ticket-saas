@@ -27,6 +27,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // Заборона зуму на мобільних на всіх сторінках
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

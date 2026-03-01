@@ -97,6 +97,7 @@ model Event {
   // mono
   monoAccountId String?
   monoJarId     String?
+  monoJarTitle  String?
 
   // афиша
   startsAt          DateTime?

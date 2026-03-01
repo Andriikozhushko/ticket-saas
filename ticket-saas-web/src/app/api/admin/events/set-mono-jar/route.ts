@@ -11,6 +11,7 @@ export async function POST(req: Request) {
     const eventId = typeof body?.eventId === "string" ? body.eventId : "";
     const jarId = typeof body?.jarId === "string" ? body.jarId : "";
     const sendId = typeof body?.sendId === "string" ? body.sendId.trim() || null : null;
+    const jarTitle = typeof body?.jarTitle === "string" ? body.jarTitle.trim() || null : null;
     if (!eventId || !jarId) return NextResponse.json({ error: "eventId and jarId required" }, { status: 400 });
     const event = await prisma.event.findFirst({
       where: { id: eventId },
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
     }
     await prisma.event.update({
       where: { id: eventId },
-      data: { monoAccountId: jarId, monoJarId: sendId },
+      data: { monoAccountId: jarId, monoJarId: sendId, monoJarTitle: jarTitle },
     });
     return NextResponse.json({ ok: true, eventId, monoAccountId: jarId });
   } catch (e) {
