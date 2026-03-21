@@ -113,6 +113,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [cameraError, setCameraError] = useState("");
+  const [isArmed, setIsArmed] = useState(false);
   const scanningRef = useRef(false);
   const scannerRef = useRef<Html5QrCodeScannerInstance | null>(null);
   const onScanRef = useRef(onScan);
@@ -182,6 +183,8 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   );
 
   useEffect(() => {
+    if (!isArmed) return;
+
     let mounted = true;
     let startTimer: number | null = null;
 
@@ -257,7 +260,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       }
       scannerRef.current = null;
     };
-  }, [handleDecodedValue]);
+  }, [handleDecodedValue, isArmed]);
 
   return (
     <Box className="ticketier-scanner-shell">
@@ -306,6 +309,20 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
           <Box className="ticketier-scan-result-card">
             <Text className="ticketier-scan-result-title">Камера недоступна</Text>
             <Text className="ticketier-scan-result-subtitle">{cameraError}</Text>
+          </Box>
+        </Box>
+      ) : null}
+
+      {!isArmed && !cameraError ? (
+        <Box className="ticketier-scan-overlay ticketier-scan-overlay-error">
+          <Box className="ticketier-scan-result-card">
+            <Text className="ticketier-scan-result-title">Увімкнути камеру</Text>
+            <Text className="ticketier-scan-result-subtitle">
+              Натисніть кнопку, дайте доступ до камери і одразу відкриється основна камера для сканування.
+            </Text>
+            <button className="ticketier-camera-start-btn" type="button" onClick={() => setIsArmed(true)}>
+              Увімкнути камеру
+            </button>
           </Box>
         </Box>
       ) : null}

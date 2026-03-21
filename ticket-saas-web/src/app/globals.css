@@ -2581,6 +2581,9 @@ a { color: inherit; text-decoration: none; }
   border: 0 !important;
   background: transparent !important;
 }
+.ticketier-scanner-surface #ticketier-qr-reader__dashboard {
+  display: none !important;
+}
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region {
   display: flex !important;
   align-items: center;
@@ -2726,6 +2729,19 @@ a { color: inherit; text-decoration: none; }
   margin-top: 14px;
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.58);
+}
+.ticketier-camera-start-btn {
+  margin-top: 16px;
+  width: 100%;
+  min-height: 54px;
+  border-radius: 14px;
+  border: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #050607;
+  background: linear-gradient(135deg, #7bf0ba 0%, #4ee396 100%);
+  box-shadow: 0 10px 30px -10px rgba(78, 227, 150, 0.55);
 }
 .ticketier-scan-ripple {
   position: absolute;
