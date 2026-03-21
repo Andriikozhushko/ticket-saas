@@ -204,6 +204,12 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       scannerRef.current = scanner;
 
       const tryStartRear = () => {
+        const permissionBtn = container.querySelector("#html5-qrcode-button-camera-permission") as HTMLButtonElement | null;
+        if (permissionBtn && !permissionBtn.disabled) {
+          permissionBtn.click();
+          return false;
+        }
+
         const cameraSelect = container.querySelector("#html5-qrcode-select-camera") as HTMLSelectElement | null;
         if (cameraSelect) {
           const options = Array.from(cameraSelect.options);
