@@ -39,7 +39,7 @@ type Html5QrCodeInstance = {
 function getQrBoxSize(): { width: number; height: number } {
   if (typeof window === "undefined") return { width: 220, height: 220 };
   const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(180, Math.min(viewport - 140, 240));
+  const size = Math.max(170, Math.min(viewport - 180, 220));
   return { width: size, height: size };
 }
 
