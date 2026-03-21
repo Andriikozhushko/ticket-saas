@@ -147,18 +147,18 @@ function EventCard({ e }: { e: EventVM }) {
                 style={{
                   position: "absolute",
                   top: 12,
-                  left: 12,
+                  right: 12,
                   zIndex: 3,
-                  background: "linear-gradient(135deg, rgba(120,120,120,0.92) 0%, rgba(76,76,76,0.95) 100%)",
+                  background: "rgba(26,26,26,0.72)",
                   color: "white",
-                  padding: "7px 12px",
+                  padding: "7px 11px",
                   borderRadius: 999,
                   fontSize: 10,
                   fontWeight: 700,
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.07em",
                   textTransform: "uppercase",
-                  border: "1px solid rgba(255,255,255,0.18)",
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.28)",
+                  border: "1px solid rgba(255,255,255,0.22)",
+                  backdropFilter: "blur(3px)",
                 }}
               >
                 Завершено
@@ -168,12 +168,14 @@ function EventCard({ e }: { e: EventVM }) {
                   position: "absolute",
                   inset: 0,
                   zIndex: 2,
-                  background: "linear-gradient(180deg, rgba(18,18,18,0.22), rgba(24,24,24,0.52))",
+                  background:
+                    "repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 10px, rgba(255,255,255,0) 10px 20px), linear-gradient(180deg, rgba(20,20,20,0.16), rgba(20,20,20,0.46))",
                   pointerEvents: "none",
                 }}
               />
               <Box
                 style={{
+                  display: "none",
                   position: "absolute",
                   left: 14,
                   right: 14,
@@ -264,11 +266,11 @@ function EventCard({ e }: { e: EventVM }) {
                   style={{
                     padding: "8px 14px",
                     borderRadius: 8,
-                    background: "rgba(120,120,120,0.22)",
-                    border: "1px solid rgba(180,180,180,0.3)",
+                    background: "rgba(26,26,26,0.5)",
+                    border: "1px solid rgba(255,255,255,0.2)",
                     fontWeight: 700,
                     letterSpacing: "0.03em",
-                    color: "var(--text)",
+                    color: "rgba(255,255,255,0.9)",
                   }}
                 >
                   Завершено
