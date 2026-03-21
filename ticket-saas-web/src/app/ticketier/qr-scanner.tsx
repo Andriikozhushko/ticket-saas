@@ -25,12 +25,14 @@ type FeedbackState = {
   meta?: string;
 };
 
-type Html5QrCodeScannerInstance = {
-  render: (onSuccess: (decodedText: string) => void, onError?: (errorMessage: string) => void) => void;
-  clear: () => Promise<void>;
-};
-
-type Html5QrCodeForFile = {
+type Html5QrCodeInstance = {
+  start: (
+    cameraConfig: unknown,
+    config: unknown,
+    onSuccess: (decodedText: string) => void,
+    onError?: (errorMessage: string) => void
+  ) => Promise<void>;
+  stop: () => Promise<void>;
   scanFile: (file: File, showImage?: boolean) => Promise<string>;
 };
 
@@ -45,9 +47,9 @@ function extractTicketIdFromUrl(url: string): string | null {
 }
 
 function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 220, height: 220 };
+  if (typeof window === "undefined") return { width: 280, height: 280 };
   const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(190, Math.min(viewport - 170, 240));
+  const size = Math.max(240, Math.min(viewport - 90, 320));
   return { width: size, height: size };
 }
 
@@ -100,7 +102,7 @@ async function decodeImageFile(file: File): Promise<string | null> {
   document.body.appendChild(tempDiv);
 
   try {
-    const scanner = new Html5Qrcode(tempId) as unknown as Html5QrCodeForFile;
+    const scanner = new Html5Qrcode(tempId) as unknown as Html5QrCodeInstance;
     return await scanner.scanFile(file, false);
   } finally {
     tempDiv.remove();
@@ -114,7 +116,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [cameraError, setCameraError] = useState("");
   const scanningRef = useRef(false);
-  const scannerRef = useRef<Html5QrCodeScannerInstance | null>(null);
+  const scannerRef = useRef<Html5QrCodeInstance | null>(null);
   const onScanRef = useRef(onScan);
   onScanRef.current = onScan;
 
@@ -157,9 +159,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       setFeedback({
         tone: "warning",
         title: "Квиток уже сканували",
-        subtitle: relative
-          ? `Цей квиток уже використали ${relative}.`
-          : "Цей квиток уже використали раніше.",
+        subtitle: relative ? `Цей квиток уже використали ${relative}.` : "Цей квиток уже використали раніше.",
         meta: result.usedBy ? `Сканував: ${result.usedBy}` : result.buyerEmail ?? undefined,
       });
       return;
@@ -174,14 +174,12 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
   useEffect(() => {
     let mounted = true;
-    let startInterval: number | null = null;
-    let attempts = 0;
 
     void (async () => {
       const container = containerRef.current;
       if (!container) return;
 
-      const { Html5QrcodeScanner } = await import("html5-qrcode");
+      const { Html5Qrcode } = await import("html5-qrcode");
       container.innerHTML = "";
       const div = document.createElement("div");
       div.id = SCANNER_DIV_ID;
@@ -189,64 +187,14 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       div.style.height = "100%";
       container.appendChild(div);
 
-      const qrbox = getQrBoxSize();
-      const scanner = new Html5QrcodeScanner(
-        SCANNER_DIV_ID,
-        {
-          fps: 10,
-          qrbox: { width: qrbox.width, height: qrbox.height },
-          aspectRatio: 1,
-          rememberLastUsedCamera: false,
-          videoConstraints: { facingMode: { ideal: "environment" } },
-        },
-        false
-      ) as unknown as Html5QrCodeScannerInstance;
+      const scanner = new Html5Qrcode(SCANNER_DIV_ID) as unknown as Html5QrCodeInstance;
       scannerRef.current = scanner;
-
-      const tryStartRear = () => {
-        const permissionBtn = container.querySelector("#html5-qrcode-button-camera-permission") as HTMLButtonElement | null;
-        if (permissionBtn && !permissionBtn.disabled) {
-          permissionBtn.click();
-          return false;
-        }
-
-        const cameraSelect = container.querySelector("#html5-qrcode-select-camera") as HTMLSelectElement | null;
-        if (cameraSelect) {
-          const options = Array.from(cameraSelect.options);
-          const rearOption = options.find((option) => /back|rear|environment|зад|основ/i.test(option.text));
-          const targetValue = rearOption?.value ?? options[0]?.value;
-          if (targetValue && cameraSelect.value !== targetValue) {
-            cameraSelect.value = targetValue;
-            cameraSelect.dispatchEvent(new Event("change", { bubbles: true }));
-          }
-        }
-
-        const startBtn = container.querySelector("#html5-qrcode-button-camera-start") as HTMLButtonElement | null;
-        if (startBtn && !startBtn.disabled) {
-          startBtn.click();
-          window.setTimeout(() => {
-            const dashboard = container.querySelector("#ticketier-qr-reader__dashboard") as HTMLElement | null;
-            if (dashboard) dashboard.style.display = "none";
-          }, 600);
-          return true;
-        }
-        return false;
-      };
+      const qrbox = getQrBoxSize();
 
       try {
-        // Android-friendly preflight: trigger browser permission immediately on page open.
-        // Once granted, html5-qrcode scanner starts reliably without manual tap.
-        try {
-          const preflightStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: "environment" } },
-            audio: false,
-          });
-          preflightStream.getTracks().forEach((track) => track.stop());
-        } catch {
-          // Permission may still be requested by scanner flow below.
-        }
-
-        scanner.render(
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: qrbox.width, height: qrbox.height } },
           (decodedText) => {
             if (!mounted || scanningRef.current) return;
             void handleDecodedValue(decodedText);
@@ -256,15 +204,6 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
             setCameraError(typeof err === "string" ? err : "Немає доступу до камери");
           }
         );
-
-        startInterval = window.setInterval(() => {
-          attempts += 1;
-          const started = tryStartRear();
-          if (started || attempts > 12) {
-            if (startInterval) window.clearInterval(startInterval);
-          }
-        }, 250);
-
         if (mounted) setCameraError("");
       } catch (error) {
         if (mounted) {
@@ -275,10 +214,13 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
     return () => {
       mounted = false;
-      if (startInterval) window.clearInterval(startInterval);
       const scanner = scannerRef.current;
       if (scanner) {
-        void scanner.clear().catch(() => {});
+        try {
+          void scanner.stop().catch(() => {});
+        } catch {
+          // scanner already stopped
+        }
       }
       scannerRef.current = null;
     };

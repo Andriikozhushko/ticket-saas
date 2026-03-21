@@ -2581,6 +2581,9 @@ a { color: inherit; text-decoration: none; }
   border: 0 !important;
   background: transparent !important;
 }
+.ticketier-scanner-surface #ticketier-qr-reader__dashboard {
+  display: none !important;
+}
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region {
   display: flex !important;
   align-items: center;
@@ -2596,20 +2599,12 @@ a { color: inherit; text-decoration: none; }
   border-radius: 28px;
   background: #000;
 }
-.ticketier-scanner-surface #html5-qrcode-anchor-scan-type-change,
-.ticketier-scanner-surface #html5-qrcode-button-file-selection,
-.ticketier-scanner-surface #html5-qrcode-select-camera,
-.ticketier-scanner-surface #html5-qrcode-button-camera-start,
-.ticketier-scanner-surface #html5-qrcode-button-camera-stop,
-.ticketier-scanner-surface #html5-qrcode-button-camera-permission {
-  display: none !important;
-}
 .ticketier-mobile-dock {
   position: absolute;
-  left: 12px;
-  right: 12px;
+  left: 16px;
+  right: 16px;
   z-index: 3;
-  bottom: calc(6px + env(safe-area-inset-bottom));
+  bottom: calc(18px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -2632,15 +2627,13 @@ a { color: inherit; text-decoration: none; }
 .ticketier-mobile-dock-actions {
   margin-top: 2px;
   display: grid !important;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 .ticketier-mobile-dock-actions .mantine-Button-root {
-  min-height: 48px;
-  width: 100%;
-  font-weight: 700;
-  padding-left: 14px;
-  padding-right: 14px;
+  min-height: 42px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 .ticketier-stat-chip {
   padding: 12px 10px;
@@ -2813,8 +2806,10 @@ a { color: inherit; text-decoration: none; }
 }
 @media (max-width: 420px) {
   .ticketier-mobile-dock {
-    left: 10px;
-    right: 10px;
-    bottom: calc(4px + env(safe-area-inset-bottom));
+    left: 12px;
+    right: 12px;
+  }
+  .ticketier-mobile-dock-actions {
+    grid-template-columns: 1fr;
   }
 }
