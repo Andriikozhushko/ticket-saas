@@ -129,6 +129,7 @@ type EventPageData = {
   title: string;
   priceCents: number;
   currency: string;
+  isFinished: boolean;
   startsAt: Date | null;
   city: string | null;
   venue: string | null;
@@ -154,6 +155,7 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
       title: true,
       priceCents: true,
       currency: true,
+      isFinished: true,
       startsAt: true,
       city: true,
       venue: true,
@@ -288,6 +290,7 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
             dateFormatted={dateDot}
             currency={e.currency}
             eventPriceCents={e.priceCents}
+            isFinished={e.isFinished}
             ticketTypes={e.ticketTypes}
           />
         </Box>

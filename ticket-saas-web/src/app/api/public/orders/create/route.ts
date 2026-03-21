@@ -40,6 +40,9 @@ export async function POST(req: Request) {
     if (((event as { status?: string }).status ?? "approved") !== "approved") {
       return NextResponse.json({ error: "Продаж квитків на цю подію недоступний." }, { status: 403 });
     }
+    if (event.isFinished) {
+      return NextResponse.json({ error: "Ця подія вже завершена. Продаж квитків закрито." }, { status: 403 });
+    }
 
     let priceCents: number;
     try {

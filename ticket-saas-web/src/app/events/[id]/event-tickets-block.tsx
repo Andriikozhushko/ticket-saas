@@ -58,6 +58,7 @@ type Props = {
   dateFormatted: string | null;
   currency: string;
   eventPriceCents: number;
+  isFinished?: boolean;
   ticketTypes: TicketType[];
 };
 
@@ -70,6 +71,7 @@ export default function EventTicketsBlock({
   dateFormatted,
   currency,
   eventPriceCents,
+  isFinished = false,
   ticketTypes,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -193,6 +195,7 @@ export default function EventTicketsBlock({
   }, [open, guestStep, emailFromSession]);
 
   const handleBuy = (t: TicketType, quantity: number) => {
+    if (isFinished) return;
     setActiveTicketsFromBar(null);
     setActiveTicket({ ticketTypeId: t.id, name: t.name, priceCents: t.priceCents, quantity });
     setError("");
@@ -205,6 +208,7 @@ export default function EventTicketsBlock({
     .filter(({ qty }) => qty > 0);
   const totalCentsBar = selectedForBar.reduce((sum, { t, qty }) => sum + t.priceCents * qty, 0);
   const openFromBar = () => {
+    if (isFinished) return;
     if (selectedForBar.length === 0) return;
     setActiveTicket(null);
     setActiveTicketsFromBar(
@@ -409,15 +413,21 @@ export default function EventTicketsBlock({
                 size="lg"
                 mt="md"
                 className="event-ticket-buy-btn"
+                disabled={isFinished}
                 onClick={() => {
                   setActiveTicket({ ticketTypeId: "", name: "Квиток", priceCents: eventPriceCents, quantity: 1 });
                   setOpen(true);
                 }}
               >
-                Оформити
+                {isFinished ? "Продаж завершено" : "Оформити"}
               </Button>
             </Box>
           </Card>
+          {isFinished ? (
+            <Card withBorder={false} padding="md" radius="md" className="event-ticket-card" mt="sm">
+              <Text size="sm" c="dimmed">Подія завершена. Продаж квитків закрито організатором.</Text>
+            </Card>
+          ) : null}
         </Box>
         <Modal
           opened={open}
@@ -549,6 +559,11 @@ export default function EventTicketsBlock({
           <span className="event-tickets-header-icon" aria-hidden>🎫</span>
         </div>
         <Stack gap="md" className="event-tickets-list">
+          {isFinished ? (
+            <Card withBorder={false} padding="md" radius="md" className="event-ticket-card">
+              <Text size="sm" c="dimmed">Подія завершена. Продаж квитків закрито організатором.</Text>
+            </Card>
+          ) : null}
           {ticketTypes.map((t) => {
             const qty = getQty(t.id);
             const totalCents = t.priceCents * qty;
@@ -578,9 +593,10 @@ export default function EventTicketsBlock({
                     <Button
                       size="md"
                       className="event-ticket-buy-btn event-ticket-buy-btn-in-card"
+                      disabled={isFinished}
                       onClick={() => handleBuy(t, qty)}
                     >
-                      Оформити
+                      {isFinished ? "Завершено" : "Оформити"}
                     </Button>
                   </Box>
                 </Box>
@@ -607,10 +623,10 @@ export default function EventTicketsBlock({
               </div>
               <Button
                 className="event-ticket-buy-btn"
-                disabled={selectedForBar.length === 0}
+                disabled={isFinished || selectedForBar.length === 0}
                 onClick={openFromBar}
               >
-                Оформити
+                {isFinished ? "Продаж завершено" : "Оформити"}
               </Button>
             </div>,
             document.body
