@@ -36,6 +36,66 @@ type Html5QrCodeInstance = {
   scanFile: (file: File, showImage?: boolean) => Promise<string>;
 };
 
+function forceNativeSquareFrame(container: HTMLElement, size: number) {
+  const scanRegion = container.querySelector("#ticketier-qr-reader__scan_region") as HTMLElement | null;
+  const shadedRegion = container.querySelector("#qr-shaded-region") as HTMLElement | null;
+  if (!scanRegion || !shadedRegion) return;
+
+  scanRegion.style.position = "relative";
+
+  shadedRegion.style.position = "absolute";
+  shadedRegion.style.left = "50%";
+  shadedRegion.style.top = "50%";
+  shadedRegion.style.transform = "translate(-50%, -50%)";
+  shadedRegion.style.width = `${size}px`;
+  shadedRegion.style.height = `${size}px`;
+  shadedRegion.style.maxWidth = "92vw";
+  shadedRegion.style.maxHeight = "92vw";
+  shadedRegion.style.background = "transparent";
+  shadedRegion.style.border = "0";
+
+  const corners = Array.from(shadedRegion.children) as HTMLElement[];
+  if (corners.length >= 4) {
+    const edge = 30;
+    const borderWidth = 5;
+
+    corners.forEach((corner, index) => {
+      corner.style.position = "absolute";
+      corner.style.width = `${edge}px`;
+      corner.style.height = `${edge}px`;
+      corner.style.borderStyle = "solid";
+      corner.style.borderColor = "#ffffff";
+      corner.style.borderWidth = "0";
+      corner.style.borderRadius = "10px";
+
+      if (index === 0) {
+        corner.style.left = "0";
+        corner.style.top = "0";
+        corner.style.borderLeftWidth = `${borderWidth}px`;
+        corner.style.borderTopWidth = `${borderWidth}px`;
+      }
+      if (index === 1) {
+        corner.style.right = "0";
+        corner.style.top = "0";
+        corner.style.borderRightWidth = `${borderWidth}px`;
+        corner.style.borderTopWidth = `${borderWidth}px`;
+      }
+      if (index === 2) {
+        corner.style.left = "0";
+        corner.style.bottom = "0";
+        corner.style.borderLeftWidth = `${borderWidth}px`;
+        corner.style.borderBottomWidth = `${borderWidth}px`;
+      }
+      if (index === 3) {
+        corner.style.right = "0";
+        corner.style.bottom = "0";
+        corner.style.borderRightWidth = `${borderWidth}px`;
+        corner.style.borderBottomWidth = `${borderWidth}px`;
+      }
+    });
+  }
+}
+
 function extractTicketIdFromUrl(url: string): string | null {
   try {
     const path = new URL(url).pathname;
@@ -188,6 +248,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
   useEffect(() => {
     let mounted = true;
+    let resizeHandler: (() => void) | null = null;
 
     void (async () => {
       const container = containerRef.current;
@@ -218,6 +279,14 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
             setCameraError(typeof err === "string" ? err : "Немає доступу до камери");
           }
         );
+        forceNativeSquareFrame(container, qrbox.width);
+        window.setTimeout(() => forceNativeSquareFrame(container, qrbox.width), 120);
+        window.setTimeout(() => forceNativeSquareFrame(container, qrbox.width), 420);
+        resizeHandler = () => {
+          const next = getQrBoxSize();
+          forceNativeSquareFrame(container, next.width);
+        };
+        window.addEventListener("resize", resizeHandler);
         if (mounted) setCameraError("");
       } catch (error) {
         if (mounted) {
@@ -228,6 +297,9 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
     return () => {
       mounted = false;
+      if (resizeHandler) {
+        window.removeEventListener("resize", resizeHandler);
+      }
       const scanner = scannerRef.current;
       if (scanner) {
         try {
