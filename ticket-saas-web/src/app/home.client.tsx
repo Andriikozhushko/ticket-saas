@@ -147,25 +147,21 @@ function EventCard({ e }: { e: EventVM }) {
               <Box
                 style={{
                   position: "absolute",
-                  top: "34%",
-                  left: "-24%",
-                  right: "-24%",
+                  top: 12,
+                  left: 12,
                   zIndex: 3,
-                  transform: "rotate(-17deg)",
-                  background:
-                    "repeating-linear-gradient(135deg, #111 0 12px, #f3c623 12px 24px)",
-                  color: "#0a0a0a",
-                  padding: "9px 0",
-                  borderRadius: 2,
-                  fontSize: 12,
-                  fontWeight: 900,
-                  letterSpacing: "0.1em",
+                  background: "rgba(9,11,18,0.86)",
+                  color: "#f8fafc",
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   textAlign: "center",
-                  borderTop: "1px solid rgba(0,0,0,0.65)",
-                  borderBottom: "1px solid rgba(0,0,0,0.65)",
-                  boxShadow: "0 12px 32px rgba(0,0,0,0.35)",
-                  animation: "finishedRibbonShift 7s linear infinite",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  backdropFilter: "blur(8px)",
+                  boxShadow: "0 10px 26px rgba(0,0,0,0.32)",
                 }}
               >
                 Завершено
@@ -176,31 +172,25 @@ function EventCard({ e }: { e: EventVM }) {
                   inset: 0,
                   zIndex: 2,
                   background:
-                    "repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 10px, rgba(255,255,255,0) 10px 20px), linear-gradient(180deg, rgba(20,20,20,0.16), rgba(20,20,20,0.46))",
+                    "linear-gradient(180deg, rgba(8,10,18,0.12) 0%, rgba(8,10,18,0.58) 100%), radial-gradient(80% 48% at 50% 0%, rgba(239,68,68,0.18) 0%, rgba(239,68,68,0) 100%)",
                   pointerEvents: "none",
                 }}
               />
               <Box
                 style={{
-                  display: "block",
                   position: "absolute",
-                  top: "58%",
-                  left: "-22%",
-                  right: "-22%",
+                  right: 12,
+                  bottom: 12,
                   zIndex: 3,
-                  transform: "rotate(17deg)",
-                  background:
-                    "repeating-linear-gradient(135deg, #111 0 12px, #f3c623 12px 24px)",
-                  borderTop: "1px solid rgba(0,0,0,0.65)",
-                  borderBottom: "1px solid rgba(0,0,0,0.65)",
-                  borderRadius: 2,
-                  padding: "7px 0",
+                  background: "rgba(239,68,68,0.2)",
+                  border: "1px solid rgba(239,68,68,0.5)",
+                  borderRadius: 999,
+                  padding: "6px 12px",
                   textAlign: "center",
-                  boxShadow: "0 12px 32px rgba(0,0,0,0.25)",
-                  animation: "finishedRibbonShiftReverse 8.5s linear infinite",
+                  boxShadow: "0 10px 22px rgba(0,0,0,0.22)",
                 }}
               >
-                <Text size="xs" fw={900} style={{ color: "#0a0a0a", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                <Text size="xs" fw={700} style={{ color: "#fee2e2", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   Подія завершена
                 </Text>
               </Box>
@@ -278,12 +268,11 @@ function EventCard({ e }: { e: EventVM }) {
                   style={{
                     padding: "8px 14px",
                     borderRadius: 8,
-                    background:
-                      "repeating-linear-gradient(135deg, rgba(16,16,16,0.95) 0 8px, rgba(243,198,35,0.9) 8px 16px)",
-                    border: "1px solid rgba(0,0,0,0.45)",
+                    background: "linear-gradient(145deg, rgba(15,23,42,0.88) 0%, rgba(30,41,59,0.88) 100%)",
+                    border: "1px solid rgba(148,163,184,0.38)",
                     fontWeight: 700,
                     letterSpacing: "0.03em",
-                    color: "#070707",
+                    color: "#e2e8f0",
                   }}
                 >
                   Завершено

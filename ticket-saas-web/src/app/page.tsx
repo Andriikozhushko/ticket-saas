@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma";
+import { unstable_noStore as noStore } from "next/cache";
 import HomeClient from "./home.client";
 
 type HomeEventRow = {
@@ -16,6 +17,8 @@ type HomeEventRow = {
 };
 
 export default async function HomePage() {
+  noStore();
+
   let rows: HomeEventRow[];
   try {
     rows = await prisma.event.findMany({
@@ -35,7 +38,8 @@ export default async function HomePage() {
         _count: { select: { orders: true, ticketTypes: true } },
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("[home] failed to load events", error);
     rows = [];
   }
 
