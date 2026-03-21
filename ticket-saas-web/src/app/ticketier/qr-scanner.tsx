@@ -37,9 +37,9 @@ type Html5QrCodeInstance = {
 };
 
 function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 200, height: 200 };
-  const viewport = Math.min(window.innerWidth, 420);
-  const size = Math.max(180, Math.min(viewport - 90, 260));
+  if (typeof window === "undefined") return { width: 220, height: 220 };
+  const viewport = Math.min(window.innerWidth, window.innerHeight);
+  const size = Math.max(180, Math.min(viewport - 140, 240));
   return { width: size, height: size };
 }
 
@@ -159,9 +159,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       setFeedback({
         tone: "warning",
         title: "Квиток уже сканували",
-        subtitle: relative
-          ? `Цей квиток уже використали ${relative}.`
-          : "Цей квиток уже використали раніше.",
+        subtitle: relative ? `Цей квиток уже використали ${relative}.` : "Цей квиток уже використали раніше.",
         meta: result.usedBy ? `Сканував: ${result.usedBy}` : result.buyerEmail ?? undefined,
       });
       return;
@@ -193,23 +191,31 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       scannerRef.current = scanner;
       const qrbox = getQrBoxSize();
 
+      const onSuccess = (decodedText: string) => {
+        if (!mounted || scanningRef.current) return;
+        void handleDecodedValue(decodedText);
+      };
+      const onError = (err: unknown) => {
+        if (!mounted || isScanFailureOnly(err)) return;
+        setCameraError(typeof err === "string" ? err : "Немає доступу до камери");
+      };
+
       try {
-        await scanner.start(
-          { facingMode: { ideal: "environment" } },
-          {
-            fps: 12,
-            qrbox: { width: qrbox.width, height: qrbox.height },
-            aspectRatio: 1,
-          },
-          (decodedText) => {
-            if (!mounted || scanningRef.current) return;
-            void handleDecodedValue(decodedText);
-          },
-          (err) => {
-            if (!mounted || isScanFailureOnly(err)) return;
-            setCameraError(typeof err === "string" ? err : "Немає доступу до камери");
-          }
-        );
+        try {
+          await scanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: qrbox.width, height: qrbox.height } },
+            onSuccess,
+            onError
+          );
+        } catch {
+          await scanner.start(
+            { facingMode: "user" },
+            { fps: 10, qrbox: { width: qrbox.width, height: qrbox.height } },
+            onSuccess,
+            onError
+          );
+        }
         if (mounted) setCameraError("");
       } catch (error) {
         if (mounted) {
