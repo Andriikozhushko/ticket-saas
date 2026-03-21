@@ -25,7 +25,6 @@ type EventVM = {
   venue: string | null;
   posterUrl: string | null;
   orgName: string | null;
-  soldTicketsCount: number;
   ordersCount: number;
   ticketTypesCount: number;
 };
@@ -129,9 +128,8 @@ function EventCard({ e }: { e: EventVM }) {
   const place = [e.venue, e.city].filter(Boolean).join(", ");
   const hasMultiplePrices = (e.ticketTypesCount ?? 0) > 1;
   const priceLabel = hasMultiplePrices ? `від ${money(e.priceCents)} грн` : `${money(e.priceCents)} грн`;
-  const soldLabel = `${e.soldTicketsCount} квитків`;
-  const cardOpacity = e.isFinished ? 0.74 : 1;
-  const cardFilter = e.isFinished ? "grayscale(0.42) saturate(0.7)" : "none";
+  const cardOpacity = e.isFinished ? 0.78 : 1;
+  const cardFilter = e.isFinished ? "grayscale(0.35) saturate(0.8)" : "none";
 
   return (
     <Card
@@ -149,18 +147,18 @@ function EventCard({ e }: { e: EventVM }) {
                 style={{
                   position: "absolute",
                   top: 12,
-                  left: -44,
+                  left: 12,
                   zIndex: 3,
-                  transform: "rotate(-28deg)",
-                  background: "linear-gradient(135deg, rgba(115,115,115,0.92) 0%, rgba(65,65,65,0.94) 100%)",
+                  background: "linear-gradient(135deg, rgba(120,120,120,0.92) 0%, rgba(76,76,76,0.95) 100%)",
                   color: "white",
-                  padding: "6px 56px",
-                  fontSize: 11,
-                  fontWeight: 800,
+                  padding: "7px 12px",
+                  borderRadius: 999,
+                  fontSize: 10,
+                  fontWeight: 700,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.28)",
                 }}
               >
                 Завершено
@@ -168,32 +166,30 @@ function EventCard({ e }: { e: EventVM }) {
               <Box
                 style={{
                   position: "absolute",
-                  bottom: 16,
-                  right: -48,
-                  zIndex: 3,
-                  transform: "rotate(-28deg)",
-                  background: "linear-gradient(135deg, rgba(120,120,120,0.9) 0%, rgba(72,72,72,0.95) 100%)",
-                  color: "white",
-                  padding: "6px 58px",
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  border: "1px solid rgba(255,255,255,0.16)",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
-                }}
-              >
-                Продано: {soldLabel}
-              </Box>
-              <Box
-                style={{
-                  position: "absolute",
                   inset: 0,
                   zIndex: 2,
-                  background: "linear-gradient(180deg, rgba(15,15,15,0.22), rgba(20,20,20,0.48))",
+                  background: "linear-gradient(180deg, rgba(18,18,18,0.22), rgba(24,24,24,0.52))",
                   pointerEvents: "none",
                 }}
               />
+              <Box
+                style={{
+                  position: "absolute",
+                  left: 14,
+                  right: 14,
+                  bottom: 14,
+                  zIndex: 3,
+                  background: "rgba(28,28,28,0.72)",
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  borderRadius: 10,
+                  padding: "10px 12px",
+                  backdropFilter: "blur(4px)",
+                }}
+              >
+                <Text size="sm" fw={600} style={{ color: "rgba(255,255,255,0.94)", letterSpacing: "0.01em" }}>
+                  Подія завершена
+                </Text>
+              </Box>
             </>
           ) : null}
           {e.posterUrl ? (
@@ -275,7 +271,7 @@ function EventCard({ e }: { e: EventVM }) {
                     color: "var(--text)",
                   }}
                 >
-                  Продано {soldLabel}
+                  Завершено
                 </Text>
               ) : (
                 <Text
