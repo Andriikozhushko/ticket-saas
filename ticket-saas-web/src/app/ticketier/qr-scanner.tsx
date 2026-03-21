@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Box, Text } from "@mantine/core";
+import { Box, Button, Text } from "@mantine/core";
 
 type ScanResult = {
   ok: boolean;
@@ -47,9 +47,9 @@ function extractTicketIdFromUrl(url: string): string | null {
 }
 
 function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 280, height: 280 };
+  if (typeof window === "undefined") return { width: 220, height: 220 };
   const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(240, Math.min(viewport - 90, 320));
+  const size = Math.max(180, Math.min(viewport - 140, 240));
   return { width: size, height: size };
 }
 
@@ -119,6 +119,11 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   const scannerRef = useRef<Html5QrCodeInstance | null>(null);
   const onScanRef = useRef(onScan);
   onScanRef.current = onScan;
+
+  const closeFeedback = useCallback(() => {
+    setFeedback(null);
+    scanningRef.current = false;
+  }, []);
 
   const resetFeedbackLater = useCallback((delayMs: number) => {
     window.setTimeout(() => {
@@ -299,6 +304,9 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
             <Text className="ticketier-scan-result-title">{feedback.title}</Text>
             <Text className="ticketier-scan-result-subtitle">{feedback.subtitle}</Text>
             {feedback.meta ? <Text className="ticketier-scan-result-meta">{feedback.meta}</Text> : null}
+            <Button mt="lg" color="dark" variant="white" onClick={closeFeedback}>
+              OK
+            </Button>
           </Box>
         </Box>
       ) : null}

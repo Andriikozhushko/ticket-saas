@@ -1,5 +1,5 @@
-import { headers } from "next/headers";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { Box, Button, Card, Stack, Text, Title } from "@mantine/core";
 import RefreshOrderButton from "./refresh-order-button";
 import PaymentCountdown from "./payment-countdown";
@@ -7,6 +7,7 @@ import CopyAmountButton from "./copy-amount-button";
 import OrderStatusPoller from "./order-status-poller";
 import OrderErrorState from "./order-error-state";
 import { buildQrImageUrl } from "@/lib/qr";
+import { refreshOrderPaymentSnapshot } from "@/lib/payments";
 
 export const dynamic = "force-dynamic";
 
@@ -24,22 +25,19 @@ type Order = {
 };
 
 async function getOrder(id: string, origin: string): Promise<Order | null> {
-  try {
-    const res = await fetch(`${origin}/api/public/orders/${id}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
+  void origin;
+  const result = await refreshOrderPaymentSnapshot(id, true);
+  if (!result) return null;
+  return result.snapshot as Order;
 }
 
 export default async function OrderPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
   const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "http";
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host) return <OrderErrorState />;
-  const origin = `${proto}://${host}`;
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+  const headerOrigin = host ? `${proto}://${host}` : "";
+  const origin = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.SITE_URL ?? headerOrigin).replace(/\/$/, "");
   const order = await getOrder(id, origin);
 
   if (!order) return <OrderErrorState />;
