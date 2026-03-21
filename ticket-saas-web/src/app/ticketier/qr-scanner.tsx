@@ -204,12 +204,11 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       const scanner = new Html5Qrcode(SCANNER_DIV_ID) as unknown as Html5QrCodeInstance;
       scannerRef.current = scanner;
       const qrbox = getQrBoxSize();
-      container.style.setProperty("--ticketier-qrbox-size", `${qrbox.width}px`);
 
       try {
         await scanner.start(
           { facingMode: "environment" },
-          { fps: 10, qrbox: { width: qrbox.width, height: qrbox.height } },
+          { fps: 10, aspectRatio: 1, qrbox: { width: qrbox.width, height: qrbox.height } },
           (decodedText) => {
             if (!mounted || scanningRef.current) return;
             void handleDecodedValue(decodedText);
