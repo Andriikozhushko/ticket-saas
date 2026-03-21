@@ -36,13 +36,6 @@ type Html5QrCodeInstance = {
   scanFile: (file: File, showImage?: boolean) => Promise<string>;
 };
 
-function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 260, height: 260 };
-  const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(220, Math.min(viewport - 80, 320));
-  return { width: size, height: size };
-}
-
 function extractTicketIdFromUrl(url: string): string | null {
   try {
     const path = new URL(url).pathname;
@@ -200,12 +193,11 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
       const scanner = new Html5Qrcode(SCANNER_DIV_ID) as unknown as Html5QrCodeInstance;
       scannerRef.current = scanner;
-      const qrbox = getQrBoxSize();
 
       try {
         await scanner.start(
           { facingMode: "environment" },
-          { fps: 10, qrbox: { width: qrbox.width, height: qrbox.height } },
+          { fps: 10 },
           (decodedText) => {
             if (!mounted || scanningRef.current) return;
             void handleDecodedValue(decodedText);

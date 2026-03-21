@@ -2607,7 +2607,7 @@ a { color: inherit; text-decoration: none; }
   z-index: 2;
   left: 50%;
   top: 44%;
-  width: min(66vw, 270px);
+  width: min(52vw, 210px);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border-radius: 22px;
@@ -2849,7 +2849,7 @@ a { color: inherit; text-decoration: none; }
     right: 12px;
   }
   .ticketier-scanner-focus {
-    width: min(72vw, 250px);
+    width: min(56vw, 190px);
   }
   .ticketier-mobile-dock-actions {
     grid-template-columns: 1fr;
