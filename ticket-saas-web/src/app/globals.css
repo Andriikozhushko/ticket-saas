@@ -2567,7 +2567,6 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   min-height: 100svh;
   width: 100%;
-  --ticketier-scan-box: clamp(170px, 52vw, 220px);
 }
 .ticketier-scanner-surface {
   position: absolute;
@@ -2589,40 +2588,16 @@ a { color: inherit; text-decoration: none; }
   display: flex !important;
   align-items: center;
   justify-content: center;
-  width: 100% !important;
-  height: 100% !important;
+  border: 0 !important;
   background: transparent !important;
 }
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region video,
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region canvas {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: cover !important;
+.ticketier-scanner-surface #ticketier-qr-reader__scan_region video {
+  width: min(100vw, 100%) !important;
+  max-width: 420px !important;
+  height: auto !important;
+  max-height: 70svh !important;
+  border-radius: 28px;
   background: #000;
-}
-.ticketier-scanner-surface #qr-shaded-region {
-  border: 2px solid rgba(255, 255, 255, 0.32) !important;
-  border-radius: 12px !important;
-  box-shadow: none !important;
-}
-.ticketier-scanner-surface #qr-shaded-region > div {
-  border-color: #ffffff !important;
-  border-width: 4px !important;
-}
-.ticketier-scanner-focus {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -58%);
-  width: var(--ticketier-scan-box);
-  height: var(--ticketier-scan-box);
-  border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.38);
-  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25), 0 0 0 9999px rgba(0, 0, 0, 0.18);
-  pointer-events: none;
-  z-index: 2;
 }
 .ticketier-mobile-dock {
   position: absolute;
