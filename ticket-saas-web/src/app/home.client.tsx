@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo } from "react";
 import Link from "next/link";
@@ -126,7 +126,7 @@ function EventCard({ e }: { e: EventVM }) {
   const dt = formatDate(e.startsAt);
   const place = [e.venue, e.city].filter(Boolean).join(", ");
   const hasMultiplePrices = (e.ticketTypesCount ?? 0) > 1;
-  const priceLabel = hasMultiplePrices ? `РІС–Рґ ${money(e.priceCents)} грн` : `${money(e.priceCents)} грн`;
+  const priceLabel = hasMultiplePrices ? `від ${money(e.priceCents)} грн` : `${money(e.priceCents)} грн`;
 
   return (
     <Card
@@ -136,7 +136,7 @@ function EventCard({ e }: { e: EventVM }) {
       styles={cardStyles}
     >
       <Box component={Link} href={`/events/${e.id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
-        {/* Р¤РѕС‚Рѕ вЂ” СЂРµРЅРґРµримо РїС–СЃР»я mount, С‰РѕР± СѓРЅРёРєРЅСѓС‚Рё hydration mismatch С‡РµСЂРµР· СЂРѕР·С€РёСЂРµння Р±СЂР°СѓР·РµСЂР° */}
+        {/* Фото — рендеримо після mount, щоб уникнути hydration mismatch через розширення браузера */}
         <Box style={{ width: "100%", background: "rgba(0,0,0,0.35)", position: "relative" }}>
           {e.posterUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -152,7 +152,7 @@ function EventCard({ e }: { e: EventVM }) {
           )}
         </Box>
 
-        {/* Р†РЅС„Рѕ РїС–Рґ С„РѕС‚Рѕ */}
+        {/* Інфо під фото */}
         <Box
           style={{
             padding: "18px 20px",
@@ -217,7 +217,7 @@ function EventCard({ e }: { e: EventVM }) {
                   transition: "box-shadow 0.2s ease, transform 0.2s ease",
                 }}
               >
-                РљРІРёС‚РєРё в†’
+                Квитки →
               </Text>
             </Group>
           </Stack>
@@ -247,7 +247,7 @@ function HeroCTAs() {
             boxShadow: "0 4px 20px rgba(239,68,68,0.3)",
           }}
         >
-          РџРµСЂРµРіР»СЏРЅСѓС‚Рё Р°С„С–С€Сѓ
+          Переглянути афішу
         </Box>
       </Link>
       {user ? (
@@ -265,7 +265,7 @@ function HeroCTAs() {
               transition: "border-color 0.2s ease, background 0.2s ease",
             }}
           >
-            РњРѕС— РєРІРёС‚РєРё
+            Мої квитки
           </Box>
         </Link>
       ) : (
@@ -286,7 +286,7 @@ function HeroCTAs() {
             transition: "border-color 0.2s ease, background 0.2s ease",
           }}
         >
-          Р’С…С–Рґ
+          Вхід
         </Box>
       )}
     </Group>
@@ -294,7 +294,7 @@ function HeroCTAs() {
 }
 
 export default function HomeClient({ events }: { events: EventVM[]; initialUser?: InitialUser }) {
-  /* initialValue: true С– getInitialValueInEffect: true вЂ” СЃРµСЂРІРµСЂ С– РєР»С–С”РЅС‚ СЃРїРѕС‡Р°С‚ку РѕР±РёРґРІР° СЂРµРЅРґРµСЂСЏС‚ь 3 РєРѕР»РѕРЅРєРё, С‰РѕР± РЅРµ Р±СѓР»Рѕ hydration mismatch С– СЃС‚СЂРёР±РєР° РЅР° РґРµСЃРєС‚РѕРїС– */
+  /* initialValue: true і getInitialValueInEffect: true — сервер і клієнт спочатку обидва рендерять 3 колонки, щоб не було hydration mismatch і стрибка на десктопі */
   const sm = useMediaQuery("(min-width: 36em)", true, { getInitialValueInEffect: true });
   const md = useMediaQuery("(min-width: 48em)", true, { getInitialValueInEffect: true });
   const columnCount = md ? 3 : sm ? 2 : 1;
@@ -347,7 +347,7 @@ export default function HomeClient({ events }: { events: EventVM[]; initialUser?
                 backgroundClip: "text",
               }}
             >
-              РљРІРёС‚РєРё РЅР° РїРѕРґС–С—
+              Квитки на події
             </Title>
             <Title
               order={1}
@@ -360,11 +360,11 @@ export default function HomeClient({ events }: { events: EventVM[]; initialUser?
                 color: "var(--text)",
               }}
             >
-              Р±РµР· РїРµСЂРµРїР»Р°С‚
+              без переплат
             </Title>
           </Box>
           <Text size="lg" style={{ color: "var(--muted)", fontSize: "clamp(1rem, 2.5vw, 1.2rem)", maxWidth: 420 }}>
-            РљСѓРїСѓР№ РѕРЅР»Р°Р№РЅ вЂ” С€РІРёРґРєРѕ С‚Р° Р±РµР·РїРµС‡РЅРѕ
+            Купуй онлайн — швидко та безпечно
           </Text>
           <HeroCTAs />
         </Stack>
@@ -373,7 +373,7 @@ export default function HomeClient({ events }: { events: EventVM[]; initialUser?
       <Box id="events">
         <Group justify="space-between" align="center" mb="xl" wrap="wrap" gap="md">
           <Title order={2} style={{ margin: 0, fontWeight: 900, letterSpacing: "-0.03em", fontSize: "clamp(1.5rem, 4vw, 2rem)" }}>
-            РђС„С–С€Р°
+            Афіша
           </Title>
           {events.length > 0 && (
             <Group gap="xs">
@@ -389,7 +389,7 @@ export default function HomeClient({ events }: { events: EventVM[]; initialUser?
                   color: "var(--muted)",
                 }}
               >
-                Р—Р° РґР°С‚ою
+                За датою
               </Box>
               <Box
                 component="span"
@@ -403,7 +403,7 @@ export default function HomeClient({ events }: { events: EventVM[]; initialUser?
                   color: "var(--muted)",
                 }}
               >
-                РЈСЃС– РїРѕРґС–С—
+                Усі події
               </Box>
             </Group>
           )}
@@ -421,10 +421,10 @@ export default function HomeClient({ events }: { events: EventVM[]; initialUser?
             }}
           >
             <Title order={3} style={{ margin: 0, color: "var(--text)" }}>
-              РќР°СЂР°Р·С– РЅРµРјР°С” Р°РєС‚РёРІРЅРёС… РїРѕРґС–Р№
+              Наразі немає активних подій
             </Title>
             <Text size="sm" style={{ color: "var(--muted)", marginTop: 10 }}>
-              Р—Р°С…РѕРґСЊС‚Рµ РїС–Р·РЅС–С€Рµ вЂ” С‚СѓС‚ Р·КјСЏРІР»СЏС‚ься РєРѕРЅС†РµСЂС‚Рё С‚Р° С–РЅС€С– РїРѕРґС–С—.
+              Заходьте пізніше — тут зʼявляться концерти та інші події.
             </Text>
           </Card>
         ) : (
@@ -443,4 +443,3 @@ export default function HomeClient({ events }: { events: EventVM[]; initialUser?
     </Box>
   );
 }
-

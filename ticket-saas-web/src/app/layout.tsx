@@ -1,4 +1,4 @@
-﻿import "@mantine/core/styles.css";
+import "@mantine/core/styles.css";
 import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
@@ -10,11 +10,11 @@ import Shell from "./shell";
 
 export const metadata: Metadata = {
   title: {
-    default: "Lizard.red вЂ” РљРІРёС‚РєРё РЅР° РїРѕРґС–С— Р·Р° С…РІРёР»ину. Р‘РµР·РїРµС‡РЅРѕ С‚Р° Р·СЂСѓС‡РЅРѕ",
+    default: "Lizard.red — Квитки на події за хвилину. Безпечно та зручно",
     template: "%s | Lizard.red",
   },
   description:
-    "РљСѓРїСѓР№С‚Рµ РєРІРёС‚РєРё РЅР° РєРѕРЅС†РµСЂС‚Рё, РІРµС‡С–рки С‚Р° РїРѕРґС–С— РѕРЅР»Р°Р№РЅ. РњРёС‚Р»РёРІР° РѕРїР»Р°С‚Р°, РєРІРёС‚РѕРє РЅР° РїРѕС€С‚Сѓ С‚Р° Сѓ В«РњРѕС— РєРІРёС‚РєРёВ». Р‘РµР· РєРѕРјС–СЃС–Р№ С‚Р° С‡Рµрг.",
+    "Купуйте квитки на концерти, вечірки та події онлайн. Митлива оплата, квиток на пошту та у «Мої квитки». Без комісій та черг.",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
@@ -27,7 +27,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  // Р—Р°Р±РѕСЂРѕРЅР° Р·уму РЅР° РјРѕР±С–Р»СЊРЅРёС… РЅР° РІСЃС–С… СЃС‚РѕСЂС–РЅРєР°С…
+  // Заборона зуму на мобільних на всіх сторінках
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

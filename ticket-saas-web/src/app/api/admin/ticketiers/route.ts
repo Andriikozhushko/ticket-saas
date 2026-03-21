@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSessionFromCookie, hashTicketierPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "orgId, login, password required" }, { status: 400 });
     }
     if (password.length < 6) {
-      return NextResponse.json({ error: "РџР°СЂРѕР»ь РјС–РЅС–мум 6 СЃРёРјРІРѕР»С–РІ" }, { status: 400 });
+      return NextResponse.json({ error: "Пароль мінімум 6 символів" }, { status: 400 });
     }
 
     const org = await prisma.organization.findFirst({
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     }).ticketier.findUnique({
       where: { login },
     });
-    if (existing) return NextResponse.json({ error: "РўР°РєРёР№ Р»РѕРіС–РЅ СѓР¶Рµ Р·Р°Р№РЅСЏС‚РёР№" }, { status: 400 });
+    if (existing) return NextResponse.json({ error: "Такий логін уже зайнятий" }, { status: 400 });
 
     const ticketier = await (prisma as unknown as {
       ticketier: {
@@ -57,7 +57,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ id: ticketier.id, login: ticketier.login });
   } catch {
-    return NextResponse.json({ error: "РџРѕРјРёР»РєР° СЃС‚РІРѕСЂРµння Р±С–Р»РµС‚РЅРёРєР°" }, { status: 500 });
+    return NextResponse.json({ error: "Помилка створення білетника" }, { status: 500 });
   }
 }
-

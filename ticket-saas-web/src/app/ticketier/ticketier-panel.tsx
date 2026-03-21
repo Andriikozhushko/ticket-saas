@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -57,7 +57,7 @@ export default function TicketierPanel() {
     const res = await fetch(`/api/ticketier/tickets?eventId=${encodeURIComponent(selectedEventId)}`);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setTicketsError((data as { error?: string }).error ?? "РќРµ РІРґР°Р»ося Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РєРІРёС‚РєРё");
+      setTicketsError((data as { error?: string }).error ?? "Не вдалося завантажити квитки");
       setTickets([]);
       setTicketsLoading(false);
       return;
@@ -114,7 +114,7 @@ export default function TicketierPanel() {
     if (!res.ok) {
       return {
         ok: false,
-        error: payload.error ?? "РџРѕРјРёР»РєР°",
+        error: payload.error ?? "Помилка",
         usedAt: payload.usedAt,
         usedBy: payload.usedBy,
         buyerEmail: payload.buyerEmail,
@@ -142,7 +142,7 @@ export default function TicketierPanel() {
   if (loading) {
     return (
       <Box p="xl">
-        <Text>Р—Р°РІР°РЅС‚Р°Р¶Рµння...</Text>
+        <Text>Завантаження...</Text>
       </Box>
     );
   }
@@ -164,20 +164,20 @@ export default function TicketierPanel() {
       {events.length === 0 ? (
         <Card withBorder p="xl" className="ticketier-empty-card">
           <Text fw={700} mb="sm">
-            РќРµРјР°С” РїСЂРёР·РЅР°С‡РµРЅРёС… РїРѕРґС–Р№
+            Немає призначених подій
           </Text>
-          <Text c="dimmed">Р’Р°Рј С‰Рµ РЅРµ РїСЂРёР·РЅР°С‡РµРЅРѕ Р¶РѕРґРЅРѕС— РїРѕРґС–С—. Р—РІРµСЂРЅС–С‚ься РґРѕ РѕСЂРіР°РЅС–Р·Р°С‚РѕСЂР°.</Text>
+          <Text c="dimmed">Вам ще не призначено жодної події. Зверніться до організатора.</Text>
         </Card>
       ) : (
         <Stack gap="md">
           <Box className="ticketier-mobile-stage">
             <Box className="ticketier-mobile-topbar">
               <Box>
-                <Text className="ticketier-mobile-label">РЎРєР°РЅРµСЂ РєРІРёС‚РєС–РІ</Text>
-                <Text className="ticketier-mobile-event-heading">{selectedEvent?.title ?? "РћР±РµСЂС–С‚ь РїРѕРґС–СЋ"}</Text>
+                <Text className="ticketier-mobile-label">Сканер квитків</Text>
+                <Text className="ticketier-mobile-event-heading">{selectedEvent?.title ?? "Оберіть подію"}</Text>
               </Box>
               <Button variant="subtle" color="gray" size="compact-sm" onClick={handleLogout}>
-                Р’РёР№С‚Рё
+                Вийти
               </Button>
             </Box>
 
@@ -186,7 +186,7 @@ export default function TicketierPanel() {
             <Box className="ticketier-mobile-dock">
               <Box className="ticketier-mobile-dock-main">
                 <Select
-                  aria-label="РџРѕРґС–я"
+                  aria-label="Подія"
                   data={events.map((event) => ({ value: event.id, label: event.title }))}
                   value={selectedEventId}
                   onChange={(value) => {
@@ -201,17 +201,17 @@ export default function TicketierPanel() {
               <Box className="ticketier-mobile-dock-stats">
                 <Box className="ticketier-stat-chip">
                   <Text className="ticketier-stat-value">{activeCount}</Text>
-                  <Text className="ticketier-stat-label">Р°РєС‚РёРІРЅРёС…</Text>
+                  <Text className="ticketier-stat-label">активних</Text>
                 </Box>
                 <Box className="ticketier-stat-chip ticketier-stat-chip-used">
                   <Text className="ticketier-stat-value">{scannedCount}</Text>
-                  <Text className="ticketier-stat-label">РІРёРєРѕСЂРёСЃС‚Р°РЅРѕ</Text>
+                  <Text className="ticketier-stat-label">використано</Text>
                 </Box>
               </Box>
 
               <Group grow className="ticketier-mobile-dock-actions">
                 <Button variant="light" color="gray" size="sm" onClick={() => setShowTickets((current) => !current)}>
-                  {showTickets ? "РЎС…РѕРІР°С‚Рё список" : "Список"}
+                  {showTickets ? "Сховати список" : "Список"}
                 </Button>
               </Group>
             </Box>
@@ -221,13 +221,13 @@ export default function TicketierPanel() {
             <Card withBorder p="lg" className="ticketier-list-card">
               <Group justify="space-between" align="center" mb="md">
                 <Box>
-                  <Text fw={700}>РћСЃС‚Р°РЅРЅС– РєРІРёС‚РєРё</Text>
+                  <Text fw={700}>Останні квитки</Text>
                   <Text size="sm" c="dimmed">
-                    {tickets.length > 0 ? `Усього РѕРїР»Р°С‡РµРЅРѕ: ${tickets.length}` : "Список РѕРЅРѕРІР»СЋС”С‚ься РїС–СЃР»я РєРѕР¶РЅРѕРіРѕ СЃРєР°ну"}
+                    {tickets.length > 0 ? `Усього оплачено: ${tickets.length}` : "Список оновлюється після кожного скану"}
                   </Text>
                 </Box>
                 <Button variant="light" size="xs" onClick={fetchTickets} loading={ticketsLoading}>
-                  РћРЅРѕРІРёС‚Рё
+                  Оновити
                 </Button>
               </Group>
 
@@ -239,11 +239,11 @@ export default function TicketierPanel() {
 
               {ticketsLoading ? (
                 <Text size="sm" c="dimmed">
-                  Р—Р°РІР°РЅС‚Р°Р¶Рµння РєРІРёС‚РєС–РІ...
+                  Завантаження квитків...
                 </Text>
               ) : recentTickets.length === 0 ? (
                 <Text size="sm" c="dimmed">
-                  Поки РЅРµРјР°С” РѕРїР»Р°С‡РµРЅРёС… РєРІРёС‚РєС–РІ.
+                  Поки немає оплачених квитків.
                 </Text>
               ) : (
                 <Stack gap="sm">
@@ -252,15 +252,15 @@ export default function TicketierPanel() {
                       <Box>
                         <Text fw={600}>{ticket.buyerEmail}</Text>
                         <Text size="sm" c="dimmed">
-                          {ticket.ticketTypeName ?? "Р‘РµР· РѕРєСЂРµРјРѕРіРѕ С‚ипу"}
+                          {ticket.ticketTypeName ?? "Без окремого типу"}
                         </Text>
                       </Box>
                       <Box ta="right">
                         <Text size="sm" c={ticket.usedAt ? "yellow" : "green"} fw={700}>
-                          {ticket.usedAt ? "Р’РёРєРѕСЂРёСЃС‚Р°РЅРѕ" : "РђРєС‚РёРІРЅРёР№"}
+                          {ticket.usedAt ? "Використано" : "Активний"}
                         </Text>
                         <Text size="xs" c="dimmed">
-                          {ticket.usedAt ? new Date(ticket.usedAt).toLocaleString("uk-UA") : "Р©Рµ РЅРµ СЃРєР°РЅСѓРІР°Р»Рё"}
+                          {ticket.usedAt ? new Date(ticket.usedAt).toLocaleString("uk-UA") : "Ще не сканували"}
                         </Text>
                       </Box>
                     </Box>
@@ -274,4 +274,3 @@ export default function TicketierPanel() {
     </Box>
   );
 }
-

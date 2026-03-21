@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromCookie } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -7,7 +7,7 @@ import ApproveEventButton from "./approve-event-button";
 import DeleteEventButton from "./delete-event-button";
 
 function formatDate(d: Date | null) {
-  if (!d) return "вЂ”";
+  if (!d) return "—";
   return new Intl.DateTimeFormat("uk-UA", {
     day: "2-digit",
     month: "short",
@@ -51,18 +51,18 @@ export default async function AdminEventsPage() {
   return (
     <Box style={{ maxWidth: 1200, width: "100%", minWidth: 0 }}>
       <Group justify="space-between" mb="xl" wrap="wrap" gap="sm">
-        <Title order={2}>РџРѕРґС–С—</Title>
+        <Title order={2}>Події</Title>
         <Link href="/admin/events/new">
-          <Button size="md">+ РќРѕРІР° РїРѕРґС–я</Button>
+          <Button size="md">+ Нова подія</Button>
         </Link>
       </Group>
 
       {events.length === 0 ? (
         <Card withBorder p="xl" radius="lg">
           <Stack align="center" gap="md">
-            <Text c="dimmed" ta="center">РџРѕРґС–Р№ РїРѕРєРё РЅРµРјР°С”.</Text>
+            <Text c="dimmed" ta="center">Подій поки немає.</Text>
             <Link href="/admin/events/new">
-              <Button variant="light" size="md">РЎС‚РІРѕСЂРёС‚Рё РїРѕРґС–СЋ</Button>
+              <Button variant="light" size="md">Створити подію</Button>
             </Link>
           </Stack>
         </Card>
@@ -74,7 +74,7 @@ export default async function AdminEventsPage() {
             const ticketTypes = ticketTypesMap.get(e.id) ?? [];
             const priceText =
               ticketTypes.length > 0
-                ? ticketTypes.map((t) => `${t.name}: ${(t.priceCents / 100).toFixed(0)} грн`).join(" В· ")
+                ? ticketTypes.map((t) => `${t.name}: ${(t.priceCents / 100).toFixed(0)} грн`).join(" · ")
                 : `${(e.priceCents / 100).toFixed(0)} грн`;
             return (
               <Card key={e.id} withBorder padding="lg" radius="lg" style={{ display: "flex", flexDirection: "column" }}>
@@ -91,7 +91,7 @@ export default async function AdminEventsPage() {
                 <Group justify="space-between" mb="xs">
                   <Text size="xs" c="dimmed">{e.org.name}</Text>
                   <Badge size="sm" color={isApproved ? "green" : "yellow"} variant="light">
-                    {isApproved ? "РћРґРѕР±СЂРµРЅРѕ" : "РќР° РјРѕРґРµСЂР°С†С–С—"}
+                    {isApproved ? "Одобрено" : "На модерації"}
                   </Badge>
                 </Group>
                 <Title order={4} lineClamp={2} mb={4}>{e.title}</Title>
@@ -103,10 +103,10 @@ export default async function AdminEventsPage() {
                 <Group gap="xs" mt="auto" wrap="wrap">
                   {!isApproved && session.isAdmin && <ApproveEventButton eventId={e.id} />}
                   <Link href={`/admin/events/${e.id}`}>
-                    <Button variant="light" size="xs">Р РµРґР°РіСѓРІР°С‚Рё</Button>
+                    <Button variant="light" size="xs">Редагувати</Button>
                   </Link>
                   <Link href={`/events/${e.id}`} target="_blank">
-                    <Button variant="subtle" size="xs">Р’С–РґРєСЂРёС‚Рё</Button>
+                    <Button variant="subtle" size="xs">Відкрити</Button>
                   </Link>
                   <DeleteEventButton eventId={e.id} eventTitle={e.title} />
                 </Group>
@@ -118,4 +118,3 @@ export default async function AdminEventsPage() {
     </Box>
   );
 }
-

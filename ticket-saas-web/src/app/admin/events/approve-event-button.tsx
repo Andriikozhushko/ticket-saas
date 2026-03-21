@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -22,10 +22,10 @@ export default function ApproveEventButton({ eventId }: { eventId: string }) {
       if (res.ok) {
         router.refresh();
       } else {
-        setError((data as { error?: string }).error ?? "РќРµ РІРґР°Р»ося РѕРґРѕР±СЂРёС‚Рё");
+        setError((data as { error?: string }).error ?? "Не вдалося одобрити");
       }
     } catch {
-      setError("РќРµ РІРґР°Р»ося РѕРґРѕР±СЂРёС‚Рё");
+      setError("Не вдалося одобрити");
     } finally {
       setLoading(false);
     }
@@ -34,10 +34,9 @@ export default function ApproveEventButton({ eventId }: { eventId: string }) {
   return (
     <>
       <Button variant="light" size="xs" color="green" onClick={handleApprove} loading={loading}>
-        РћРґРѕР±СЂРёС‚Рё
+        Одобрити
       </Button>
       {error && <Text size="xs" c="red" component="span" ml="xs">{error}</Text>}
     </>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -53,11 +53,11 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
         body: JSON.stringify({ name: newOrgName.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "РџРѕРјРёР»РєР°");
+      if (!res.ok) throw new Error(data.error ?? "Помилка");
       setOrgs((prev) => [...prev, { id: data.id, name: data.name, hasMono: false, jars: [], events: [] }]);
       setNewOrgName("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "РџРѕРјРёР»РєР°");
+      setError(e instanceof Error ? e.message : "Помилка");
     } finally {
       setCreateOrgLoading(false);
     }
@@ -76,7 +76,7 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
         body: JSON.stringify({ orgId: createEventOrgId, title: createEventTitle.trim(), priceCents: price }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "РџРѕРјРёР»РєР°");
+      if (!res.ok) throw new Error(data.error ?? "Помилка");
       setOrgs((prev) =>
         prev.map((o) =>
           o.id === createEventOrgId
@@ -87,7 +87,7 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
       setCreateEventTitle("");
       setCreateEventPrice("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "РџРѕРјРёР»РєР°");
+      setError(e instanceof Error ? e.message : "Помилка");
     } finally {
       setCreateEventLoading(false);
     }
@@ -104,12 +104,12 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
         body: JSON.stringify({ orgId: monoOrgId, token: monoToken.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? data.details ?? "РџРѕРјРёР»РєР°");
+      if (!res.ok) throw new Error(data.error ?? data.details ?? "Помилка");
       setOrgJars((prev) => ({ ...prev, [monoOrgId]: (data.jars ?? []).map((j: { id: string; sendId?: string; title: string }) => ({ id: j.id, sendId: j.sendId ?? null, title: j.title })) }));
       setOrgs((prev) => prev.map((o) => (o.id === monoOrgId ? { ...o, hasMono: true } : o)));
       setMonoToken("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "РџРѕРјРёР»РєР°");
+      setError(e instanceof Error ? e.message : "Помилка");
     } finally {
       setMonoLoading(false);
     }
@@ -125,7 +125,7 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
         body: formData,
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { error?: string }).error ?? "РџРѕРјРёР»РєР°");
+      if (!res.ok) throw new Error((data as { error?: string }).error ?? "Помилка");
       const posterUrl = (data as { posterUrl?: string }).posterUrl ?? null;
       setOrgs((prev) =>
         prev.map((o) => ({
@@ -135,7 +135,7 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
       );
       setPosterFileKey((prev) => ({ ...prev, [eventId]: (prev[eventId] ?? 0) + 1 }));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶Рµння");
+      setError(e instanceof Error ? e.message : "Помилка завантаження");
     } finally {
       setPosterLoading((prev) => ({ ...prev, [eventId]: false }));
     }
@@ -151,7 +151,7 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
         body: JSON.stringify({ eventId, jarId, sendId, jarTitle }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "РџРѕРјРёР»РєР°");
+      if (!res.ok) throw new Error(data.error ?? "Помилка");
       setOrgs((prev) =>
         prev.map((o) => ({
           ...o,
@@ -167,68 +167,68 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
   return (
     <Stack gap="xl" className="admin-dashboard-stack">
       <Group justify="space-between" wrap="wrap" gap="sm">
-        <Title order={1}>РђРґРјС–РЅ</Title>
+        <Title order={1}>Адмін</Title>
         <Button component={Link} href="/" variant="subtle" color="blue" size="sm">
-          в†ђ РќР° РіРѕР»овну
+          ← На головну
         </Button>
       </Group>
 
       {error && <Text size="sm" c="red">{error}</Text>}
 
       <Card withBorder p="lg" radius="md">
-        <Title order={3} mb="md">РЎС‚РІРѕСЂРёС‚Рё РѕСЂРіР°РЅС–Р·Р°С†С–СЋ</Title>
+        <Title order={3} mb="md">Створити організацію</Title>
         <Group align="flex-end" wrap="wrap" gap="sm">
-          <TextInput label="РќР°Р·РІР°" placeholder="Моя РѕСЂРіР°РЅС–Р·Р°С†С–я" value={newOrgName} onChange={(e) => setNewOrgName(e.currentTarget.value)} style={{ flex: "1 1 200px", minWidth: 0 }} />
-          <Button onClick={handleCreateOrg} loading={createOrgLoading}>РЎС‚РІРѕСЂРёС‚Рё</Button>
+          <TextInput label="Назва" placeholder="Моя організація" value={newOrgName} onChange={(e) => setNewOrgName(e.currentTarget.value)} style={{ flex: "1 1 200px", minWidth: 0 }} />
+          <Button onClick={handleCreateOrg} loading={createOrgLoading}>Створити</Button>
         </Group>
       </Card>
 
       <Card withBorder p="lg" radius="md">
-        <Title order={3} mb="md">РЎС‚РІРѕСЂРёС‚Рё РїРѕРґС–СЋ</Title>
+        <Title order={3} mb="md">Створити подію</Title>
         <Stack gap="sm">
           <Select
-            label="РћСЂРіР°РЅС–Р·Р°С†С–я"
-            placeholder="РћР±РµСЂС–С‚ь РѕСЂРіР°РЅС–Р·Р°С†С–СЋ"
+            label="Організація"
+            placeholder="Оберіть організацію"
             data={orgs.map((o) => ({ value: o.id, label: o.name }))}
             value={createEventOrgId}
             onChange={(v) => setCreateEventOrgId(v ?? "")}
           />
-          <TextInput label="РќР°Р·РІР° РїРѕРґС–С—" placeholder="РљРѕРЅС†РµСЂС‚" value={createEventTitle} onChange={(e) => setCreateEventTitle(e.currentTarget.value)} />
-          <TextInput label="Р¦С–РЅР° (грн)" placeholder="100" value={createEventPrice} onChange={(e) => setCreateEventPrice(e.currentTarget.value)} type="number" min={0} step={0.01} />
-          <Button onClick={handleCreateEvent} loading={createEventLoading} disabled={!createEventOrgId || !createEventTitle.trim()}>РЎС‚РІРѕСЂРёС‚Рё РїРѕРґС–СЋ</Button>
+          <TextInput label="Назва події" placeholder="Концерт" value={createEventTitle} onChange={(e) => setCreateEventTitle(e.currentTarget.value)} />
+          <TextInput label="Ціна (грн)" placeholder="100" value={createEventPrice} onChange={(e) => setCreateEventPrice(e.currentTarget.value)} type="number" min={0} step={0.01} />
+          <Button onClick={handleCreateEvent} loading={createEventLoading} disabled={!createEventOrgId || !createEventTitle.trim()}>Створити подію</Button>
         </Stack>
       </Card>
 
       <Card withBorder p="lg" radius="md">
-        <Title order={3} mb="md">РџС–РґРєР»СЋС‡РёС‚Рё Monobank (Р±Р°РЅРєР°)</Title>
-        <Text size="sm" c="dimmed" mb="sm">РўРѕРєРµРЅ Р· РѕСЃРѕР±РёСЃС‚РѕРіРѕ РєР°Р±С–РЅРµС‚Сѓ Monobank (web.monobank.ua) в†’ РќР°Р»Р°С€С‚СѓРІР°ння в†’ РўРѕРєРµРЅРё.</Text>
+        <Title order={3} mb="md">Підключити Monobank (банка)</Title>
+        <Text size="sm" c="dimmed" mb="sm">Токен з особистого кабінету Monobank (web.monobank.ua) → Налаштування → Токени.</Text>
         <Stack gap="sm">
           <Select
-            label="РћСЂРіР°РЅС–Р·Р°С†С–я"
-            placeholder="РћР±РµСЂС–С‚ь РѕСЂРіР°РЅС–Р·Р°С†С–СЋ"
+            label="Організація"
+            placeholder="Оберіть організацію"
             data={orgs.map((o) => ({ value: o.id, label: o.name }))}
             value={monoOrgId}
             onChange={(v) => setMonoOrgId(v ?? "")}
           />
-          <TextInput label="РўРѕРєРµРЅ Monobank" type="password" placeholder="u..." value={monoToken} onChange={(e) => setMonoToken(e.currentTarget.value)} />
-          <Button onClick={handleMonoConnect} loading={monoLoading} disabled={!monoOrgId || !monoToken.trim()}>РџС–РґРєР»СЋС‡РёС‚Рё</Button>
+          <TextInput label="Токен Monobank" type="password" placeholder="u..." value={monoToken} onChange={(e) => setMonoToken(e.currentTarget.value)} />
+          <Button onClick={handleMonoConnect} loading={monoLoading} disabled={!monoOrgId || !monoToken.trim()}>Підключити</Button>
         </Stack>
       </Card>
 
       <Divider />
 
-      <Title order={3}>РћСЂРіР°РЅС–Р·Р°С†С–С— С‚Р° РїРѕРґС–С—</Title>
+      <Title order={3}>Організації та події</Title>
       {orgs.length === 0 ? (
-        <Text size="sm" c="dimmed">Р©Рµ РЅРµРјР°С” РѕСЂРіР°РЅС–Р·Р°С†С–Р№. РЎС‚РІРѕСЂС–С‚ь РѕСЂРіР°РЅС–Р·Р°С†С–СЋ РІРёС‰Рµ.</Text>
+        <Text size="sm" c="dimmed">Ще немає організацій. Створіть організацію вище.</Text>
       ) : (
       orgs.map((org) => (
         <Paper key={org.id} withBorder p="lg" radius="md">
           <Group justify="space-between" wrap="wrap" gap="xs" mb="md">
             <Text fw={700}>{org.name}</Text>
-            {org.hasMono && <Text size="xs" c="green">Monobank РїС–РґРєР»СЋС‡РµРЅРѕ</Text>}
+            {org.hasMono && <Text size="xs" c="green">Monobank підключено</Text>}
           </Group>
           {org.events.length === 0 ? (
-            <Text size="sm" c="dimmed">РќРµРјР°С” РїРѕРґС–Р№</Text>
+            <Text size="sm" c="dimmed">Немає подій</Text>
           ) : (
             <Stack gap="md">
               {org.events.map((e) => (
@@ -236,19 +236,19 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
                   <Group justify="space-between" wrap="wrap" mb="xs">
                     <Box>
                       <Text fw={600}>{e.title}</Text>
-                      <Text size="xs" c="dimmed">{e.priceCents / 100} UAH {e.monoAccountId ? "В· Jar РїСЂРёРІСЏР·Р°РЅ" : ""}</Text>
+                      <Text size="xs" c="dimmed">{e.priceCents / 100} UAH {e.monoAccountId ? "· Jar привязан" : ""}</Text>
                     </Box>
                     {org.hasMono && (orgJars[org.id]?.length ?? 0) > 0 && (
                       <Group gap="xs">
                         <Select
-                          placeholder="РћР±РµСЂС–С‚ь Р±Р°нку"
+                          placeholder="Оберіть банку"
                           data={orgJars[org.id].map((j) => ({ value: j.id, label: j.title }))}
                           value={jarEventId[e.id] ?? ""}
                           onChange={(v) => setJarEventId((prev) => ({ ...prev, [e.id]: v ?? "" }))}
                           size="xs"
                           style={{ minWidth: 0, flex: "1 1 140px" }}
                         />
-                        <Button size="xs" loading={jarLoading[e.id]} disabled={!jarEventId[e.id]} onClick={() => { const j = orgJars[org.id]?.find((x) => x.id === (jarEventId[e.id] ?? "")); handleSetJar(e.id, jarEventId[e.id] ?? "", j?.sendId ?? null, j?.title ?? null); }}>РџСЂРёРІКјСЏР·Р°С‚Рё</Button>
+                        <Button size="xs" loading={jarLoading[e.id]} disabled={!jarEventId[e.id]} onClick={() => { const j = orgJars[org.id]?.find((x) => x.id === (jarEventId[e.id] ?? "")); handleSetJar(e.id, jarEventId[e.id] ?? "", j?.sendId ?? null, j?.title ?? null); }}>Привʼязати</Button>
                       </Group>
                     )}
                   </Group>
@@ -260,7 +260,7 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
                       </Box>
                     )}
                     <Box style={{ flex: 1, minWidth: 0 }}>
-                      <Text size="xs" fw={500} mb={4} c="dimmed">РџРѕСЃС‚РµСЂ (С„РѕС‚Рѕ)</Text>
+                      <Text size="xs" fw={500} mb={4} c="dimmed">Постер (фото)</Text>
                       <input
                         key={posterFileKey[e.id] ?? 0}
                         type="file"
@@ -273,18 +273,17 @@ export default function AdminDashboard({ orgs: initialOrgs }: { orgs: OrgVM[] })
                         disabled={posterLoading[e.id]}
                       />
                     </Box>
-                    {posterLoading[e.id] && <Text size="xs" c="dimmed">Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏвЂ¦</Text>}
+                    {posterLoading[e.id] && <Text size="xs" c="dimmed">Завантаження…</Text>}
                   </Group>
                 </Box>
               ))}
             </Stack>
           )}
           {org.hasMono && !orgJars[org.id]?.length && (
-            <Text size="xs" c="dimmed" mt="sm">РџС–РґРєР»СЋС‡С–С‚ь Monobank С‰Рµ СЂР°Р·, С‰РѕР± РѕР±СЂР°С‚Рё Р±Р°нку РґР»я РїРѕРґС–Р№.</Text>
+            <Text size="xs" c="dimmed" mt="sm">Підключіть Monobank ще раз, щоб обрати банку для подій.</Text>
           )}
         </Paper>
       )))}
     </Stack>
   );
 }
-

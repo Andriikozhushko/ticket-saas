@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -41,7 +41,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, eventId, monoAccountId: jarId });
   } catch {
-    return NextResponse.json({ error: "РџРѕРјРёР»РєР° прив'СЏР·РєРё Р±Р°РЅРєРё" }, { status: 500 });
+    return NextResponse.json({ error: "Помилка прив'язки банки" }, { status: 500 });
   }
 }
-

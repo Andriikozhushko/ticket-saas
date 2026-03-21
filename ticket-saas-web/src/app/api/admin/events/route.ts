@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -28,10 +28,10 @@ export async function POST(req: Request) {
     });
     const ticketTypes: TicketTypeInput[] = mappedTicketTypes.filter((t): t is TicketTypeInput => t !== null);
     if (!orgId || !title) return NextResponse.json({ error: "orgId, title required" }, { status: 400 });
-    if (ticketTypes.length === 0) return NextResponse.json({ error: "Р”РѕРґР°Р№С‚Рµ С…РѕС‡Р° Р± РѕРґРёРЅ РІРёРґ РєРІРёС‚РєР°" }, { status: 400 });
+    if (ticketTypes.length === 0) return NextResponse.json({ error: "Додайте хоча б один вид квитка" }, { status: 400 });
     const jarId = typeof body?.jarId === "string" ? body.jarId.trim() : "";
     const sendId = typeof body?.sendId === "string" ? body.sendId.trim() : "";
-    if (!jarId || !sendId) return NextResponse.json({ error: "РћР±РµСЂС–С‚ь Р±Р°нку (Monobank) РґР»я РїСЂРёР№ому РѕРїР»Р°С‚" }, { status: 400 });
+    if (!jarId || !sendId) return NextResponse.json({ error: "Оберіть банку (Monobank) для прийому оплат" }, { status: 400 });
     const org = await prisma.organization.findFirst({
       where: { id: orgId, ownerId: session.userId },
     });
@@ -64,9 +64,8 @@ export async function POST(req: Request) {
     const message = e instanceof Error ? e.message : String(e);
     console.error("[POST /api/admin/events]", e);
     return NextResponse.json(
-      { error: process.env.NODE_ENV === "development" ? message : "РџРѕРјРёР»РєР° СЃС‚РІРѕСЂРµння РїРѕРґС–С—" },
+      { error: process.env.NODE_ENV === "development" ? message : "Помилка створення події" },
       { status: 500 }
     );
   }
 }
-

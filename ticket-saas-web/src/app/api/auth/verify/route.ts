@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { verifyAuthCode, createSession, setSessionCookie } from "@/lib/auth";
 import { checkVerifyRateLimit, recordVerifyAttempt, getClientIp } from "@/lib/rate-limit";
 import { verifyBodySchema } from "@/lib/schemas/auth";
@@ -9,13 +9,13 @@ export async function POST(req: Request) {
     const ip = getClientIp(req);
     const rate = checkVerifyRateLimit(ip);
     if (!rate.allowed) {
-      return NextResponse.json({ error: rate.error ?? "Р—Р°Р±Р°РіР°С‚Рѕ СЃРїСЂРѕР±." }, { status: 429 });
+      return NextResponse.json({ error: rate.error ?? "Забагато спроб." }, { status: 429 });
     }
 
     const raw = await req.json().catch(() => null);
     const parsed = verifyBodySchema.safeParse(raw);
     if (!parsed.success) {
-      const msg = parsed.error.issues[0]?.message ?? "Р’РєР°Р¶С–С‚ь email С– РєРѕРґ.";
+      const msg = parsed.error.issues[0]?.message ?? "Вкажіть email і код.";
       return NextResponse.json({ error: msg }, { status: 400 });
     }
 
@@ -31,8 +31,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, isAdmin: result.isAdmin });
   } catch (error) {
     console.error("[auth/verify]", error);
-    const formatted = formatRouteError(error, "РџРѕРјРёР»РєР° РІС…оду.");
+    const formatted = formatRouteError(error, "Помилка входу.");
     return NextResponse.json({ error: formatted.message }, { status: formatted.status });
   }
 }
-

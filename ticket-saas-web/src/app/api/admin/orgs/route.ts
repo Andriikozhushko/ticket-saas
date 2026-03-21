@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -21,7 +21,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(org);
   } catch {
-    return NextResponse.json({ error: "РџРѕРјРёР»РєР° СЃС‚РІРѕСЂРµння РѕСЂРіР°РЅС–Р·Р°С†С–С—" }, { status: 500 });
+    return NextResponse.json({ error: "Помилка створення організації" }, { status: 500 });
   }
 }
-

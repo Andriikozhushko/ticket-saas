@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
@@ -143,7 +143,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
   const handleSendCode = async () => {
     setError("");
     if (!IS_DEV && !turnstileToken) {
-      setError("РџС–РґС‚РІРµСЂРґС–С‚ь РєР°РїС‡Сѓ");
+      setError("Підтвердіть капчу");
       return;
     }
     setSendLoading(true);
@@ -154,7 +154,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
         body: JSON.stringify({ email: email.trim(), token: turnstileToken }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "РџРѕРјРёР»РєР°"); return; }
+      if (!res.ok) { setError(data.error ?? "Помилка"); return; }
       setTurnstileToken("");
       if (turnstileWidgetIdRef.current != null && window.turnstile) {
         try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch { /* ignore */ }
@@ -181,9 +181,9 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
       });
       const data = await res.json();
       if (!res.ok) {
-        const errMsg = data.error ?? "РџРѕРјРёР»РєР°";
+        const errMsg = data.error ?? "Помилка";
         setError(errMsg);
-        if (errMsg.includes("Р’РёС‡РµСЂРїР°РЅРѕ") || errMsg.includes("СЃРїСЂРѕР±")) {
+        if (errMsg.includes("Вичерпано") || errMsg.includes("спроб")) {
           setStep("email");
           setCode("");
           setTurnstileToken("");
@@ -253,12 +253,12 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
       <Group gap={12}>
         {user.isAdmin && (
           <Button component={Link} href="/admin" variant="light" color="blue" style={linkStyle}>
-            РђРґРјС–РЅ
+            Адмін
           </Button>
         )}
         <Text size="sm" c="dimmed" visibleFrom="sm">{user.email}</Text>
         <Button variant="outline" color="gray" style={linkStyle} onClick={handleLogout}>
-          Р’РёР№С‚Рё
+          Вийти
         </Button>
       </Group>
     );
@@ -268,12 +268,12 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
     <>
       <Group gap={8} wrap="wrap" align="center">
         <Button variant="subtle" color="blue" style={linkStyle} onClick={() => { setError(""); setEmail(""); setCode(""); setStep("email"); openAuth(); }}>
-          РЈРІС–Р№С‚Рё
+          Увійти
         </Button>
         {sessionError && (
           <Text size="xs" c="dimmed" component="span">
             <Button variant="subtle" size="xs" onClick={loadSession} style={{ padding: "0 6px", minHeight: "auto", height: "auto" }}>
-              РџРѕРІС‚РѕСЂРёС‚Рё
+              Повторити
             </Button>
           </Text>
         )}
@@ -315,7 +315,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
           body: { paddingTop: 24, paddingLeft: 28, paddingRight: 28, paddingBottom: 28 },
         }}
         closeButtonProps={{
-          "aria-label": "Р—Р°РєСЂРёС‚Рё",
+          "aria-label": "Закрити",
           style: {
             width: 40,
             height: 40,
@@ -326,7 +326,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
             backgroundColor: "transparent",
           },
         }}
-        title="Р’С…С–Рґ"
+        title="Вхід"
       >
         <Stack gap="xl" className="auth-form-stack">
           {error && (
@@ -359,15 +359,15 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
                 size="md"
                 className="auth-form-submit"
               >
-                РћС‚СЂРёРјР°С‚Рё РєРѕРґ
+                Отримати код
               </Button>
             </>
           ) : (
             <>
-              <Text size="sm" c="dimmed">Код РЅР°РґС–СЃР»Р°РЅРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text></Text>
+              <Text size="sm" c="dimmed">Код надіслано на <Text span fw={600} c="var(--text)">{email}</Text></Text>
               <Box>
-                <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Р’РІРµРґС–С‚ь 6 С†РёС„СЂ</Text>
-                {/* Р”РµСЃРєС‚РѕРї: 6 РѕРєСЂРµРјРёС… РїРѕР»С–РІ */}
+                <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Введіть 6 цифр</Text>
+                {/* Десктоп: 6 окремих полів */}
                 <Group gap={8} justify="center" wrap="nowrap" onPaste={handleCodePaste} className="auth-code-row auth-code-desktop">
                   {Array.from({ length: CODE_LENGTH }, (_, i) => (
                     <input
@@ -381,12 +381,12 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
                       onChange={(e) => setCodeChar(i, e.target.value.replace(/\D/g, ""))}
                       onKeyDown={(e) => handleCodeKeyDown(i, e)}
                       className="otp-cell auth-form-input"
-                      aria-label={`Р¦РёС„СЂР° ${i + 1}`}
+                      aria-label={`Цифра ${i + 1}`}
                       style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                     />
                   ))}
                 </Group>
-                {/* РњРѕР±С–Р»СЊРЅРёР№: РѕРґРЅРµ РїРѕР»Рµ РЅР° 6 С†РёС„СЂ */}
+                {/* Мобільний: одне поле на 6 цифр */}
                 <Box className="auth-code-mobile" onPaste={(e) => { e.preventDefault(); const t = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, CODE_LENGTH); if (t) setCode(t); }}>
                   <input
                     ref={codeSingleRef}
@@ -397,14 +397,14 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
                     className="auth-form-input otp-single"
-                    aria-label="Код Р· 6 С†РёС„СЂ"
+                    aria-label="Код з 6 цифр"
                     style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                   />
                 </Box>
               </Box>
               {needCaptchaOnCodeStep && (
                 <>
-                  <Text size="xs" c="dimmed" mb={4}>РџСЂРѕР№РґС–С‚ь РєР°РїС‡Сѓ РґР»я РЅР°СЃС‚СѓРїРЅРѕС— СЃРїСЂРѕР±Рё</Text>
+                  <Text size="xs" c="dimmed" mb={4}>Пройдіть капчу для наступної спроби</Text>
                   <div className="turnstile-outer">
                     <Box ref={turnstileCodeContainerRef} className="turnstile-container" />
                   </div>
@@ -427,7 +427,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
                   transition: "transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease",
                 }}
               >
-                РЈРІС–Р№С‚Рё
+                Увійти
               </Button>
             </>
           )}
@@ -436,4 +436,3 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
     </>
   );
 }
-

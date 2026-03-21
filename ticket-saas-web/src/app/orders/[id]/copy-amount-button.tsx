@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Box, Text, Tooltip, ActionIcon } from "@mantine/core";
@@ -59,13 +59,13 @@ export default function CopyAmountButton({ amountHuman, currency = "UAH" }: Prop
       >
         {amountHuman} {currency}
       </Text>
-      <Tooltip label={copied ? "РЎРєРѕРїС–Р№РѕРІР°РЅРѕ!" : "РљРѕРїС–СЋРІР°С‚Рё суму"} withArrow>
+      <Tooltip label={copied ? "Скопійовано!" : "Копіювати суму"} withArrow>
         <ActionIcon
           variant="subtle"
           size="md"
           radius="md"
           onClick={handleCopy}
-          aria-label={copied ? "РЎРєРѕРїС–Р№РѕРІР°РЅРѕ" : "РљРѕРїС–СЋРІР°С‚Рё суму"}
+          aria-label={copied ? "Скопійовано" : "Копіювати суму"}
           style={{
             color: copied ? "var(--accent)" : "var(--muted)",
             background: "transparent",
@@ -77,4 +77,3 @@ export default function CopyAmountButton({ amountHuman, currency = "UAH" }: Prop
     </Box>
   );
 }
-

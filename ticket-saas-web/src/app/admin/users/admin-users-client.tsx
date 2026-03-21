@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ export default function AdminUsersClient({ users }: { users: UserRow[] }) {
   const addUser = async () => {
     const email = addEmail.trim().toLowerCase();
     if (!email) {
-      setAddError("Р’РєР°Р¶С–С‚ь email");
+      setAddError("Вкажіть email");
       return;
     }
     setAddError(null);
@@ -35,10 +35,10 @@ export default function AdminUsersClient({ users }: { users: UserRow[] }) {
         setAddRole("user");
         router.refresh();
       } else {
-        setAddError((data as { error?: string }).error ?? "РќРµ РІРґР°Р»ося РґРѕРґР°С‚Рё");
+        setAddError((data as { error?: string }).error ?? "Не вдалося додати");
       }
     } catch {
-      setAddError("РџРѕРјРёР»РєР° РјРµСЂРµР¶С–");
+      setAddError("Помилка мережі");
     } finally {
       setAddLoading(false);
     }
@@ -57,10 +57,10 @@ export default function AdminUsersClient({ users }: { users: UserRow[] }) {
       if (res.ok) {
         router.refresh();
       } else {
-        setError((data as { error?: string }).error ?? "РќРµ РІРґР°Р»ося РѕРЅРѕРІРёС‚Рё СЂРѕР»ь");
+        setError((data as { error?: string }).error ?? "Не вдалося оновити роль");
       }
     } catch {
-      setError("РќРµ РІРґР°Р»ося РѕРЅРѕРІРёС‚Рё СЂРѕР»ь");
+      setError("Не вдалося оновити роль");
     } finally {
       setUpdating(null);
     }
@@ -68,10 +68,10 @@ export default function AdminUsersClient({ users }: { users: UserRow[] }) {
 
   return (
     <Box style={{ width: "100%", minWidth: 0 }}>
-      <Title order={2} mb="lg">РљРѕСЂРёСЃС‚СѓРІР°С‡С–</Title>
+      <Title order={2} mb="lg">Користувачі</Title>
       {error && <Text size="sm" c="red" mb="sm">{error}</Text>}
       <Card withBorder p="md" radius="md" mb="lg">
-        <Text size="sm" fw={600} mb="xs">Р”РѕРґР°С‚Рё РєРѕСЂРёСЃС‚СѓРІР°С‡Р°</Text>
+        <Text size="sm" fw={600} mb="xs">Додати користувача</Text>
         <Stack gap="xs" className="admin-add-user-form">
           <TextInput
             placeholder="email@example.com"
@@ -81,21 +81,21 @@ export default function AdminUsersClient({ users }: { users: UserRow[] }) {
           />
           <Select
             data={[
-              { value: "user", label: "РљРѕСЂРёСЃС‚СѓРІР°С‡" },
-              { value: "organizer", label: "РћСЂРіР°РЅС–Р·Р°С‚ор" },
-              { value: "admin", label: "РђРґРјС–РЅ" },
+              { value: "user", label: "Користувач" },
+              { value: "organizer", label: "Організатор" },
+              { value: "admin", label: "Адмін" },
             ]}
             value={addRole}
             onChange={(v) => v && setAddRole(v)}
           />
           {addError && <Text size="xs" c="red">{addError}</Text>}
-          <Button size="sm" onClick={addUser} loading={addLoading}>Р”РѕРґР°С‚Рё</Button>
+          <Button size="sm" onClick={addUser} loading={addLoading}>Додати</Button>
         </Stack>
       </Card>
       <Card withBorder p={0} radius="md">
         {users.length === 0 ? (
           <Box p="xl">
-            <Text size="sm" c="dimmed">РљРѕСЂРёСЃС‚СѓРІР°С‡С–РІ РїРѕРєРё РЅРµРјР°С”.</Text>
+            <Text size="sm" c="dimmed">Користувачів поки немає.</Text>
           </Box>
         ) : (
         <Box style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
@@ -103,8 +103,8 @@ export default function AdminUsersClient({ users }: { users: UserRow[] }) {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Email</Table.Th>
-              <Table.Th>Р РѕР»ь</Table.Th>
-              <Table.Th>Р”Р°С‚Р°</Table.Th>
+              <Table.Th>Роль</Table.Th>
+              <Table.Th>Дата</Table.Th>
               <Table.Th />
             </Table.Tr>
           </Table.Thead>
@@ -117,9 +117,9 @@ export default function AdminUsersClient({ users }: { users: UserRow[] }) {
                     size="xs"
                     style={{ width: 140 }}
                     data={[
-                      { value: "user", label: "РљРѕСЂРёСЃС‚СѓРІР°С‡" },
-                      { value: "organizer", label: "РћСЂРіР°РЅС–Р·Р°С‚ор" },
-                      { value: "admin", label: "РђРґРјС–РЅ" },
+                      { value: "user", label: "Користувач" },
+                      { value: "organizer", label: "Організатор" },
+                      { value: "admin", label: "Адмін" },
                     ]}
                     value={u.role}
                     onChange={(v) => v && updateRole(u.id, v)}
@@ -138,4 +138,3 @@ export default function AdminUsersClient({ users }: { users: UserRow[] }) {
     </Box>
   );
 }
-

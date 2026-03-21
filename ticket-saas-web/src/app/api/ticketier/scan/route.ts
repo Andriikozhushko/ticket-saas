@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getTicketierSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { consumeTicket } from "@/lib/tickets";
@@ -43,18 +43,18 @@ export async function POST(req: Request) {
     });
 
     if (!ticket) {
-      return NextResponse.json({ error: "РљРІРёС‚РѕРє РЅРµ Р·РЅР°Р№РґРµРЅРѕ", valid: false, state: "error" }, { status: 404 });
+      return NextResponse.json({ error: "Квиток не знайдено", valid: false, state: "error" }, { status: 404 });
     }
 
     if (!allowedEventIds.includes(ticket.order.eventId)) {
-      return NextResponse.json({ error: "РќРµРјР°С” РґРѕСЃС‚упу РґРѕ С†С–С”С— РїРѕРґС–С—", valid: false, state: "error" }, { status: 403 });
+      return NextResponse.json({ error: "Немає доступу до цієї події", valid: false, state: "error" }, { status: 403 });
     }
 
     const consumed = await consumeTicket(ticketId, session.login);
     if (!consumed.ok && consumed.reason === "already_used") {
       return NextResponse.json(
         {
-          error: "РљРІРёС‚РѕРє СѓР¶Рµ РІРёРєРѕСЂРёСЃС‚Р°РЅРѕ",
+          error: "Квиток уже використано",
           usedAt: consumed.ticket?.usedAt,
           usedBy: consumed.ticket?.usedBy,
           buyerEmail: ticket.order.buyerEmail,
@@ -67,13 +67,13 @@ export async function POST(req: Request) {
     }
 
     if (!consumed.ok) {
-      return NextResponse.json({ error: "РљРІРёС‚РѕРє РЅРµ Р·РЅР°Р№РґРµРЅРѕ", valid: false, state: "error" }, { status: 404 });
+      return NextResponse.json({ error: "Квиток не знайдено", valid: false, state: "error" }, { status: 404 });
     }
 
     return NextResponse.json({
       ok: true,
       valid: true,
-      message: "РљРІРёС‚РѕРє РїС–РґС‚РІРµСЂРґР¶РµРЅРѕ",
+      message: "Квиток підтверджено",
       usedAt: consumed.ticket?.usedAt,
       usedBy: consumed.ticket?.usedBy,
       buyerEmail: ticket.order.buyerEmail,
@@ -81,7 +81,6 @@ export async function POST(req: Request) {
       state: "success",
     });
   } catch {
-    return NextResponse.json({ error: "РџРѕРјРёР»РєР° СЃРєР°РЅСѓРІР°ння", state: "error" }, { status: 500 });
+    return NextResponse.json({ error: "Помилка сканування", state: "error" }, { status: 500 });
   }
 }
-

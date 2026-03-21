@@ -1,4 +1,4 @@
-﻿/**
+/**
  * In-memory rate limits for local app instances.
  * Good enough for dev / single-instance deploys; replace with Redis for multi-instance scaling.
  */
@@ -33,13 +33,13 @@ export function checkLoginRateLimit(ip: string, email: string): { allowed: boole
   const lastEmailAttempt = emailArr[emailArr.length - 1];
 
   if (typeof lastEmailAttempt === "number" && now - lastEmailAttempt < SEND_CODE_COOLDOWN_MS) {
-    return { allowed: false, error: "Код СѓР¶Рµ Р±СѓР»Рѕ РЅР°РґС–СЃР»Р°РЅРѕ. Р—Р°С‡РµРєР°Р№С‚Рµ Р±Р»РёР·ько С…РІРёР»РёРЅРё РїРµСЂРµРґ РїРѕРІС‚орною СЃРїСЂРѕР±ою." };
+    return { allowed: false, error: "Код уже було надіслано. Зачекайте близько хвилини перед повторною спробою." };
   }
   if (ipArr.length >= MAX_PER_IP) {
-    return { allowed: false, error: "Р—Р°Р±Р°РіР°С‚Рѕ СЃРїСЂРѕР±. РЎРїСЂРѕР±СѓР№С‚Рµ С‰Рµ СЂР°Р· С‡РµСЂРµР· 10 С…РІРёР»РёРЅ." };
+    return { allowed: false, error: "Забагато спроб. Спробуйте ще раз через 10 хвилин." };
   }
   if (emailArr.length >= MAX_PER_EMAIL) {
-    return { allowed: false, error: "РќР° С†РµР№ email СѓР¶Рµ РЅР°РґС–СЃР»Р°РЅРѕ РјР°ксимум РєРѕРґС–РІ. Р—Р°С‡РµРєР°Р№С‚Рµ 10 С…РІРёР»РёРЅ." };
+    return { allowed: false, error: "На цей email уже надіслано максимум кодів. Зачекайте 10 хвилин." };
   }
 
   return { allowed: true };
@@ -76,7 +76,7 @@ export function checkVerifyRateLimit(ip: string): { allowed: boolean; error?: st
   const attempts = verifyIpTimestamps.get(ip) ?? [];
 
   if (attempts.length >= VERIFY_MAX_PER_IP) {
-    return { allowed: false, error: "Р—Р°Р±Р°РіР°С‚Рѕ СЃРїСЂРѕР± РїРµСЂРµРІС–рки коду. РЎРїСЂРѕР±СѓР№С‚Рµ С‰Рµ СЂР°Р· С‡РµСЂРµР· 10 С…РІРёР»РёРЅ." };
+    return { allowed: false, error: "Забагато спроб перевірки коду. Спробуйте ще раз через 10 хвилин." };
   }
 
   return { allowed: true };
@@ -100,7 +100,7 @@ export function checkOrderCreateRateLimit(ip: string): { allowed: boolean; error
   const attempts = orderIpTimestamps.get(ip) ?? [];
 
   if (attempts.length >= ORDER_MAX_PER_IP) {
-    return { allowed: false, error: "Р—Р°Р±Р°РіР°С‚Рѕ Р·Р°РјРѕРІР»Рµнь. РЎРїСЂРѕР±СѓР№С‚Рµ С‰Рµ СЂР°Р· С‡РµСЂРµР· 5 С…РІРёР»РёРЅ." };
+    return { allowed: false, error: "Забагато замовлень. Спробуйте ще раз через 5 хвилин." };
   }
 
   return { allowed: true };
@@ -112,4 +112,3 @@ export function recordOrderCreateAttempt(ip: string): void {
   attempts.push(now);
   orderIpTimestamps.set(ip, attempts);
 }
-

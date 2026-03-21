@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -53,7 +53,6 @@ export async function POST(req: Request) {
       jars: jars.map((jar) => ({ id: jar.id, sendId: jar.sendId, title: jar.title })),
     });
   } catch {
-    return NextResponse.json({ error: "РџРѕРјРёР»РєР° РїС–РґРєР»СЋС‡Рµння Monobank" }, { status: 500 });
+    return NextResponse.json({ error: "Помилка підключення Monobank" }, { status: 500 });
   }
 }
-

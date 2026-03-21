@@ -1,10 +1,10 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const STATUSES = ["awaiting_payment", "paid", "expired"] as const;
 
-/** РћРЅРѕРІРёС‚Рё СЃС‚Р°С‚СѓСЃ Р°Р±Рѕ С‡Р°СЃ Р·Р°РјРѕРІР»Рµння (С‚С–Р»ьки РїРѕРІРЅРёР№ Р°РґРјС–РЅ). */
+/** Оновити статус або час замовлення (тільки повний адмін). */
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -51,4 +51,3 @@ export async function PATCH(
   await prisma.order.update({ where: { id }, data });
   return NextResponse.json({ ok: true });
 }
-

@@ -1,13 +1,13 @@
-﻿"use client";
+"use client";
 
 /**
- * РђРЅС–РјРѕРІР°РЅРёР№ С„РѕРЅ: Р±Р»СѓРєР°СЋС‡С– Р±Р»РѕР±Рё (СЂРѕР·РјРёС‚С– РїР»ями) + РѕСЂР±Рё (СЃРІС–С‚Р»РѕРІС– С‚РѕС‡РєРё).
- * Р’РёРєРѕСЂРёСЃС‚РѕРІСѓС”С‚ься РІ Shell вЂ” РѕРґРЅР°РєРѕРІРѕ РЅР° РІСЃС–С… СЃС‚РѕСЂС–РЅРєР°С… (РіРѕР»РѕРІРЅР°, РїРѕРґС–С—, РјРѕС— РєРІРёС‚РєРё, про РЅР°СЃ, Р·Р°РјРѕРІР»Рµння).
+ * Анімований фон: блукаючі блоби (розмиті плями) + орби (світлові точки).
+ * Використовується в Shell — однаково на всіх сторінках (головна, події, мої квитки, про нас, замовлення).
  */
 export function AnimatedBackground() {
   return (
     <div className="app-animated-bg" aria-hidden>
-      {/* 3 РІРµР»РёРєС– СЂРѕР·РјРёС‚С– Р±Р»РѕР±Рё */}
+      {/* 3 великі розмиті блоби */}
       <div className="app-bg-blob-wrap">
         <div className="app-bg-blob" />
       </div>
@@ -17,7 +17,7 @@ export function AnimatedBackground() {
       <div className="app-bg-blob-wrap">
         <div className="app-bg-blob" />
       </div>
-      {/* 6 РѕСЂР±С–РІ, С‰Рѕ СЂСѓС…Р°СЋС‚ься РїРѕ РµРєСЂР°ну */}
+      {/* 6 орбів, що рухаються по екрану */}
       <div className="app-bg-orb" />
       <div className="app-bg-orb" />
       <div className="app-bg-orb" />
@@ -27,4 +27,3 @@ export function AnimatedBackground() {
     </div>
   );
 }
-

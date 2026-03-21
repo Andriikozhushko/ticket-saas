@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Button, Card, Group, Select, Stack, Text, TextInput } from "@mantine/core";
@@ -14,7 +14,7 @@ export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
   const handleSubmit = async () => {
     const trimmed = email.trim();
     if (!trimmed) {
-      setError("Р’РєР°Р¶С–С‚ь email");
+      setError("Вкажіть email");
       return;
     }
 
@@ -29,10 +29,10 @@ export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError((data as { error?: string }).error ?? "РџРѕРјРёР»РєР° РІРёРґР°С‡С–");
+        setError((data as { error?: string }).error ?? "Помилка видачі");
         return;
       }
-      setSuccess(`Р’РёРґР°РЅРѕ ${(data as { ticketsCount?: number }).ticketsCount ?? quantity} РєРІРёС‚РѕРє(Рё) РЅР° ${trimmed}`);
+      setSuccess(`Видано ${(data as { ticketsCount?: number }).ticketsCount ?? quantity} квиток(и) на ${trimmed}`);
       setEmail("");
     } finally {
       setLoading(false);
@@ -42,14 +42,14 @@ export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
   return (
     <Card withBorder p="lg" radius="md" style={{ borderColor: "var(--border)" }}>
       <Text size="sm" fw={700} mb={4}>
-        РџРѕРґР°СЂСѓРІР°С‚Рё Р°Р±Рѕ РІРёРґР°С‚Рё РєРІРёС‚РєРё
+        Подарувати або видати квитки
       </Text>
       <Text size="xs" c="dimmed" mb="md">
-        Р’РІРµРґС–С‚ь email РѕС‚СЂРёРјСѓРІР°С‡Р°. РЎРёСЃС‚РµРјР° СЃС‚РІРѕСЂРёС‚ь РєРІРёС‚РєРё С‚Р° РЅР°РґС–С€Р»Рµ Р»РёСЃС‚ Р· QR-РєРѕРґР°РјРё.
+        Введіть email отримувача. Система створить квитки та надішле лист з QR-кодами.
       </Text>
       <Stack gap="sm">
         <TextInput
-          label="Email РѕС‚СЂРёРјСѓРІР°С‡Р°"
+          label="Email отримувача"
           placeholder="email@example.com"
           value={email}
           onChange={(e) => {
@@ -61,17 +61,17 @@ export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
         />
         <Group grow>
           <Select
-            label="РљС–Р»СЊРєС–СЃС‚ь (1-10)"
+            label="Кількість (1-10)"
             data={Array.from({ length: 10 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))}
             value={String(quantity)}
             onChange={(value) => setQuantity(Number(value) || 1)}
           />
           <Select
-            label="РџСЂРёС‡РёРЅР°"
+            label="Причина"
             data={[
-              { value: "gift", label: "РџРѕРґР°рунок" },
-              { value: "issuance", label: "Р’РёРґР°С‡Р°" },
-              { value: "purchase", label: "РџРѕРєСѓРїРєР°" },
+              { value: "gift", label: "Подарунок" },
+              { value: "issuance", label: "Видача" },
+              { value: "purchase", label: "Покупка" },
             ]}
             value={reason}
             onChange={(value) => value && setReason(value)}
@@ -80,10 +80,9 @@ export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
         {error && <Text size="sm" c="red">{error}</Text>}
         {success && <Text size="sm" c="green">{success}</Text>}
         <Button size="sm" onClick={handleSubmit} loading={loading}>
-          {reason === "gift" ? "РџРѕРґР°СЂСѓРІР°С‚Рё РєРІРёС‚РєРё" : "Р’РёРґР°С‚Рё РєРІРёС‚РєРё"}
+          {reason === "gift" ? "Подарувати квитки" : "Видати квитки"}
         </Button>
       </Stack>
     </Card>
   );
 }
-

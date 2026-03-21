@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyTicketierPassword, createTicketierSession } from "@/lib/auth";
 
@@ -11,14 +11,14 @@ export async function POST(req: Request) {
     const login = typeof body?.login === "string" ? body.login.trim().toLowerCase() : "";
     const password = typeof body?.password === "string" ? body.password : "";
     if (!login || !password) {
-      return NextResponse.json({ error: "Р›РѕРіС–РЅ С– РїР°СЂРѕР»ь РѕР±РѕРІКјСЏР·РєРѕРІС–" }, { status: 400 });
+      return NextResponse.json({ error: "Логін і пароль обовʼязкові" }, { status: 400 });
     }
     const ticketier = await prisma.ticketier.findUnique({
       where: { login },
       select: { id: true, passwordHash: true },
     });
     if (!ticketier || !verifyTicketierPassword(password, ticketier.passwordHash)) {
-      return NextResponse.json({ error: "РќРµРІС–СЂРЅРёР№ Р»РѕРіС–РЅ Р°Р±Рѕ РїР°СЂРѕР»ь" }, { status: 401 });
+      return NextResponse.json({ error: "Невірний логін або пароль" }, { status: 401 });
     }
     const sessionId = await createTicketierSession(ticketier.id);
     const res = NextResponse.json({ ok: true });
@@ -32,11 +32,10 @@ export async function POST(req: Request) {
     return res;
   } catch (err) {
     console.error("[ticketier/login]", err);
-    const message = err instanceof Error ? err.message : "РџРѕРјРёР»РєР° РІС…оду";
+    const message = err instanceof Error ? err.message : "Помилка входу";
     return NextResponse.json(
-      { error: process.env.NODE_ENV === "development" ? message : "РџРѕРјРёР»РєР° РІС…оду" },
+      { error: process.env.NODE_ENV === "development" ? message : "Помилка входу" },
       { status: 500 }
     );
   }
 }
-

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { bufferMatchesMime } from "@/lib/image-validate";
@@ -34,17 +34,17 @@ export async function POST(
     const formData = await req.formData();
     const file = formData.get("file");
     if (!file || !(file instanceof File)) {
-      return NextResponse.json({ error: "РџРѕС‚СЂС–Р±РµРЅ С„Р°Р№Р» (file)" }, { status: 400 });
+      return NextResponse.json({ error: "Потрібен файл (file)" }, { status: 400 });
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: "Р”РѕР·РІРѕР»РµРЅС– С„РѕСЂРјР°С‚Рё: JPEG, PNG, WebP" }, { status: 400 });
+      return NextResponse.json({ error: "Дозволені формати: JPEG, PNG, WebP" }, { status: 400 });
     }
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: "Р РѕР·РјС–СЂ С„Р°Р№Р»Сѓ РґРѕ 8 РњР‘" }, { status: 400 });
+      return NextResponse.json({ error: "Розмір файлу до 8 МБ" }, { status: 400 });
     }
     const buffer = Buffer.from(await file.arrayBuffer());
     if (!bufferMatchesMime(buffer, file.type)) {
-      return NextResponse.json({ error: "Р”РѕР·РІРѕР»РµРЅС– С„РѕСЂРјР°С‚Рё: JPEG, PNG, WebP (С„Р°Р№Р» РЅРµ РІС–РґРїРѕРІС–РґР°С” С‚ипу)" }, { status: 400 });
+      return NextResponse.json({ error: "Дозволені формати: JPEG, PNG, WebP (файл не відповідає типу)" }, { status: 400 });
     }
     const ext = extFromMime(file.type);
     const dir = path.join(process.cwd(), "public", "uploads", "organizers");
@@ -59,7 +59,6 @@ export async function POST(
     });
     return NextResponse.json({ organizerPhotoUrl });
   } catch {
-    return NextResponse.json({ error: "РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶Рµння" }, { status: 500 });
+    return NextResponse.json({ error: "Помилка завантаження" }, { status: 500 });
   }
 }
-

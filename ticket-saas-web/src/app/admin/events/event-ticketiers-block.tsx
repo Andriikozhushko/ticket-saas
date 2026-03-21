@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { Box, Button, Card, Group, Stack, Text, TextInput } from "@mantine/core";
@@ -18,7 +18,7 @@ export default function EventTicketiersBlock({ eventId, orgId }: { eventId: stri
   const fetchList = useCallback(async () => {
     const res = await fetch(`/api/admin/orgs/${orgId}/ticketiers`);
     if (!res.ok) {
-      setListError("РќРµ РІРґР°Р»ося Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё список");
+      setListError("Не вдалося завантажити список");
       setList([]);
       return;
     }
@@ -42,7 +42,7 @@ export default function EventTicketiersBlock({ eventId, orgId }: { eventId: stri
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setActionError((data as { error?: string }).error ?? "РќРµ РІРґР°Р»ося РїСЂРёР·РЅР°С‡РёС‚Рё");
+      setActionError((data as { error?: string }).error ?? "Не вдалося призначити");
       return;
     }
     fetchList();
@@ -56,7 +56,7 @@ export default function EventTicketiersBlock({ eventId, orgId }: { eventId: stri
     );
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setActionError((data as { error?: string }).error ?? "РќРµ РІРґР°Р»ося РїСЂРёР±СЂР°С‚Рё");
+      setActionError((data as { error?: string }).error ?? "Не вдалося прибрати");
       return;
     }
     fetchList();
@@ -74,7 +74,7 @@ export default function EventTicketiersBlock({ eventId, orgId }: { eventId: stri
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setCreateError((data as { error?: string }).error ?? "РџРѕРјРёР»РєР°");
+        setCreateError((data as { error?: string }).error ?? "Помилка");
         return;
       }
       const id = (data as { id?: string }).id;
@@ -90,15 +90,15 @@ export default function EventTicketiersBlock({ eventId, orgId }: { eventId: stri
   return (
     <Box pt="md" style={{ borderTop: "1px solid var(--mantine-color-dark-4)" }}>
       <Text size="sm" fw={600} mb="xs">
-        Р‘С–Р»РµС‚РЅРёРєРё
+        Білетники
       </Text>
       <Text size="xs" c="dimmed" mb="sm">
-        РЎС‚РІРѕСЂС–С‚ь РѕР±Р»С–РєРѕРІС– Р·Р°писи РґР»я Р±С–Р»РµС‚РЅРёРєС–РІ С– РїСЂРёР·РЅР°С‡С‚Рµ С—С… РЅР° С†СЋ РїРѕРґС–СЋ. Р’РѕРЅРё Р·РјРѕР¶СѓС‚ь СЃРєР°РЅСѓРІР°С‚Рё QR РЅР° РІС…РѕРґС–.
+        Створіть облікові записи для білетників і призначте їх на цю подію. Вони зможуть сканувати QR на вході.
       </Text>
       {listError && <Text size="sm" c="red" mb="xs">{listError}</Text>}
       {actionError && <Text size="sm" c="red" mb="xs">{actionError}</Text>}
       {loading ? (
-        <Text size="sm" c="dimmed">Р—Р°РІР°РЅС‚Р°Р¶Рµння...</Text>
+        <Text size="sm" c="dimmed">Завантаження...</Text>
       ) : (
         <Stack gap="sm">
           {list.map((ticketier) => (
@@ -108,30 +108,30 @@ export default function EventTicketiersBlock({ eventId, orgId }: { eventId: stri
               </Text>
               {isAssigned(ticketier) ? (
                 <Button size="xs" variant="subtle" color="red" onClick={() => unassign(ticketier.id)}>
-                  РџСЂРёР±СЂР°С‚Рё Р· РїРѕРґС–С—
+                  Прибрати з події
                 </Button>
               ) : (
                 <Button size="xs" variant="light" onClick={() => assign(ticketier.id)}>
-                  Р”РѕРґР°С‚Рё РґРѕ РїРѕРґС–С—
+                  Додати до події
                 </Button>
               )}
             </Group>
           ))}
           <Card withBorder p="sm" radius="md">
             <Text size="xs" fw={500} mb="xs">
-              РќРѕРІРёР№ Р±С–Р»РµС‚РЅРёРє
+              Новий білетник
             </Text>
             <Group gap="xs" align="flex-end">
-              <TextInput placeholder="Р›РѕРіС–РЅ" value={newLogin} onChange={(e) => setNewLogin(e.target.value)} size="xs" />
+              <TextInput placeholder="Логін" value={newLogin} onChange={(e) => setNewLogin(e.target.value)} size="xs" />
               <TextInput
                 type="password"
-                placeholder="РџР°СЂРѕР»ь (РјС–РЅ. 6)"
+                placeholder="Пароль (мін. 6)"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 size="xs"
               />
               <Button size="xs" onClick={createTicketier} loading={createLoading} disabled={!newLogin.trim() || newPassword.length < 6}>
-                РЎС‚РІРѕСЂРёС‚Рё С– РїСЂРёР·РЅР°С‡РёС‚Рё
+                Створити і призначити
               </Button>
             </Group>
             {createError && <Text size="xs" c="red" mt="xs">{createError}</Text>}
@@ -141,4 +141,3 @@ export default function EventTicketiersBlock({ eventId, orgId }: { eventId: stri
     </Box>
   );
 }
-

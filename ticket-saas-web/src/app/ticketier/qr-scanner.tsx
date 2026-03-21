@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Button, Text } from "@mantine/core";
@@ -84,7 +84,7 @@ function formatRelativeUsedAt(value?: string | null): string | null {
   const absMinutes = Math.round(Math.abs(diffMs) / 60000);
   const relative = new Intl.RelativeTimeFormat("uk", { numeric: "auto" });
 
-  if (absMinutes < 1) return "С‰РѕР№РЅРѕ";
+  if (absMinutes < 1) return "щойно";
   if (absMinutes < 60) return relative.format(Math.round(diffMs / 60000), "minute");
 
   const absHours = Math.round(absMinutes / 60);
@@ -134,8 +134,8 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
     if (!ticketId) {
       setFeedback({
         tone: "error",
-        title: "РќРµРІС–СЂРЅРёР№ QR-РєРѕРґ",
-        subtitle: "РЎРїСЂРѕР±СѓР№С‚Рµ РЅР°РІРµСЃС‚Рё РєР°РјРµСЂСѓ С‰Рµ СЂР°Р·.",
+        title: "Невірний QR-код",
+        subtitle: "Спробуйте навести камеру ще раз.",
       });
       return;
     }
@@ -145,10 +145,10 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
     if (result.ok || result.state === "success") {
       setFeedback({
         tone: "success",
-        title: "РљРІРёС‚РѕРє РїС–РґС‚РІРµСЂРґР¶РµРЅРѕ",
+        title: "Квиток підтверджено",
         subtitle: result.ticketTypeName
-          ? `Р’С…С–Рґ РґРѕР·РІРѕР»РµРЅРѕ. Тип РєРІРёС‚РєР°: ${result.ticketTypeName}.`
-          : "Р’С…С–Рґ РґРѕР·РІРѕР»РµРЅРѕ. Р“С–СЃС‚ь РјРѕР¶Рµ РїСЂРѕС…РѕРґРёС‚Рё.",
+          ? `Вхід дозволено. Тип квитка: ${result.ticketTypeName}.`
+          : "Вхід дозволено. Гість може проходити.",
         meta: result.buyerEmail ?? undefined,
       });
       return;
@@ -158,19 +158,19 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       const relative = formatRelativeUsedAt(result.usedAt);
       setFeedback({
         tone: "warning",
-        title: "РљРІРёС‚РѕРє СѓР¶Рµ СЃРєР°РЅСѓРІР°Р»Рё",
+        title: "Квиток уже сканували",
         subtitle: relative
-          ? `Р¦РµР№ РєРІРёС‚РѕРє СѓР¶Рµ РІРёРєРѕСЂРёСЃС‚Р°Р»Рё ${relative}.`
-          : "Р¦РµР№ РєРІРёС‚РѕРє СѓР¶Рµ РІРёРєРѕСЂРёСЃС‚Р°Р»Рё СЂР°РЅС–С€Рµ.",
-        meta: result.usedBy ? `РЎРєР°РЅСѓРІР°РІ: ${result.usedBy}` : result.buyerEmail ?? undefined,
+          ? `Цей квиток уже використали ${relative}.`
+          : "Цей квиток уже використали раніше.",
+        meta: result.usedBy ? `Сканував: ${result.usedBy}` : result.buyerEmail ?? undefined,
       });
       return;
     }
 
     setFeedback({
       tone: "error",
-      title: "РќРµ РІРґР°Р»ося РїС–РґС‚РІРµСЂРґРёС‚Рё",
-      subtitle: result.error ?? "РЎС‚Р°Р»Р°ся РїРѕРјРёР»РєР° РїС–Рґ С‡Р°СЃ СЃРєР°РЅСѓРІР°ння.",
+      title: "Не вдалося підтвердити",
+      subtitle: result.error ?? "Сталася помилка під час сканування.",
     });
   }, []);
 
@@ -203,13 +203,13 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
           },
           (err) => {
             if (!mounted || isScanFailureOnly(err)) return;
-            setCameraError(typeof err === "string" ? err : "РќРµРјР°С” РґРѕСЃС‚упу РґРѕ РєР°РјРµри");
+            setCameraError(typeof err === "string" ? err : "Немає доступу до камери");
           }
         );
         if (mounted) setCameraError("");
       } catch (error) {
         if (mounted) {
-          setCameraError(error instanceof Error ? error.message : "РџРѕРјРёР»РєР° РєР°РјРµри");
+          setCameraError(error instanceof Error ? error.message : "Помилка камери");
         }
       }
     })();
@@ -247,8 +247,8 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
               if (!decoded) {
                 setFeedback({
                   tone: "error",
-                  title: "QR РЅРµ Р·РЅР°Р№РґРµРЅРѕ",
-                  subtitle: "РЎРїСЂРѕР±СѓР№С‚Рµ С‡С–С‚РєС–С€Рµ С„РѕС‚Рѕ Р°Р±Рѕ РїРѕРІРµСЂРЅС–С‚ься РґРѕ РєР°РјРµри.",
+                  title: "QR не знайдено",
+                  subtitle: "Спробуйте чіткіше фото або поверніться до камери.",
                 });
                 return;
               }
@@ -256,8 +256,8 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
             } catch {
               setFeedback({
                 tone: "error",
-                title: "РќРµ РІРґР°Р»ося РїСЂРѕС‡РёС‚Р°С‚Рё С„РѕС‚Рѕ",
-                subtitle: "РЎРїСЂРѕР±СѓР№С‚Рµ С–РЅС€Рµ С„РѕС‚Рѕ Р°Р±Рѕ РїРѕРІРµСЂРЅС–С‚ься РґРѕ РєР°РјРµри.",
+                title: "Не вдалося прочитати фото",
+                subtitle: "Спробуйте інше фото або поверніться до камери.",
               });
             } finally {
               if (fileInputRef.current) {
@@ -271,7 +271,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       {cameraError ? (
         <Box className="ticketier-scan-overlay ticketier-scan-overlay-error">
           <Box className="ticketier-scan-result-card">
-            <Text className="ticketier-scan-result-title">РљР°РјРµСЂР° РЅРµРґРѕСЃС‚СѓРїРЅР°</Text>
+            <Text className="ticketier-scan-result-title">Камера недоступна</Text>
             <Text className="ticketier-scan-result-subtitle">{cameraError}</Text>
           </Box>
         </Box>
@@ -283,7 +283,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
           <Box className="ticketier-scan-ripple ticketier-scan-ripple-delayed" aria-hidden="true" />
           <Box className="ticketier-scan-result-card">
             <Box className={`ticketier-scan-result-icon ticketier-scan-result-icon-${feedback.tone}`} aria-hidden="true">
-              {feedback.tone === "success" ? "OK" : feedback.tone === "warning" ? "РЈР–Р•" : "STOP"}
+              {feedback.tone === "success" ? "OK" : feedback.tone === "warning" ? "УЖЕ" : "STOP"}
             </Box>
             <Text className="ticketier-scan-result-title">{feedback.title}</Text>
             <Text className="ticketier-scan-result-subtitle">{feedback.subtitle}</Text>
@@ -297,4 +297,3 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
     </Box>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, ReactNode } from "react";
 import AdminMobileNav from "./admin-mobile-nav";
@@ -18,7 +18,7 @@ export default function AdminShell({ sidebar, children }: AdminShellProps) {
           type="button"
           className="admin-mobile-burger"
           onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Р—Р°РєСЂРёС‚Рё РјРµню" : "Р’С–РґРєСЂРёС‚Рё РјРµню"}
+          aria-label={open ? "Закрити меню" : "Відкрити меню"}
           aria-expanded={open}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -33,14 +33,14 @@ export default function AdminShell({ sidebar, children }: AdminShellProps) {
             )}
           </svg>
         </button>
-        <span className="admin-mobile-title">Lizard.red В· РђРґРјС–РЅ</span>
+        <span className="admin-mobile-title">Lizard.red · Адмін</span>
       </header>
       {open && (
         <div
           className="admin-sidebar-overlay"
           role="button"
           tabIndex={0}
-          aria-label="Р—Р°РєСЂРёС‚Рё РјРµню"
+          aria-label="Закрити меню"
           onClick={() => setOpen(false)}
           onKeyDown={(e) => e.key === "Enter" && setOpen(false)}
         />
@@ -58,4 +58,3 @@ export default function AdminShell({ sidebar, children }: AdminShellProps) {
     </div>
   );
 }
-

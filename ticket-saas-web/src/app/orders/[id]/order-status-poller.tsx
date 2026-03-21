@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const POLL_INTERVAL_MS = 30_000; // РЎРїС–Р»СЊРЅРёР№ опрос РїРѕ РґР¶РµСЂРµР»Сѓ СЂР°Р· РЅР° 30 СЃ; СЃС‚РѕСЂС–РЅРєР° РѕРЅРѕРІР»СЋС”С‚ься Р±РµР· В«РЇ РѕРїР»Р°С‚РёРІВ»
+const POLL_INTERVAL_MS = 30_000; // Спільний опрос по джерелу раз на 30 с; сторінка оновлюється без «Я оплатив»
 
 export default function OrderStatusPoller({
   orderId,
@@ -25,4 +25,3 @@ export default function OrderStatusPoller({
 
   return null;
 }
-

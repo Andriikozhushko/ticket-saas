@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { getSessionFromCookie } from "@/lib/auth";
 import Link from "next/link";
 import { Box, Title, Text, Badge, Stack, Group, Card } from "@mantine/core";
@@ -76,9 +76,9 @@ function StatusBadge({ status, expiresAt }: { status: string; expiresAt?: Date }
   const isExpired = expiresAt && expiresAt < now;
   const displayStatus = status === "awaiting_payment" && isExpired ? "expired" : status;
   const labels: Record<string, string> = {
-    paid: "РћРїР»Р°С‡РµРЅРѕ",
-    awaiting_payment: "РћС‡С–РєСѓС” РѕРїР»Р°С‚Рё",
-    expired: "Р§Р°СЃ РІРёР№С€РѕРІ",
+    paid: "Оплачено",
+    awaiting_payment: "Очікує оплати",
+    expired: "Час вийшов",
   };
   const colorMap: Record<string, string> = {
     paid: "green",
@@ -180,11 +180,11 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
     return (
       <Stack gap="lg" maw={480} mx="auto" p="xl">
         <Link href="/" style={{ fontSize: 14, fontWeight: 500, color: "var(--muted)", textDecoration: "none" }}>
-          в†ђ РќР°Р·Р°Рґ РґРѕ Р°С„С–С€С–
+          ← Назад до афіші
         </Link>
         <Card withBorder padding="xl" radius="md" style={{ borderColor: "var(--border)", textAlign: "center", background: "var(--card-bg)" }}>
-          <Title order={2} style={{ margin: "0 0 8px 0", fontSize: 22, fontWeight: 700 }}>РџРѕРґС–СЋ РЅРµ Р·РЅР°Р№РґРµРЅРѕ</Title>
-          <Text size="sm" c="dimmed">РџРµСЂРµРІС–СЂС‚Рµ РїРѕСЃРёР»Р°ння</Text>
+          <Title order={2} style={{ margin: "0 0 8px 0", fontSize: 22, fontWeight: 700 }}>Подію не знайдено</Title>
+          <Text size="sm" c="dimmed">Перевірте посилання</Text>
         </Card>
       </Stack>
     );
@@ -199,14 +199,14 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
     <Box style={{ minHeight: "100vh" }}>
       <Box className="page-bg-glow" />
       <Box className="event-page-container">
-        {/* РљРЅРѕРїРєР° РІРіРѕСЂС– */}
+        {/* Кнопка вгорі */}
         <Box style={{ alignSelf: "stretch", paddingBottom: 24 }}>
           <Link href="/" style={{ fontSize: 14, fontWeight: 600, color: "var(--muted)", textDecoration: "none" }}>
-            в†ђ РќР°Р·Р°Рґ РґРѕ Р°С„С–С€С–
+            ← Назад до афіші
           </Link>
         </Box>
 
-        {/* РџРѕСЃС‚РµСЂ РїРѕРґС–С— вЂ” РїРѕРІРЅР° С€РёСЂРёРЅР° С‚Р° РІРёСЃРѕС‚Р°, Р±РµР· РѕР±СЂС–Р·Р°ння */}
+        {/* Постер події — повна ширина та висота, без обрізання */}
         <Box
           className="event-poster-wrap"
           style={{
@@ -230,14 +230,14 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
           )}
         </Box>
 
-        {/* Р—Р°РіРѕР»РѕРІРѕРє */}
+        {/* Заголовок */}
         <Box style={{ width: "100%", maxWidth: 720, marginBottom: 24 }}>
           <Title order={1} style={{ margin: 0, fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 700, lineHeight: 1.2, color: "var(--text)", textAlign: "left" }}>
             {e.title}
           </Title>
         </Box>
 
-        {/* Р”Р°С‚Р°, С‡Р°СЃ, РјС–СЃС†Рµ вЂ” РІРёС‰Рµ Р±Р»оку РєРІРёС‚РєС–РІ */}
+        {/* Дата, час, місце — вище блоку квитків */}
         {(dateDot || time || venue || city) && (
           <Box
             className="event-datetime-place-block"
@@ -280,7 +280,7 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
           </Box>
         )}
 
-        {/* РљРІРёС‚РєРё/РѕРїР»Р°С‚Р° */}
+        {/* Квитки/оплата */}
         <Box id="tickets" style={{ width: "100%", maxWidth: 720, marginBottom: 40 }}>
           <EventTicketsBlock
             eventId={e.id}
@@ -292,7 +292,7 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
           />
         </Box>
 
-        {/* РџРѕС‚С–Рј опис вЂ” С€РёСЂС€РёР№ С‚РµРєСЃС‚ */}
+        {/* Потім опис — ширший текст */}
         {e.description && e.description.trim() && (
           <Box style={{ width: "100%", maxWidth: 720, marginBottom: 32, textAlign: "left" }}>
             <Text
@@ -310,24 +310,24 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
 
         {/* Disclaimer */}
         <Text size="xs" c="dimmed" mt="md" style={{ width: "100%", maxWidth: 720, lineHeight: 1.6, textAlign: "left" }}>
-          * РџС–СЃР»я РѕРїР»Р°С‚Рё РєРІРёС‚РѕРє РЅР°РґС–Р№РґРµ РЅР° email (QR-РєРѕРґ). РџРµСЂРµРІС–СЂС‚Рµ РїР°пку В«Р РµРєР»Р°РјР°В» Р°Р±Рѕ В«РџСЂРѕРјРѕВ» Сѓ Gmail.
+          * Після оплати квиток надійде на email (QR-код). Перевірте папку «Реклама» або «Промо» у Gmail.
         </Text>
 
         {isAdmin && e.orders && (
           <Card withBorder padding="lg" radius="md" mt={48} style={{ width: "100%", maxWidth: 720, borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}>
             <Group justify="space-between" mb="md" pb="md" style={{ borderBottom: "1px solid var(--border)" }}>
-              <Text fw={700} size="md">РћСЃС‚Р°РЅРЅС– Р·Р°РјРѕРІР»Рµння</Text>
-              <Text size="sm" c="dimmed">Р’сього: {e._count?.orders ?? 0}</Text>
+              <Text fw={700} size="md">Останні замовлення</Text>
+              <Text size="sm" c="dimmed">Всього: {e._count?.orders ?? 0}</Text>
             </Group>
             {!e.orders.length ? (
-              <Text size="sm" c="dimmed" ta="center" py="xl">Р—Р°РјРѕРІР»Рµнь РїРѕРєРё РЅРµРјР°С”</Text>
+              <Text size="sm" c="dimmed" ta="center" py="xl">Замовлень поки немає</Text>
             ) : (
               <Stack gap={0}>
                 {e.orders.map((order) => (
                   <Group key={order.id} justify="space-between" py="sm" style={{ borderBottom: "1px solid var(--border)" }}>
                     <Box>
                       <Text size="sm" fw={600}>{order.buyerEmail}</Text>
-                      <Text size="xs" c="dimmed">{formatDateShort(order.createdAt)} В· {money(order.amountExpectedCents)} {e.currency}</Text>
+                      <Text size="xs" c="dimmed">{formatDateShort(order.createdAt)} · {money(order.amountExpectedCents)} {e.currency}</Text>
                     </Box>
                     <StatusBadge status={order.status} expiresAt={order.expiresAt} />
                   </Group>
@@ -340,4 +340,3 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
     </Box>
   );
 }
-
