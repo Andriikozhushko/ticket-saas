@@ -2597,7 +2597,11 @@ a { color: inherit; text-decoration: none; }
   background: #000;
 }
 .ticketier-scanner-surface #html5-qrcode-anchor-scan-type-change,
-.ticketier-scanner-surface #html5-qrcode-button-file-selection {
+.ticketier-scanner-surface #html5-qrcode-button-file-selection,
+.ticketier-scanner-surface #html5-qrcode-select-camera,
+.ticketier-scanner-surface #html5-qrcode-button-camera-start,
+.ticketier-scanner-surface #html5-qrcode-button-camera-stop,
+.ticketier-scanner-surface #html5-qrcode-button-camera-permission {
   display: none !important;
 }
 .ticketier-mobile-dock {
