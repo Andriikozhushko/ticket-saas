@@ -231,7 +231,6 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   return (
     <Box className="ticketier-scanner-shell">
       <Box ref={containerRef} className="ticketier-scanner-surface" />
-      <Box className="ticketier-aim-box" aria-hidden="true" />
 
       <input
         ref={fileInputRef}
