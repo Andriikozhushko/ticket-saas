@@ -19,11 +19,13 @@ type EventVM = {
   title: string;
   priceCents: number;
   currency: string;
+  isFinished: boolean;
   startsAt: string | null; // ISO
   city: string | null;
   venue: string | null;
   posterUrl: string | null;
   orgName: string | null;
+  soldTicketsCount: number;
   ordersCount: number;
   ticketTypesCount: number;
 };
@@ -127,6 +129,9 @@ function EventCard({ e }: { e: EventVM }) {
   const place = [e.venue, e.city].filter(Boolean).join(", ");
   const hasMultiplePrices = (e.ticketTypesCount ?? 0) > 1;
   const priceLabel = hasMultiplePrices ? `від ${money(e.priceCents)} грн` : `${money(e.priceCents)} грн`;
+  const soldLabel = `${e.soldTicketsCount} квитків`;
+  const cardOpacity = e.isFinished ? 0.74 : 1;
+  const cardFilter = e.isFinished ? "grayscale(0.42) saturate(0.7)" : "none";
 
   return (
     <Card
@@ -138,15 +143,68 @@ function EventCard({ e }: { e: EventVM }) {
       <Box component={Link} href={`/events/${e.id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
         {/* Фото — рендеримо після mount, щоб уникнути hydration mismatch через розширення браузера */}
         <Box style={{ width: "100%", background: "rgba(0,0,0,0.35)", position: "relative" }}>
+          {e.isFinished ? (
+            <>
+              <Box
+                style={{
+                  position: "absolute",
+                  top: 12,
+                  left: -44,
+                  zIndex: 3,
+                  transform: "rotate(-28deg)",
+                  background: "linear-gradient(135deg, rgba(115,115,115,0.92) 0%, rgba(65,65,65,0.94) 100%)",
+                  color: "white",
+                  padding: "6px 56px",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+                }}
+              >
+                Завершено
+              </Box>
+              <Box
+                style={{
+                  position: "absolute",
+                  bottom: 16,
+                  right: -48,
+                  zIndex: 3,
+                  transform: "rotate(-28deg)",
+                  background: "linear-gradient(135deg, rgba(120,120,120,0.9) 0%, rgba(72,72,72,0.95) 100%)",
+                  color: "white",
+                  padding: "6px 58px",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  border: "1px solid rgba(255,255,255,0.16)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+                }}
+              >
+                Продано: {soldLabel}
+              </Box>
+              <Box
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 2,
+                  background: "linear-gradient(180deg, rgba(15,15,15,0.22), rgba(20,20,20,0.48))",
+                  pointerEvents: "none",
+                }}
+              />
+            </>
+          ) : null}
           {e.posterUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={e.posterUrl}
               alt=""
-              style={{ width: "100%", height: "auto", display: "block", verticalAlign: "top", maxHeight: 380, objectFit: "contain", objectPosition: "top" }}
+              style={{ width: "100%", height: "auto", display: "block", verticalAlign: "top", maxHeight: 380, objectFit: "contain", objectPosition: "top", opacity: cardOpacity, filter: cardFilter }}
             />
           ) : (
-            <AspectRatio ratio={3 / 4}>
+            <AspectRatio ratio={3 / 4} style={{ opacity: cardOpacity, filter: cardFilter }}>
               <PosterFallback seed={e.id} title={e.title} />
             </AspectRatio>
           )}
@@ -203,22 +261,40 @@ function EventCard({ e }: { e: EventVM }) {
               <Text size="md" fw={700} style={{ color: "var(--text)", letterSpacing: "0.02em" }}>
                 {priceLabel}
               </Text>
-              <Text
-                component="span"
-                size="sm"
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  background: "linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(185,28,28,0.15) 100%)",
-                  border: "1px solid rgba(239,68,68,0.35)",
-                  fontWeight: 700,
-                  letterSpacing: "0.03em",
-                  color: "var(--text)",
-                  transition: "box-shadow 0.2s ease, transform 0.2s ease",
-                }}
-              >
-                Квитки →
-              </Text>
+              {e.isFinished ? (
+                <Text
+                  component="span"
+                  size="sm"
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    background: "rgba(120,120,120,0.22)",
+                    border: "1px solid rgba(180,180,180,0.3)",
+                    fontWeight: 700,
+                    letterSpacing: "0.03em",
+                    color: "var(--text)",
+                  }}
+                >
+                  Продано {soldLabel}
+                </Text>
+              ) : (
+                <Text
+                  component="span"
+                  size="sm"
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    background: "linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(185,28,28,0.15) 100%)",
+                    border: "1px solid rgba(239,68,68,0.35)",
+                    fontWeight: 700,
+                    letterSpacing: "0.03em",
+                    color: "var(--text)",
+                    transition: "box-shadow 0.2s ease, transform 0.2s ease",
+                  }}
+                >
+                  Квитки →
+                </Text>
+              )}
             </Group>
           </Stack>
         </Box>

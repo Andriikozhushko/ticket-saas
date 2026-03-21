@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Badge, Box, Button, Card, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import ApproveEventButton from "./approve-event-button";
 import DeleteEventButton from "./delete-event-button";
+import ToggleFinishedButton from "./toggle-finished-button";
 
 function formatDate(d: Date | null) {
   if (!d) return "—";
@@ -90,9 +91,12 @@ export default async function AdminEventsPage() {
                 )}
                 <Group justify="space-between" mb="xs">
                   <Text size="xs" c="dimmed">{e.org.name}</Text>
-                  <Badge size="sm" color={isApproved ? "green" : "yellow"} variant="light">
-                    {isApproved ? "Одобрено" : "На модерації"}
-                  </Badge>
+                  <Group gap={6}>
+                    <Badge size="sm" color={isApproved ? "green" : "yellow"} variant="light">
+                      {isApproved ? "Одобрено" : "На модерації"}
+                    </Badge>
+                    {e.isFinished ? <Badge size="sm" color="gray" variant="light">Завершено</Badge> : null}
+                  </Group>
                 </Group>
                 <Title order={4} lineClamp={2} mb={4}>{e.title}</Title>
                 <Text size="sm" c="dimmed" mb="xs">{formatDate(e.startsAt)}</Text>
@@ -102,6 +106,7 @@ export default async function AdminEventsPage() {
                 <Text size="sm" fw={500} mb="md">{priceText}</Text>
                 <Group gap="xs" mt="auto" wrap="wrap">
                   {!isApproved && session.isAdmin && <ApproveEventButton eventId={e.id} />}
+                  <ToggleFinishedButton eventId={e.id} isFinished={e.isFinished} />
                   <Link href={`/admin/events/${e.id}`}>
                     <Button variant="light" size="xs">Редагувати</Button>
                   </Link>

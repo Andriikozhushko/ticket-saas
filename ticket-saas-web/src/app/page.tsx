@@ -6,6 +6,7 @@ type HomeEventRow = {
   title: string;
   priceCents: number;
   currency: string;
+  isFinished: boolean;
   startsAt: Date | null;
   city: string | null;
   venue: string | null;
@@ -25,6 +26,7 @@ export default async function HomePage() {
         title: true,
         priceCents: true,
         currency: true,
+        isFinished: true,
         startsAt: true,
         city: true,
         venue: true,
@@ -37,16 +39,30 @@ export default async function HomePage() {
     rows = [];
   }
 
+  const eventIds = rows.map((e) => e.id);
+  const soldRows =
+    eventIds.length > 0
+      ? await prisma.order.groupBy({
+          by: ["eventId"],
+          where: { eventId: { in: eventIds }, status: "paid" },
+          _sum: { quantity: true },
+        })
+      : [];
+  const soldMap = new Map<string, number>();
+  for (const row of soldRows) soldMap.set(row.eventId, row._sum.quantity ?? 0);
+
   const events = rows.map((e) => ({
     id: e.id,
     title: e.title,
     priceCents: e.priceCents,
     currency: e.currency,
+    isFinished: e.isFinished,
     startsAt: e.startsAt?.toISOString() ?? null,
     city: e.city,
     venue: e.venue,
     posterUrl: e.posterUrl,
     orgName: e.org?.name ?? null,
+    soldTicketsCount: soldMap.get(e.id) ?? 0,
     ordersCount: e._count.orders,
     ticketTypesCount: e._count.ticketTypes,
   }));

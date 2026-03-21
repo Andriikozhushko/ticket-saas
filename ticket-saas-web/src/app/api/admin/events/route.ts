@@ -40,6 +40,7 @@ export async function POST(req: Request) {
     const venue = typeof body?.venue === "string" ? body.venue.trim() || null : null;
     const city = typeof body?.city === "string" ? body.city.trim() || null : null;
     const description = typeof body?.description === "string" ? body.description.trim() || null : null;
+    const isFinished = body?.isFinished === true;
     const priceCents = Math.min(...ticketTypes.map((t) => t.priceCents));
     const event = await prisma.event.create({
       data: {
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
         venue,
         city,
         description,
+        isFinished,
         monoAccountId: jarId,
         monoJarId: sendId,
         ticketTypes: {

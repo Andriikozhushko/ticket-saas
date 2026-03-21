@@ -58,6 +58,7 @@ export async function PATCH(
     const posterUrl = typeof body?.posterUrl === "string" ? body.posterUrl.trim() || null : undefined;
     const organizerPhotoUrl = typeof body?.organizerPhotoUrl === "string" ? body.organizerPhotoUrl.trim() || null : undefined;
     const description = typeof body?.description === "string" ? body.description.trim() || null : undefined;
+    const isFinished = typeof body?.isFinished === "boolean" ? body.isFinished : undefined;
     const rawTicketTypes = Array.isArray(body?.ticketTypes) ? body.ticketTypes : undefined;
     type TicketTypeRow = { name: string; priceCents: number };
     const mappedTicketTypes: (TicketTypeRow | null)[] | undefined =
@@ -78,6 +79,7 @@ export async function PATCH(
     if (posterUrl !== undefined) updateData.posterUrl = posterUrl;
     if (organizerPhotoUrl !== undefined) updateData.organizerPhotoUrl = organizerPhotoUrl;
     if (description !== undefined) updateData.description = description;
+    if (isFinished !== undefined) updateData.isFinished = isFinished;
 
     if (ticketTypes && ticketTypes.length > 0) {
       updateData.priceCents = Math.min(...ticketTypes.map((t: { name: string; priceCents: number }) => t.priceCents));

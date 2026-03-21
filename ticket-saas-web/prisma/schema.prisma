@@ -108,6 +108,7 @@ model Event {
   description       String?
 
   status    String   @default("approved") // pending_approval | approved
+  isFinished Boolean @default(false)
   createdAt DateTime @default(now())
   orders    Order[]
   ticketTypes TicketType[]

@@ -35,6 +35,7 @@ export default async function EditEventPage({
         posterUrl: event.posterUrl,
         organizerPhotoUrl: event.organizerPhotoUrl,
         description: (event as { description?: string | null }).description ?? null,
+        isFinished: event.isFinished,
         orgId: event.orgId,
         ticketTypes: event.ticketTypes.map((t) => ({ id: t.id, name: t.name, priceCents: t.priceCents })),
       }}

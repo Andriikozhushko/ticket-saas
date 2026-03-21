@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Group,
   Stack,
   Text,
@@ -35,6 +36,7 @@ type EventFormProps = {
     posterUrl: string | null;
     organizerPhotoUrl: string | null;
     description: string | null;
+    isFinished?: boolean;
     orgId: string;
     ticketTypes: { id: string; name: string; priceCents: number }[];
   };
@@ -62,6 +64,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
   const [venue, setVenue] = useState(event?.venue ?? "");
   const [city, setCity] = useState(event?.city ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
+  const [isFinished, setIsFinished] = useState(Boolean(event?.isFinished));
   const [ticketRows, setTicketRows] = useState<TicketTypeRow[]>(
     event?.ticketTypes?.length
       ? event.ticketTypes.map((t) => ({ name: t.name, priceCents: String(t.priceCents / 100) }))
@@ -168,6 +171,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
             venue: venue.trim(),
             city: city.trim(),
             description: description.trim(),
+            isFinished,
             ticketTypes,
           }),
         });
@@ -193,6 +197,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
             venue: venue.trim(),
             city: city.trim(),
             description: description.trim(),
+            isFinished,
             ticketTypes,
             jarId: selectedJar.id,
             sendId: selectedJar.sendId,
@@ -269,6 +274,11 @@ export default function EventForm({ orgs, event }: EventFormProps) {
           <TextInput label="Місто" value={city} onChange={(e) => setCity(e.currentTarget.value)} placeholder="Київ" required />
           <TextInput label="Майданчик" value={venue} onChange={(e) => setVenue(e.currentTarget.value)} placeholder="Назва залу" required />
           <Textarea label="Опис події" value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder="Короткий опис події для відображення на сторінці" minRows={8} autosize maxRows={20} style={{ minWidth: "100%" }} required />
+          <Checkbox
+            checked={isFinished}
+            onChange={(e) => setIsFinished(e.currentTarget.checked)}
+            label="Подія завершена (показувати на головній як завершену)"
+          />
           <Box>
             <Group justify="space-between" mb="xs">
               <Text size="sm" fw={500}>Види квитків</Text>
