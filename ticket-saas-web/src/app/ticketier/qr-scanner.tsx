@@ -39,7 +39,7 @@ type Html5QrCodeInstance = {
 function getQrBoxSize(): { width: number; height: number } {
   if (typeof window === "undefined") return { width: 200, height: 200 };
   const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(170, Math.min(viewport - 160, 220));
+  const size = Math.max(180, Math.min(viewport - 180, 250));
   return { width: size, height: size };
 }
 
@@ -231,6 +231,12 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   return (
     <Box className="ticketier-scanner-shell">
       <Box ref={containerRef} className="ticketier-scanner-surface" />
+      <Box className="ticketier-scan-frame" aria-hidden="true">
+        <span className="ticketier-scan-corner ticketier-scan-corner-tl" />
+        <span className="ticketier-scan-corner ticketier-scan-corner-tr" />
+        <span className="ticketier-scan-corner ticketier-scan-corner-bl" />
+        <span className="ticketier-scan-corner ticketier-scan-corner-br" />
+      </Box>
 
       <input
         ref={fileInputRef}

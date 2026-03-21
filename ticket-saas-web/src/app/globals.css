@@ -2567,6 +2567,7 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   min-height: 100svh;
   width: 100%;
+  --ticketier-frame-size: min(62vw, 250px);
 }
 .ticketier-scanner-surface {
   position: absolute;
@@ -2588,17 +2589,69 @@ a { color: inherit; text-decoration: none; }
   display: flex !important;
   align-items: center;
   justify-content: center;
+  width: 100% !important;
+  height: 100% !important;
   background: transparent !important;
 }
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region video,
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region canvas {
-  width: min(72vw, 280px) !important;
-  height: min(72vw, 280px) !important;
-  max-width: 280px !important;
-  max-height: 280px !important;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: cover !important;
-  border-radius: 28px;
   background: #000;
+}
+.ticketier-scanner-surface #qr-shaded-region,
+.ticketier-scanner-surface #qr-shaded-region > * {
+  display: none !important;
+}
+.ticketier-scan-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -58%);
+  width: var(--ticketier-frame-size);
+  height: var(--ticketier-frame-size);
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.22);
+  z-index: 2;
+  pointer-events: none;
+}
+.ticketier-scan-corner {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-color: #fff;
+  border-style: solid;
+  border-width: 0;
+}
+.ticketier-scan-corner-tl {
+  left: -2px;
+  top: -2px;
+  border-left-width: 5px;
+  border-top-width: 5px;
+  border-top-left-radius: 8px;
+}
+.ticketier-scan-corner-tr {
+  right: -2px;
+  top: -2px;
+  border-right-width: 5px;
+  border-top-width: 5px;
+  border-top-right-radius: 8px;
+}
+.ticketier-scan-corner-bl {
+  left: -2px;
+  bottom: -2px;
+  border-left-width: 5px;
+  border-bottom-width: 5px;
+  border-bottom-left-radius: 8px;
+}
+.ticketier-scan-corner-br {
+  right: -2px;
+  bottom: -2px;
+  border-right-width: 5px;
+  border-bottom-width: 5px;
+  border-bottom-right-radius: 8px;
 }
 .ticketier-mobile-dock {
   position: absolute;
