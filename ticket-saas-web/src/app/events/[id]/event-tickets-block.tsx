@@ -44,6 +44,7 @@ declare global {
   interface Window {
     turnstile?: {
       render: (el: HTMLElement | string, opts: { sitekey: string; theme?: string; callback: (token: string) => void; "expired-callback"?: () => void }) => string;
+      reset: (widgetId: string) => void;
       remove: (widgetId: string) => void;
     };
   }
@@ -66,7 +67,6 @@ function money(cents: number) {
 
 export default function EventTicketsBlock({
   eventId,
-  eventTitle,
   dateFormatted,
   currency,
   eventPriceCents,
@@ -82,7 +82,6 @@ export default function EventTicketsBlock({
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const narrow = useMediaQuery("(max-width: 420px)");
   const isMobile = useMediaQuery("(max-width: 560px)");
-  const sessionPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Без реєстрації: спочатку email → надіслати код → ввести код → підтвердити
   const [guestStep, setGuestStep] = useState<"email" | "code" | null>(null);
   const [guestCode, setGuestCode] = useState("");
@@ -143,8 +142,8 @@ export default function EventTicketsBlock({
     if (!open || !guestStep || guestStep !== "email" || emailFromSession) return;
     if (!TURNSTILE_SITEKEY) return;
     let cancelled = false;
+    const container = turnstileContainerRef.current;
     const tryRender = () => {
-      const container = turnstileContainerRef.current;
       if (!container || !window.turnstile || cancelled) return;
       if (turnstileWidgetIdRef.current != null) return;
       setTurnstileToken("");
@@ -170,7 +169,6 @@ export default function EventTicketsBlock({
     return () => {
       cancelled = true;
       clearTimeout(t);
-      const container = turnstileContainerRef.current;
       if (turnstileWidgetIdRef.current != null && window.turnstile && container && document.contains(container)) {
         try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch { /* ignore */ }
         turnstileWidgetIdRef.current = null;

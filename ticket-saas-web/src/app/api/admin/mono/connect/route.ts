@@ -9,6 +9,7 @@ export async function POST(req: Request) {
   const session = await getSessionFromCookie();
   const canAccess = session?.isAdmin || session?.role === "organizer";
   if (!canAccess) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   try {
     const body = await req.json();
     const orgId = typeof body?.orgId === "string" ? body.orgId : "";
@@ -27,14 +28,15 @@ export async function POST(req: Request) {
       const text = await res.text();
       return NextResponse.json({ error: "Monobank auth failed", details: text }, { status: 400 });
     }
+
     const info = (await res.json()) as MonoClientInfo;
     const jars = (info.jars || [])
-      .filter((j) => j.currencyCode === 980 && !!j.sendId)
-      .map((j) => ({
-        id: j.id,
-        sendId: j.sendId.startsWith("jar/") ? j.sendId.slice(4) : j.sendId,
-        title: j.title,
-        currencyCode: j.currencyCode,
+      .filter((jar) => jar.currencyCode === 980 && Boolean(jar.sendId))
+      .map((jar) => ({
+        id: jar.id,
+        sendId: jar.sendId.startsWith("jar/") ? jar.sendId.slice(4) : jar.sendId,
+        title: jar.title,
+        currencyCode: jar.currencyCode,
       }));
     const defaultJarId = jars[0]?.id || "0";
 
@@ -43,13 +45,14 @@ export async function POST(req: Request) {
       update: { token, accountId: defaultJarId },
       create: { orgId, token, accountId: defaultJarId },
     });
+
     return NextResponse.json({
       ok: true,
       orgId: conn.orgId,
       defaultJarId: conn.accountId !== "0" ? conn.accountId : null,
-      jars: jars.map((j) => ({ id: j.id, sendId: j.sendId, title: j.title })),
+      jars: jars.map((jar) => ({ id: jar.id, sendId: jar.sendId, title: jar.title })),
     });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Помилка підключення Monobank" }, { status: 500 });
   }
 }

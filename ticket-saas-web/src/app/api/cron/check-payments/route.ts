@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { runSharedPoll, sourceKey } from "@/lib/monobank-shared-poll";
+import { runSharedPoll } from "@/lib/monobank-shared-poll";
+import { expireAwaitingPaymentOrders, getPendingMonobankSources } from "@/lib/payments";
 
 /**
- * Cron: періодично перевіряє оплати по всіх джерелах Monobank з очікуючими замовленнями.
- * Навіть якщо сайт "закритий" (ніхто не на сторінці), оплата буде підтверджена в БД.
- * Викликати ззовні (cron) кожні 1–2 хв з заголовком Authorization: Bearer <CRON_SECRET>.
+ * Cron: periodically checks payments across all Monobank sources that still have pending orders.
+ * Call externally every 1-2 minutes with Authorization: Bearer <CRON_SECRET>.
  */
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -34,64 +33,28 @@ export async function POST(req: Request) {
 
 async function runCheckPayments() {
   try {
-    const now = new Date();
-    // Позначити прострочені замовлення як expired у БД
-    const expired = await prisma.order.updateMany({
-      where: { status: "awaiting_payment", expiresAt: { lt: now } },
-      data: { status: "expired" },
-    });
-    if (expired.count > 0) {
-      console.log("[cron/check-payments] marked expired count=%s", expired.count);
-    }
-    const orders = await prisma.order.findMany({
-      where: {
-        status: "awaiting_payment",
-        expiresAt: { gt: now },
-        event: {
-          monoAccountId: { not: null },
-          org: { mono: { isNot: null } },
-        },
-      },
-      select: {
-        event: {
-          select: {
-            orgId: true,
-            monoAccountId: true,
-            org: { select: { mono: { select: { token: true } } } },
-          },
-        },
-      },
-    });
-
-    const sources = new Map<string, { token: string; accountId: string }>();
-    for (const o of orders) {
-      const ev = o.event as {
-        orgId: string;
-        monoAccountId: string | null;
-        org?: { mono?: { token: string } | null };
-      };
-      if (!ev?.orgId || !ev?.monoAccountId || !ev?.org?.mono?.token) continue;
-      const key = sourceKey(ev.orgId, ev.monoAccountId);
-      if (!sources.has(key)) {
-        sources.set(key, { token: ev.org.mono.token, accountId: ev.monoAccountId });
-      }
+    const expiredCount = await expireAwaitingPaymentOrders();
+    if (expiredCount > 0) {
+      console.log("[cron/check-payments] marked expired count=%s", expiredCount);
     }
 
+    const sources = await getPendingMonobankSources();
     const results: { key: string; matched: string[] }[] = [];
-    for (const [key, { token, accountId }] of sources) {
+
+    for (const { key, token, accountId } of sources) {
       const result = await runSharedPoll(key, token, accountId);
-      if (result.ok && result.matchedOrderIds?.length) {
+      if (result.ok && result.matchedOrderIds.length > 0) {
         results.push({ key, matched: result.matchedOrderIds });
       }
     }
 
     return NextResponse.json({
       ok: true,
-      sourcesChecked: sources.size,
+      sourcesChecked: sources.length,
       matched: results,
     });
-  } catch (e) {
-    console.error("[cron/check-payments]", e);
+  } catch (error) {
+    console.error("[cron/check-payments]", error);
     return NextResponse.json({ error: "Cron failed" }, { status: 500 });
   }
 }

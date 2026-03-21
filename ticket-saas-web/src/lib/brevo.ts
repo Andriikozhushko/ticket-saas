@@ -1,8 +1,3 @@
-/**
- * Відправка листів через Brevo (api.brevo.com) Transactional API.
- * API key та sender задаються в .env: BREVO_API_KEY, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME.
- */
-
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
 export type SendEmailOptions = {
@@ -16,12 +11,12 @@ export async function sendEmail(options: SendEmailOptions): Promise<{ ok: true }
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL ?? "noreply@lizard.red";
   const senderName = process.env.BREVO_SENDER_NAME ?? "Lizard.red";
+  const text = options.textContent ?? options.htmlContent?.replace(/<[^>]*>/g, "") ?? "";
 
   if (!apiKey) {
     if (process.env.NODE_ENV === "development") {
-      const text = options.textContent ?? options.htmlContent?.replace(/<[^>]*>/g, "") ?? "";
-      console.log("[brevo] DEV (no API key): письмо не відправлено. Отримувач:", options.to);
-      console.log("[brevo] DEV: код/текст у консолі:", text.trim());
+      console.log("[brevo] DEV (no API key): email not sent. Recipient:", options.to);
+      console.log("[brevo] DEV content:", text.trim());
       return { ok: true };
     }
     console.error("[brevo] BREVO_API_KEY is not set");
@@ -53,10 +48,16 @@ export async function sendEmail(options: SendEmailOptions): Promise<{ ok: true }
       console.error("[brevo] send failed:", res.status, msg);
       return { ok: false, error: msg };
     }
+
     return { ok: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[brevo] send error:", msg);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[brevo] DEV fallback after send error. Recipient:", options.to);
+      console.log("[brevo] DEV fallback content:", text.trim());
+      return { ok: true };
+    }
     return { ok: false, error: msg };
   }
 }

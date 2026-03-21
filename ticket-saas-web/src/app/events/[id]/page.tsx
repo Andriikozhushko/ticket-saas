@@ -8,22 +8,6 @@ function money(cents: number) {
   return (cents / 100).toFixed(2);
 }
 
-function formatDate(d?: Date | null) {
-  if (!d) return null;
-  try {
-    return new Intl.DateTimeFormat("uk-UA", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Europe/Kyiv",
-    }).format(d);
-  } catch {
-    return (typeof d === "object" && "toISOString" in d ? (d as Date).toISOString() : String(d));
-  }
-}
-
 function formatDateDot(d?: Date | null) {
   if (!d) return null;
   try {
@@ -139,13 +123,6 @@ const IconClock = () => (
     <polyline points="12 6 12 12 16 14" />
   </svg>
 );
-const IconTicket = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <path d="M2 9a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v2a1 1 0 0 1-2 0V9a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h1" />
-    <path d="M4 12h2" />
-    <path d="M4 16h2" />
-  </svg>
-);
 
 type EventPageData = {
   id: string;
@@ -213,7 +190,6 @@ export default async function EventPage(props: { params: Promise<{ id: string }>
     );
   }
 
-  const minPrice = e.ticketTypes.length > 0 ? Math.min(...e.ticketTypes.map((t) => t.priceCents)) : e.priceCents;
   const dateDot = formatDateDot(e.startsAt);
   const time = formatTime(e.startsAt);
   const venue = e.venue?.trim() || null;

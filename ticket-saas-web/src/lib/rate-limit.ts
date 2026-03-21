@@ -1,40 +1,47 @@
 /**
- * In-memory rate limit for login/send-code.
- * Max 5 requests per IP per 10 min, max 3 codes per email per 10 min.
+ * In-memory rate limits for local app instances.
+ * Good enough for dev / single-instance deploys; replace with Redis for multi-instance scaling.
  */
 
-const WINDOW_MS = 10 * 60 * 1000; // 10 min
+const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_IP = 5;
 const MAX_PER_EMAIL = 3;
+const SEND_CODE_COOLDOWN_MS = 60 * 1000;
 
 const ipTimestamps: Map<string, number[]> = new Map();
 const emailTimestamps: Map<string, number[]> = new Map();
 
-function prune(map: Map<string, number[]>, windowEnd: number) {
+function prune(map: Map<string, number[]>, windowStart: number) {
   const toDelete: string[] = [];
   map.forEach((arr, key) => {
-    const kept = arr.filter((t) => t > windowEnd);
+    const kept = arr.filter((t) => t > windowStart);
     if (kept.length === 0) toDelete.push(key);
     else map.set(key, kept);
   });
-  toDelete.forEach((k) => map.delete(k));
+  toDelete.forEach((key) => map.delete(key));
 }
 
 export function checkLoginRateLimit(ip: string, email: string): { allowed: boolean; error?: string } {
   const now = Date.now();
-  const windowEnd = now - WINDOW_MS;
-  prune(ipTimestamps, windowEnd);
-  prune(emailTimestamps, windowEnd);
+  const windowStart = now - WINDOW_MS;
+  prune(ipTimestamps, windowStart);
+  prune(emailTimestamps, windowStart);
 
+  const normalizedEmail = email.trim().toLowerCase();
   const ipArr = ipTimestamps.get(ip) ?? [];
-  const emailArr = emailTimestamps.get(email.toLowerCase()) ?? [];
+  const emailArr = emailTimestamps.get(normalizedEmail) ?? [];
+  const lastEmailAttempt = emailArr[emailArr.length - 1];
 
+  if (typeof lastEmailAttempt === "number" && now - lastEmailAttempt < SEND_CODE_COOLDOWN_MS) {
+    return { allowed: false, error: "Код уже було надіслано. Зачекайте близько хвилини перед повторною спробою." };
+  }
   if (ipArr.length >= MAX_PER_IP) {
-    return { allowed: false, error: "Забагато спроб. Спробуйте через 10 хвилин." };
+    return { allowed: false, error: "Забагато спроб. Спробуйте ще раз через 10 хвилин." };
   }
   if (emailArr.length >= MAX_PER_EMAIL) {
-    return { allowed: false, error: "На цей email вже надіслано максимум кодів. Зачекайте 10 хвилин." };
+    return { allowed: false, error: "На цей email уже надіслано максимум кодів. Зачекайте 10 хвилин." };
   }
+
   return { allowed: true };
 }
 
@@ -44,10 +51,10 @@ export function recordLoginAttempt(ip: string, email: string): void {
   ipArr.push(now);
   ipTimestamps.set(ip, ipArr);
 
-  const key = email.trim().toLowerCase();
-  const emailArr = emailTimestamps.get(key) ?? [];
+  const normalizedEmail = email.trim().toLowerCase();
+  const emailArr = emailTimestamps.get(normalizedEmail) ?? [];
   emailArr.push(now);
-  emailTimestamps.set(key, emailArr);
+  emailTimestamps.set(normalizedEmail, emailArr);
 }
 
 export function getClientIp(req: Request): string {
@@ -58,54 +65,50 @@ export function getClientIp(req: Request): string {
   return "unknown";
 }
 
-// ——— Verify code (IP only): max 15 per 10 min ———
 const VERIFY_WINDOW_MS = 10 * 60 * 1000;
 const VERIFY_MAX_PER_IP = 15;
 const verifyIpTimestamps: Map<string, number[]> = new Map();
 
 export function checkVerifyRateLimit(ip: string): { allowed: boolean; error?: string } {
   const now = Date.now();
-  const windowEnd = now - VERIFY_WINDOW_MS;
-  prune(verifyIpTimestamps, windowEnd);
-  const arr = verifyIpTimestamps.get(ip) ?? [];
-  if (arr.length >= VERIFY_MAX_PER_IP) {
-    return { allowed: false, error: "Забагато спроб перевірки коду. Спробуйте через 10 хвилин." };
+  const windowStart = now - VERIFY_WINDOW_MS;
+  prune(verifyIpTimestamps, windowStart);
+  const attempts = verifyIpTimestamps.get(ip) ?? [];
+
+  if (attempts.length >= VERIFY_MAX_PER_IP) {
+    return { allowed: false, error: "Забагато спроб перевірки коду. Спробуйте ще раз через 10 хвилин." };
   }
+
   return { allowed: true };
 }
 
 export function recordVerifyAttempt(ip: string): void {
   const now = Date.now();
-  const arr = verifyIpTimestamps.get(ip) ?? [];
-  arr.push(now);
-  verifyIpTimestamps.set(ip, arr);
+  const attempts = verifyIpTimestamps.get(ip) ?? [];
+  attempts.push(now);
+  verifyIpTimestamps.set(ip, attempts);
 }
 
-// ——— Order create (IP only): max 25 per 5 min ———
 const ORDER_WINDOW_MS = 5 * 60 * 1000;
 const ORDER_MAX_PER_IP = 25;
 const orderIpTimestamps: Map<string, number[]> = new Map();
 
 export function checkOrderCreateRateLimit(ip: string): { allowed: boolean; error?: string } {
   const now = Date.now();
-  const windowEnd = now - ORDER_WINDOW_MS;
-  const toDelete: string[] = [];
-  orderIpTimestamps.forEach((arr, key) => {
-    const kept = arr.filter((t) => t > windowEnd);
-    if (kept.length === 0) toDelete.push(key);
-    else orderIpTimestamps.set(key, kept);
-  });
-  toDelete.forEach((k) => orderIpTimestamps.delete(k));
-  const arr = orderIpTimestamps.get(ip) ?? [];
-  if (arr.length >= ORDER_MAX_PER_IP) {
-    return { allowed: false, error: "Забагато замовлень. Спробуйте через 5 хвилин." };
+  const windowStart = now - ORDER_WINDOW_MS;
+  prune(orderIpTimestamps, windowStart);
+  const attempts = orderIpTimestamps.get(ip) ?? [];
+
+  if (attempts.length >= ORDER_MAX_PER_IP) {
+    return { allowed: false, error: "Забагато замовлень. Спробуйте ще раз через 5 хвилин." };
   }
+
   return { allowed: true };
 }
 
 export function recordOrderCreateAttempt(ip: string): void {
   const now = Date.now();
-  const arr = orderIpTimestamps.get(ip) ?? [];
-  arr.push(now);
-  orderIpTimestamps.set(ip, arr);
+  const attempts = orderIpTimestamps.get(ip) ?? [];
+  attempts.push(now);
+  orderIpTimestamps.set(ip, attempts);
 }

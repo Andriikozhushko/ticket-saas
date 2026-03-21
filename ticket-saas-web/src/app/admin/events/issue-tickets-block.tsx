@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Button, Card, Stack, Text, TextInput, Select, Group } from "@mantine/core";
+import { Button, Card, Group, Select, Stack, Text, TextInput } from "@mantine/core";
 
 export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
   const [email, setEmail] = useState("");
@@ -17,6 +17,7 @@ export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
       setError("Вкажіть email");
       return;
     }
+
     setError("");
     setSuccess("");
     setLoading(true);
@@ -40,24 +41,30 @@ export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
 
   return (
     <Card withBorder p="lg" radius="md" style={{ borderColor: "var(--border)" }}>
-      <Text size="sm" fw={700} mb={4}>Подарувати або видати квитки</Text>
+      <Text size="sm" fw={700} mb={4}>
+        Подарувати або видати квитки
+      </Text>
       <Text size="xs" c="dimmed" mb="md">
-        Введіть email отримувача — йому створять квитки та надішлють лист з QR-кодами. За замовчуванням: подарунок (лист отримувачу буде про подарунок).
+        Введіть email отримувача. Система створить квитки та надішле лист з QR-кодами.
       </Text>
       <Stack gap="sm">
         <TextInput
           label="Email отримувача"
           placeholder="email@example.com"
           value={email}
-          onChange={(e) => { setEmail(e.currentTarget.value); setError(""); setSuccess(""); }}
+          onChange={(e) => {
+            setEmail(e.currentTarget.value);
+            setError("");
+            setSuccess("");
+          }}
           type="email"
         />
         <Group grow>
           <Select
-            label="Кількість (1–10)"
+            label="Кількість (1-10)"
             data={Array.from({ length: 10 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))}
             value={String(quantity)}
-            onChange={(v) => setQuantity(Number(v) || 1)}
+            onChange={(value) => setQuantity(Number(value) || 1)}
           />
           <Select
             label="Причина"
@@ -67,7 +74,7 @@ export default function IssueTicketsBlock({ eventId }: { eventId: string }) {
               { value: "purchase", label: "Покупка" },
             ]}
             value={reason}
-            onChange={(v) => v && setReason(v)}
+            onChange={(value) => value && setReason(value)}
           />
         </Group>
         {error && <Text size="sm" c="red">{error}</Text>}

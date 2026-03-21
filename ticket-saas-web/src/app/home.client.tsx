@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import {
   AspectRatio,
@@ -123,26 +123,10 @@ borderColor: "rgba(239,68,68,0.2)",
 };
 
 function EventCard({ e }: { e: EventVM }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   const dt = formatDate(e.startsAt);
   const place = [e.venue, e.city].filter(Boolean).join(", ");
   const hasMultiplePrices = (e.ticketTypesCount ?? 0) > 1;
   const priceLabel = hasMultiplePrices ? `від ${money(e.priceCents)} грн` : `${money(e.priceCents)} грн`;
-
-  if (!mounted) {
-    return (
-      <Card withBorder padding={0} style={cardStyle} styles={cardStyles}>
-        <Box style={{ width: "100%", aspectRatio: "3/4", background: "rgba(0,0,0,0.2)" }} />
-        <Box style={{ padding: "18px 20px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <Box style={{ height: 20, width: "85%", background: "rgba(255,255,255,0.08)", borderRadius: 4 }} />
-          <Box style={{ height: 14, width: "55%", marginTop: 10, background: "rgba(255,255,255,0.06)", borderRadius: 4 }} />
-          <Box style={{ height: 14, width: "70%", marginTop: 8, background: "rgba(255,255,255,0.06)", borderRadius: 4 }} />
-        </Box>
-      </Card>
-    );
-  }
 
   return (
     <Card
@@ -309,7 +293,7 @@ function HeroCTAs() {
   );
 }
 
-export default function HomeClient({ events, initialUser = null }: { events: EventVM[]; initialUser?: InitialUser }) {
+export default function HomeClient({ events }: { events: EventVM[]; initialUser?: InitialUser }) {
   /* initialValue: true і getInitialValueInEffect: true — сервер і клієнт спочатку обидва рендерять 3 колонки, щоб не було hydration mismatch і стрибка на десктопі */
   const sm = useMediaQuery("(min-width: 36em)", true, { getInitialValueInEffect: true });
   const md = useMediaQuery("(min-width: 48em)", true, { getInitialValueInEffect: true });

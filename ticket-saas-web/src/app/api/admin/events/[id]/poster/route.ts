@@ -62,7 +62,7 @@ export async function POST(
       data: { posterUrl },
     });
     return NextResponse.json({ posterUrl });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Помилка завантаження" }, { status: 500 });
   }
 }

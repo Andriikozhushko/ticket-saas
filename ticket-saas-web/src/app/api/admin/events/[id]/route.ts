@@ -97,7 +97,7 @@ export async function PATCH(
       include: { ticketTypes: { orderBy: { sortOrder: "asc" } } },
     });
     return NextResponse.json(updated);
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Помилка оновлення" }, { status: 500 });
   }
 }
@@ -119,9 +119,13 @@ export async function DELETE(
     if (!session.isAdmin && event.org.ownerId !== session.userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const orderIds = await prisma.order.findMany({ where: { eventId }, select: { id: true } }).then((o) => o.map((x) => x.id));
-    const db = prisma as unknown as { ticketierEvent?: { deleteMany: (p: { where: { eventId: string } }) => Promise<unknown> } };
+    const db = prisma as unknown as {
+      ticketierEvent?: { deleteMany: (p: { where: { eventId: string } }) => Promise<unknown> };
+      orderPaymentPart?: { deleteMany: (p: { where: { orderId: { in: string[] } } }) => Promise<unknown> };
+    };
     const tx = [
       prisma.payment.deleteMany({ where: { orderId: { in: orderIds } } }),
+      ...(db.orderPaymentPart ? [db.orderPaymentPart.deleteMany({ where: { orderId: { in: orderIds } } })] : []),
       prisma.ticket.deleteMany({ where: { orderId: { in: orderIds } } }),
       prisma.order.deleteMany({ where: { eventId } }),
       ...(db.ticketierEvent ? [db.ticketierEvent.deleteMany({ where: { eventId } })] : []),
@@ -129,7 +133,7 @@ export async function DELETE(
     ] as unknown as Parameters<typeof prisma.$transaction>[0];
     await prisma.$transaction(tx);
     return NextResponse.json({ ok: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Помилка видалення" }, { status: 500 });
   }
 }

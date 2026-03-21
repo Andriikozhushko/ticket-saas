@@ -1,14 +1,46 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Text } from "@mantine/core";
 
+type ScanResult = {
+  ok: boolean;
+  error?: string;
+  usedAt?: string | null;
+  usedBy?: string | null;
+  buyerEmail?: string | null;
+  ticketTypeName?: string | null;
+  state?: "success" | "already_used" | "error";
+};
+
+type Props = {
+  onScan: (ticketId: string) => Promise<ScanResult>;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+};
+
+type FeedbackState = {
+  tone: "success" | "warning" | "error";
+  title: string;
+  subtitle: string;
+  meta?: string;
+};
+
+type Html5QrCodeInstance = {
+  start: (
+    cameraConfig: unknown,
+    config: unknown,
+    onSuccess: (decodedText: string) => void,
+    onError?: (errorMessage: string) => void
+  ) => Promise<void>;
+  stop: () => Promise<void>;
+  scanFile: (file: File, showImage?: boolean) => Promise<string>;
+};
+
 function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 250, height: 250 };
-  const w = window.innerWidth;
-  if (w <= 400) return { width: Math.min(w - 32, 280), height: Math.min(w - 32, 280) };
-  if (w <= 768) return { width: Math.min(w - 48, 320), height: Math.min(w - 48, 320) };
-  return { width: 250, height: 250 };
+  if (typeof window === "undefined") return { width: 260, height: 260 };
+  const viewport = Math.min(window.innerWidth, window.innerHeight);
+  const size = Math.max(220, Math.min(viewport - 80, 320));
+  return { width: size, height: size };
 }
 
 function extractTicketIdFromUrl(url: string): string | null {
@@ -21,11 +53,17 @@ function extractTicketIdFromUrl(url: string): string | null {
   }
 }
 
-/** Пропускаємо "код не знайдено" — це нормально для кожного кадру без QR. Показуємо лише справжні помилки (камера, доступ). */
+function normalizeTicketId(decodedText: string): string | null {
+  const value = decodedText.trim();
+  if (!value) return null;
+  return extractTicketIdFromUrl(value) ?? value;
+}
+
 function isScanFailureOnly(err: unknown): boolean {
-  const s = typeof err === "string" ? err : (err as Error)?.message ?? String(err ?? "");
-  if (!s) return true;
-  const lower = s.toLowerCase();
+  const message = typeof err === "string" ? err : (err as Error)?.message ?? String(err ?? "");
+  if (!message) return true;
+
+  const lower = message.toLowerCase();
   return (
     lower.includes("nomultiformat") ||
     lower.includes("no multiformat") ||
@@ -36,110 +74,235 @@ function isScanFailureOnly(err: unknown): boolean {
   );
 }
 
-type Props = {
-  onScan: (ticketId: string) => Promise<{ ok: boolean; error?: string; usedAt?: string }>;
-};
+function formatRelativeUsedAt(value?: string | null): string | null {
+  if (!value) return null;
+
+  const usedAt = new Date(value);
+  if (Number.isNaN(usedAt.getTime())) return null;
+
+  const diffMs = usedAt.getTime() - Date.now();
+  const absMinutes = Math.round(Math.abs(diffMs) / 60000);
+  const relative = new Intl.RelativeTimeFormat("uk", { numeric: "auto" });
+
+  if (absMinutes < 1) return "щойно";
+  if (absMinutes < 60) return relative.format(Math.round(diffMs / 60000), "minute");
+
+  const absHours = Math.round(absMinutes / 60);
+  if (absHours < 24) return relative.format(Math.round(diffMs / 3600000), "hour");
+
+  return relative.format(Math.round(diffMs / 86400000), "day");
+}
+
+async function decodeImageFile(file: File): Promise<string | null> {
+  const { Html5Qrcode } = await import("html5-qrcode");
+  const tempId = `ticketier-file-${Date.now()}`;
+  const tempDiv = document.createElement("div");
+  tempDiv.id = tempId;
+  tempDiv.style.display = "none";
+  document.body.appendChild(tempDiv);
+
+  try {
+    const scanner = new Html5Qrcode(tempId) as unknown as Html5QrCodeInstance;
+    return await scanner.scanFile(file, false);
+  } finally {
+    tempDiv.remove();
+  }
+}
 
 const SCANNER_DIV_ID = "ticketier-qr-reader";
 
-export default function QRScanner({ onScan }: Props) {
+export default function QRScanner({ onScan, fileInputRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<"idle" | "scanning" | "success" | "error">("idle");
-  const [message, setMessage] = useState("");
+  const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [cameraError, setCameraError] = useState("");
   const scanningRef = useRef(false);
-  const startedRef = useRef(false);
-  const scannerRef = useRef<{ stop: () => Promise<void> } | null>(null);
+  const scannerRef = useRef<Html5QrCodeInstance | null>(null);
   const onScanRef = useRef(onScan);
   onScanRef.current = onScan;
 
+  const resetFeedbackLater = useCallback((delayMs: number) => {
+    window.setTimeout(() => {
+      setFeedback(null);
+      scanningRef.current = false;
+    }, delayMs);
+  }, []);
+
+  const handleDecodedValue = useCallback(
+    async (decodedText: string) => {
+      if (scanningRef.current) return;
+
+      scanningRef.current = true;
+      const ticketId = normalizeTicketId(decodedText);
+
+      if (!ticketId) {
+        setFeedback({
+          tone: "error",
+          title: "Невірний QR-код",
+          subtitle: "Спробуйте навести камеру ще раз.",
+        });
+        resetFeedbackLater(2800);
+        return;
+      }
+
+      const result = await onScanRef.current(ticketId);
+
+      if (result.ok || result.state === "success") {
+        setFeedback({
+          tone: "success",
+          title: "Квиток підтверджено",
+          subtitle: result.ticketTypeName
+            ? `Вхід дозволено. Тип квитка: ${result.ticketTypeName}.`
+            : "Вхід дозволено. Гість може проходити.",
+          meta: result.buyerEmail ?? undefined,
+        });
+        resetFeedbackLater(3600);
+        return;
+      }
+
+      if (result.state === "already_used") {
+        const relative = formatRelativeUsedAt(result.usedAt);
+        setFeedback({
+          tone: "warning",
+          title: "Квиток уже сканували",
+          subtitle: relative
+            ? `Цей квиток уже використали ${relative}.`
+            : "Цей квиток уже використали раніше.",
+          meta: result.usedBy ? `Сканував: ${result.usedBy}` : result.buyerEmail ?? undefined,
+        });
+        resetFeedbackLater(4600);
+        return;
+      }
+
+      setFeedback({
+        tone: "error",
+        title: "Не вдалося підтвердити",
+        subtitle: result.error ?? "Сталася помилка під час сканування.",
+      });
+      resetFeedbackLater(3600);
+    },
+    [resetFeedbackLater]
+  );
+
   useEffect(() => {
     let mounted = true;
-    startedRef.current = false;
-    scannerRef.current = null;
-    const container = containerRef.current;
-    if (!container) return;
 
-    (async () => {
+    void (async () => {
+      const container = containerRef.current;
+      if (!container) return;
+
       const { Html5Qrcode } = await import("html5-qrcode");
-      const id = SCANNER_DIV_ID;
-      const existing = document.getElementById(id);
-      if (existing && existing.parentElement !== container) existing.remove();
       container.innerHTML = "";
       const div = document.createElement("div");
-      div.id = id;
+      div.id = SCANNER_DIV_ID;
       div.style.width = "100%";
-      div.style.maxWidth = "100%";
-      div.style.margin = "0 auto";
-      div.style.borderRadius = "12px";
-      div.style.overflow = "hidden";
+      div.style.height = "100%";
       container.appendChild(div);
+
+      const scanner = new Html5Qrcode(SCANNER_DIV_ID) as unknown as Html5QrCodeInstance;
+      scannerRef.current = scanner;
       const qrbox = getQrBoxSize();
-      const sc = new Html5Qrcode(id);
-      scannerRef.current = sc;
+
       try {
-        await sc.start(
+        await scanner.start(
           { facingMode: "environment" },
           { fps: 10, qrbox: { width: qrbox.width, height: qrbox.height } },
           (decodedText) => {
             if (!mounted || scanningRef.current) return;
-            scanningRef.current = true;
-            setStatus("scanning");
-            const ticketId = extractTicketIdFromUrl(decodedText) ?? decodedText;
-            if (!ticketId) {
-              setStatus("error");
-              setMessage("Невірний QR-код");
-              setTimeout(() => { setStatus("idle"); scanningRef.current = false; }, 2000);
-              return;
-            }
-            onScanRef.current(ticketId).then((res) => {
-              if (!mounted) return;
-              if (res.ok) {
-                setStatus("success");
-                setMessage("Квиток підтверджено");
-              } else {
-                setStatus("error");
-                setMessage(res.error ?? "Помилка");
-              }
-              setTimeout(() => { setStatus("idle"); scanningRef.current = false; }, 2500);
-            });
+            void handleDecodedValue(decodedText);
           },
           (err) => {
-            if (!mounted) return;
-            if (isScanFailureOnly(err)) return;
-            const msg = typeof err === "string" ? err : (err as Error)?.message ?? "Немає доступу до камери";
-            setCameraError(msg);
+            if (!mounted || isScanFailureOnly(err)) return;
+            setCameraError(typeof err === "string" ? err : "Немає доступу до камери");
           }
         );
-        startedRef.current = true;
         if (mounted) setCameraError("");
-      } catch (e) {
-        if (mounted) setCameraError((e as Error)?.message ?? "Помилка камери");
+      } catch (error) {
+        if (mounted) {
+          setCameraError(error instanceof Error ? error.message : "Помилка камери");
+        }
       }
     })();
+
     return () => {
       mounted = false;
-      const sc = scannerRef.current;
-      if (sc && startedRef.current) {
+      const scanner = scannerRef.current;
+      if (scanner) {
         try {
-          sc.stop().catch(() => {});
+          void scanner.stop().catch(() => {});
         } catch {
-          // scanner was not running or already stopped
+          // scanner already stopped
         }
       }
       scannerRef.current = null;
-      startedRef.current = false;
     };
-  }, []);
+  }, [handleDecodedValue]);
 
   return (
-    <Box ref={containerRef} style={{ width: "100%" }}>
-      {cameraError && <Text size="sm" c="red" mt="sm">{cameraError}</Text>}
-      {status !== "idle" && (
-        <Text size="md" fw={600} mt="md" c={status === "success" ? "green" : status === "error" ? "red" : "dimmed"}>
-          {message}
-        </Text>
-      )}
+    <Box className="ticketier-scanner-shell">
+      <Box ref={containerRef} className="ticketier-scanner-surface" />
+      <Box className="ticketier-scanner-focus" aria-hidden="true" />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: "none" }}
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0] ?? null;
+          if (!file) return;
+          void (async () => {
+            try {
+              const decoded = await decodeImageFile(file);
+              if (!decoded) {
+                setFeedback({
+                  tone: "error",
+                  title: "QR не знайдено",
+                  subtitle: "Спробуйте чіткіше фото або поверніться до камери.",
+                });
+                resetFeedbackLater(3000);
+                return;
+              }
+              await handleDecodedValue(decoded);
+            } catch {
+              setFeedback({
+                tone: "error",
+                title: "Не вдалося прочитати фото",
+                subtitle: "Спробуйте інше фото або поверніться до камери.",
+              });
+              resetFeedbackLater(3000);
+            } finally {
+              if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+              }
+            }
+          })();
+        }}
+      />
+
+      {cameraError ? (
+        <Box className="ticketier-scan-overlay ticketier-scan-overlay-error">
+          <Box className="ticketier-scan-result-card">
+            <Text className="ticketier-scan-result-title">Камера недоступна</Text>
+            <Text className="ticketier-scan-result-subtitle">{cameraError}</Text>
+          </Box>
+        </Box>
+      ) : null}
+
+      {feedback ? (
+        <Box className={`ticketier-scan-overlay ticketier-scan-overlay-${feedback.tone}`}>
+          <Box className="ticketier-scan-ripple" aria-hidden="true" />
+          <Box className="ticketier-scan-ripple ticketier-scan-ripple-delayed" aria-hidden="true" />
+          <Box className="ticketier-scan-result-card">
+            <Box className={`ticketier-scan-result-icon ticketier-scan-result-icon-${feedback.tone}`} aria-hidden="true">
+              {feedback.tone === "success" ? "OK" : feedback.tone === "warning" ? "УЖЕ" : "STOP"}
+            </Box>
+            <Text className="ticketier-scan-result-title">{feedback.title}</Text>
+            <Text className="ticketier-scan-result-subtitle">{feedback.subtitle}</Text>
+            {feedback.meta ? <Text className="ticketier-scan-result-meta">{feedback.meta}</Text> : null}
+          </Box>
+        </Box>
+      ) : null}
     </Box>
   );
 }

@@ -6,6 +6,7 @@ import PaymentCountdown from "./payment-countdown";
 import CopyAmountButton from "./copy-amount-button";
 import OrderStatusPoller from "./order-status-poller";
 import OrderErrorState from "./order-error-state";
+import { buildQrImageUrl } from "@/lib/qr";
 
 export const dynamic = "force-dynamic";
 
@@ -196,7 +197,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                       )}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${origin}/api/public/tickets/verify/${ticket.id}`)}&bgcolor=FFFFFF&color=000000`}
+                        src={buildQrImageUrl(origin, `${origin}/api/public/tickets/verify/${ticket.id}`, 220)}
                         alt={tickets.length > 1 ? `QR ${i + 1}` : "QR квитка"}
                         width={220}
                         height={220}

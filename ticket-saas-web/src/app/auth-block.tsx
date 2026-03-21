@@ -11,6 +11,7 @@ const TURNSTILE_SITEKEY =
   process.env.NODE_ENV === "development"
     ? (process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "1x00000000000000000000AA")
     : (process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "");
+const IS_DEV = process.env.NODE_ENV !== "production";
 
 declare global {
   interface Window {
@@ -55,22 +56,28 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
 
   const [sessionError, setSessionError] = useState(false);
 
-  const loadSession = () => {
+  const loadSession = useCallback(() => {
     setSessionError(false);
     fetch("/api/auth/session")
-      .then((r) => r.json())
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) {
+          throw new Error(data.error ?? "Session check failed");
+        }
+        return data;
+      })
       .then((data) => {
         const u = data.user ?? null;
         setUser(u);
         setLoading(false);
       })
       .catch(() => { setLoading(false); setSessionError(true); });
-  };
+  }, [setUser]);
 
-  useEffect(() => { loadSession(); }, []);
+  useEffect(() => { loadSession(); }, [loadSession]);
 
-  const needCaptchaOnCodeStep = failedCodeAttempts >= 3;
-  const showTurnstile = open && (step === "email" || (step === "code" && needCaptchaOnCodeStep));
+  const needCaptchaOnCodeStep = !IS_DEV && failedCodeAttempts >= 3;
+  const showTurnstile = !IS_DEV && open && (step === "email" || (step === "code" && needCaptchaOnCodeStep));
 
   useEffect(() => {
     if (!showTurnstile) {
@@ -135,7 +142,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
 
   const handleSendCode = async () => {
     setError("");
-    if (!turnstileToken) {
+    if (!IS_DEV && !turnstileToken) {
       setError("Підтвердіть капчу");
       return;
     }
@@ -347,7 +354,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
               <Button
                 onClick={handleSendCode}
                 loading={sendLoading}
-                disabled={!turnstileToken}
+                disabled={!IS_DEV && !turnstileToken}
                 fullWidth
                 size="md"
                 className="auth-form-submit"

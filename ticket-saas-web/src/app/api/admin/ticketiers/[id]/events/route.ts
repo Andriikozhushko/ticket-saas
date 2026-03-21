@@ -40,7 +40,7 @@ export async function POST(
       data: { ticketierId, eventId },
     });
     return NextResponse.json({ ok: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Помилка" }, { status: 500 });
   }
 }

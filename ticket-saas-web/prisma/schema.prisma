@@ -142,6 +142,7 @@ model Order {
   createdAt           DateTime @default(now())
 
   payment Payment?
+  paymentParts OrderPaymentPart[]
   tickets Ticket[]
 
   @@unique([eventId, amountExpectedCents])
@@ -159,6 +160,19 @@ model Payment {
   order   Order?  @relation(fields: [orderId], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+model OrderPaymentPart {
+  id              String   @id @default(uuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  monoOperationId String   @unique
+  amountCents     Int
+  occurredAt      DateTime
+  rawJson         Json
+  createdAt       DateTime @default(now())
+
+  @@index([orderId, occurredAt])
 }
 
 model Ticket {

@@ -4,10 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/app.js",
-    "dev": "tsx watch src/app.ts"
+    "test": "npm --prefix ticket-saas-web run test",
+    "test:legacy": "echo \"No legacy test suite configured\"",
+    "build": "npm --prefix ticket-saas-web run build",
+    "build:legacy": "tsc -p tsconfig.json",
+    "start": "npm --prefix ticket-saas-web run start",
+    "start:legacy": "node dist/app.js",
+    "dev": "npm --prefix ticket-saas-web run dev",
+    "dev:web": "npm --prefix ticket-saas-web run dev",
+    "dev:legacy": "tsx watch src/app.ts",
+    "lint": "npm --prefix ticket-saas-web run lint",
+    "typecheck": "npm --prefix ticket-saas-web run typecheck"
   },
   "keywords": [],
   "author": "",

@@ -4,14 +4,13 @@
  * Designed so a future webhook can mark orders paid and this stays as fallback.
  */
 
+import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/brevo";
+import { matchTransactionsToOrders } from "@/lib/monobank-matching";
+import { sendTicketsEmail } from "@/lib/ticket-email";
 
-// Cooldown: do not call Monobank more than once per this many ms per source.
 const COOLDOWN_MS = 30_000;
-// Закриваємо платіж тільки якщо зіставили з замовленням за останні 20 хв.
-const RECENT_ORDER_MINUTES = 20;
-// Виписка Monobank: останні N днів (до 31).
+const RECENT_ORDER_MINUTES = 6 * 60;
 const RECENT_DAYS = 3;
 const TO_SEC_BUFFER = 3600;
 
@@ -34,19 +33,16 @@ type CacheEntry = {
 
 const statementCache = new Map<string, CacheEntry>();
 
-/** Source key: same org + same jar/account = one shared poll. */
 export function sourceKey(orgId: string, accountId: string): string {
   return `${orgId}:${accountId}`;
 }
 
-/** Незакриті замовлення за останні 20 хв по цьому Monobank-джерелу. */
 export async function getPendingOrdersForSource(orgId: string, monoAccountId: string) {
   const now = new Date();
   const since = new Date(now.getTime() - RECENT_ORDER_MINUTES * 60 * 1000);
   const orders = await prisma.order.findMany({
     where: {
-      status: "awaiting_payment",
-      expiresAt: { gt: now },
+      status: { in: ["awaiting_payment", "expired"] },
       createdAt: { gte: since },
       event: {
         orgId,
@@ -60,7 +56,8 @@ export async function getPendingOrdersForSource(orgId: string, monoAccountId: st
     },
     orderBy: { createdAt: "asc" },
   });
-  return orders.filter((o) => !o.payment && o.tickets.length === 0);
+
+  return orders.filter((order) => !order.payment && order.tickets.length === 0);
 }
 
 export type SharedPollResult =
@@ -68,10 +65,6 @@ export type SharedPollResult =
   | { ok: false; stillChecking: true }
   | { ok: false; error: string };
 
-/**
- * Run one shared poll for the given source. Uses cache if cooldown not expired.
- * On 429, returns stillChecking (no long backoff). One fetch can confirm many orders.
- */
 export async function runSharedPoll(
   key: string,
   token: string,
@@ -85,8 +78,14 @@ export async function runSharedPoll(
 
   const cached = statementCache.get(key);
   if (cached && nowMs - cached.fetchedAt < COOLDOWN_MS) {
-    const matched = await matchAndApply(key, cached.list, cached.usedDefaultAccount, token);
-    console.log("[monobank-shared-poll] source=%s pending=%d reused cache matched=%d orderIds=%s", key, pending.length, matched.length, matched.join(","));
+    const matched = await matchAndApply(key, cached.list, cached.usedDefaultAccount);
+    console.log(
+      "[monobank-shared-poll] source=%s pending=%d reused cache matched=%d orderIds=%s",
+      key,
+      pending.length,
+      matched.length,
+      matched.join(",")
+    );
     return { ok: true, matchedOrderIds: matched };
   }
 
@@ -101,12 +100,23 @@ export async function runSharedPoll(
   const res = await fetch(url, { headers: { "X-Token": token } });
   if (res.status === 429) {
     const body = await res.text();
-    console.error("[monobank-shared-poll] 429 Too Many Requests source=%s pending=%d %s", key, pending.length, body);
+    console.error(
+      "[monobank-shared-poll] 429 Too Many Requests source=%s pending=%d %s",
+      key,
+      pending.length,
+      body
+    );
     return { ok: false, stillChecking: true };
   }
+
   if (!res.ok) {
     const body = await res.text();
-    console.error("[monobank-shared-poll] API error source=%s status=%s %s", key, res.status, body);
+    console.error(
+      "[monobank-shared-poll] API error source=%s status=%s %s",
+      key,
+      res.status,
+      body
+    );
     return { ok: false, stillChecking: true };
   }
 
@@ -116,10 +126,12 @@ export async function runSharedPoll(
       `https://api.monobank.ua/personal/statement/0/${fromSec}/${toSec}`,
       { headers: { "X-Token": token } }
     );
+
     if (defaultRes.status === 429) {
       console.error("[monobank-shared-poll] 429 on default account source=%s", key);
       return { ok: false, stillChecking: true };
     }
+
     if (defaultRes.ok) {
       list = (await defaultRes.json()) as StatementItem[];
       usedDefaultAccount = true;
@@ -127,112 +139,179 @@ export async function runSharedPoll(
   }
 
   statementCache.set(key, { fetchedAt: nowMs, list, usedDefaultAccount });
-  console.log("[monobank-shared-poll] source=%s pending=%d fetched transactionCount=%d usedDefaultAccount=%s", key, pending.length, list.length, usedDefaultAccount);
+  console.log(
+    "[monobank-shared-poll] source=%s pending=%d fetched transactionCount=%d usedDefaultAccount=%s",
+    key,
+    pending.length,
+    list.length,
+    usedDefaultAccount
+  );
 
-  const matchedOrderIds = await matchAndApply(key, list, usedDefaultAccount, token);
-  console.log("[monobank-shared-poll] source=%s matched=%d orderIds=%s", key, matchedOrderIds.length, matchedOrderIds.join(","));
+  const matchedOrderIds = await matchAndApply(key, list, usedDefaultAccount);
+  console.log(
+    "[monobank-shared-poll] source=%s matched=%d orderIds=%s",
+    key,
+    matchedOrderIds.length,
+    matchedOrderIds.join(",")
+  );
   return { ok: true, matchedOrderIds };
 }
 
-/** Already-used mono operation ids (one tx -> one order). */
 async function usedMonoOperationIds(txIds: string[]): Promise<Set<string>> {
-  if (txIds.length === 0) return new Set();
-  const existing = await prisma.payment.findMany({
-    where: { monoOperationId: { in: txIds } },
-    select: { monoOperationId: true },
-  });
-  return new Set(existing.map((p) => p.monoOperationId));
+  if (txIds.length === 0) {
+    return new Set();
+  }
+
+  const [existingPayments, existingParts] = await Promise.all([
+    prisma.payment.findMany({
+      where: { monoOperationId: { in: txIds } },
+      select: { monoOperationId: true },
+    }),
+    (prisma as unknown as {
+      orderPaymentPart: {
+        findMany: (args: {
+          where: { monoOperationId: { in: string[] } };
+          select: { monoOperationId: true };
+        }) => Promise<Array<{ monoOperationId: string }>>;
+      };
+    }).orderPaymentPart.findMany({
+      where: { monoOperationId: { in: txIds } },
+      select: { monoOperationId: true },
+    }),
+  ]);
+
+  return new Set([
+    ...existingPayments.map((payment) => payment.monoOperationId),
+    ...existingParts.map((part) => part.monoOperationId),
+  ]);
 }
 
-/**
- * Match transactions to pending orders by amount; one tx -> one order.
- * Then create Payment + Tickets and send email for each matched order.
- */
+function buildSettlementOperationId(transactions: StatementItem[]): string {
+  if (transactions.length === 1) {
+    return transactions[0].id;
+  }
+
+  const hash = crypto
+    .createHash("sha256")
+    .update(transactions.map((transaction) => transaction.id).sort().join("|"))
+    .digest("hex");
+
+  return `split:${hash}`;
+}
+
+function settlementOccurredAt(transactions: StatementItem[]): Date {
+  const latestUnix = Math.max(...transactions.map((transaction) => transaction.time));
+  return new Date(latestUnix * 1000);
+}
+
+function settlementAmountCents(transactions: StatementItem[]): number {
+  return transactions.reduce(
+    (sum, transaction) => sum + Math.abs(transaction.operationAmount ?? transaction.amount),
+    0
+  );
+}
+
+function settlementRawJson(transactions: StatementItem[]): object {
+  return transactions.length === 1
+    ? (transactions[0] as unknown as object)
+    : ({ splitTransactions: transactions } as object);
+}
+
 async function matchAndApply(
-  _key: string,
+  key: string,
   list: StatementItem[],
-  usedDefaultAccount: boolean,
-  _token: string
+  usedDefaultAccount: boolean
 ): Promise<string[]> {
-  const [orgId, accountId] = _key.split(":");
+  const [orgId, accountId] = key.split(":");
   const pending = await getPendingOrdersForSource(orgId, accountId);
-  if (pending.length === 0) return [];
+  if (pending.length === 0) {
+    return [];
+  }
 
-  const txIds = list.map((t) => t.id);
+  const txIds = list.map((item) => item.id);
   const used = await usedMonoOperationIds(txIds);
-  const usedInBatch = new Set<string>();
-
   const matchedOrderIds: string[] = [];
 
-  for (const order of pending) {
-    const expectedCents = order.amountExpectedCents;
-    const match = list.find((item) => {
-      const isUah = item.currencyCode === 980 || item.currencyCode === undefined;
-      if (!isUah) return false;
-      const amount = item.operationAmount ?? item.amount;
-      const absAmount = Math.abs(amount);
-      if (absAmount !== expectedCents) return false;
-      if (used.has(item.id) || usedInBatch.has(item.id)) return false;
-      const desc = String((item.description ?? "") + (item.comment ?? ""));
-      if (desc.includes(order.id)) return true;
-      if (usedDefaultAccount) return amount < 0;
-      return amount > 0;
-    });
-    if (!match) continue;
+  const matches = matchTransactionsToOrders({
+    pendingOrders: pending.map((order) => ({
+      id: order.id,
+      amountExpectedCents: order.amountExpectedCents,
+      createdAt: order.createdAt,
+      expiresAt: order.expiresAt,
+    })),
+    statement: list,
+    usedOperationIds: used,
+    usedDefaultAccount,
+  });
 
-    usedInBatch.add(match.id);
+  for (const match of matches) {
+    const order = pending.find((candidate) => candidate.id === match.orderId);
+    if (!order) {
+      continue;
+    }
+
     const quantity = Math.max(1, order.quantity ?? 1);
+    const transactions = match.transactions;
+    const settlementId = buildSettlementOperationId(transactions);
+
     try {
-      await prisma.$transaction([
-        prisma.payment.create({
+      await prisma.$transaction(async (tx) => {
+        await tx.payment.create({
           data: {
-            monoOperationId: match.id,
-            amountCents: Math.abs(match.operationAmount ?? match.amount),
-            occurredAt: new Date(match.time * 1000),
-            rawJson: match as unknown as object,
+            monoOperationId: settlementId,
+            amountCents: settlementAmountCents(transactions),
+            occurredAt: settlementOccurredAt(transactions),
+            rawJson: settlementRawJson(transactions),
             orderId: order.id,
           },
-        }),
-        prisma.order.update({
+        });
+
+        for (const transaction of transactions) {
+          await (tx as unknown as {
+            orderPaymentPart: {
+              create: (args: {
+                data: {
+                  orderId: string;
+                  monoOperationId: string;
+                  amountCents: number;
+                  occurredAt: Date;
+                  rawJson: object;
+                };
+              }) => Promise<unknown>;
+            };
+          }).orderPaymentPart.create({
+            data: {
+              orderId: order.id,
+              monoOperationId: transaction.id,
+              amountCents: Math.abs(transaction.operationAmount ?? transaction.amount),
+              occurredAt: new Date(transaction.time * 1000),
+              rawJson: transaction as unknown as object,
+            },
+          });
+        }
+
+        await tx.order.update({
           where: { id: order.id },
           data: { status: "paid" },
-        }),
-        ...Array.from({ length: quantity }, () =>
-          prisma.ticket.create({ data: { orderId: order.id } })
-        ),
-      ]);
+        });
+
+        for (let index = 0; index < quantity; index += 1) {
+          await tx.ticket.create({ data: { orderId: order.id } });
+        }
+      });
+
       matchedOrderIds.push(order.id);
-      await sendTicketEmail(order.id);
-    } catch (e) {
-      console.error("[monobank-shared-poll] failed to apply match orderId=%s monoOpId=%s", order.id, match.id, e);
+      await sendTicketsEmail(order.id, "payment_confirmed");
+    } catch (error) {
+      console.error(
+        "[monobank-shared-poll] failed to apply match orderId=%s settlementId=%s txCount=%d",
+        order.id,
+        settlementId,
+        transactions.length,
+        error
+      );
     }
   }
 
   return matchedOrderIds;
-}
-
-async function sendTicketEmail(orderId: string): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.SITE_URL ?? "https://lizard.red";
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { event: { select: { title: true } }, tickets: true },
-  });
-  if (!order?.tickets.length) return;
-  const eventTitle = (order.event as { title: string }).title ?? "Подія";
-  const myTicketsUrl = `${baseUrl.replace(/\/$/, "")}/my-tickets`;
-  const qrSize = 200;
-  const qrImages = order.tickets
-    .map(
-      (t) =>
-        `<div style="margin:12px 0;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(`${baseUrl.replace(/\/$/, "")}/api/public/tickets/verify/${t.id}`)}&bgcolor=FFFFFF&color=000000" alt="QR" width="${qrSize}" height="${qrSize}" style="display:block;border-radius:8px;" /></div>`
-    )
-    .join("");
-  const htmlContent = `<p>Оплату отримано. Ваш квиток на подію <strong>${eventTitle}</strong> готовий.</p><p>QR-коди для входу:</p>${qrImages}<p><a href="${myTicketsUrl}">Переглянути мої квитки</a> (увійдіть з email ${order.buyerEmail}).</p>`;
-  const textContent = `Оплату отримано. Квиток(и) на подію «${eventTitle}» готові. Переглянути: ${myTicketsUrl}`;
-  await sendEmail({
-    to: order.buyerEmail,
-    subject: `Ваш квиток — ${eventTitle}`,
-    textContent,
-    htmlContent,
-  });
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { AppShell, Box, Burger, Container, Drawer, Group } from "@mantine/core";
 import ScrollLizard from "@/app/scroll-lizard";
@@ -48,9 +49,11 @@ function ShellInner({ children, initialUser = null }: ShellProps) {
         <Container size={1120} h="100%" px={{ base: "sm", sm: "md" }}>
           <Group justify="space-between" h="100%" wrap="nowrap" gap="md">
             <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none", minWidth: 0 }}>
-              <img
+              <Image
                 src="/logo.png"
                 alt="Lizard.red"
+                width={160}
+                height={52}
                 style={{
                   height: "clamp(32px, 8vw, 52px)",
                   width: "auto",

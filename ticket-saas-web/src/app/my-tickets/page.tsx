@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Box, Card, Stack, Text, Title, Group } from "@mantine/core";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { buildQrImageUrl } from "@/lib/qr";
 import { IconCalendar, IconClock, IconPin } from "@/components/icons";
 
 function formatDateOnly(d: Date) {
@@ -174,7 +175,7 @@ export default async function MyTicketsPage() {
                               )}
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verifyUrl)}`}
+                                src={buildQrImageUrl(origin, verifyUrl, 200)}
                                 alt={ticketList.length > 1 ? `QR квитка ${i + 1}` : "QR квитка"}
                                 width={200}
                                 height={200}

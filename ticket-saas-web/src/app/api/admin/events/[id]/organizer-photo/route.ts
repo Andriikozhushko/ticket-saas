@@ -58,7 +58,7 @@ export async function POST(
       data: { organizerPhotoUrl },
     });
     return NextResponse.json({ organizerPhotoUrl });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Помилка завантаження" }, { status: 500 });
   }
 }
