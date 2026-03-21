@@ -2595,14 +2595,13 @@ a { color: inherit; text-decoration: none; }
 }
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region video,
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region canvas {
-  width: 100% !important;
-  height: 100% !important;
+  width: var(--ticketier-frame-size) !important;
+  height: var(--ticketier-frame-size) !important;
+  max-width: var(--ticketier-frame-size) !important;
+  max-height: var(--ticketier-frame-size) !important;
   object-fit: cover !important;
+  border-radius: 18px;
   background: #000;
-}
-.ticketier-scanner-surface #qr-shaded-region,
-.ticketier-scanner-surface #qr-shaded-region > * {
-  display: none !important;
 }
 .ticketier-scan-frame {
   position: absolute;
