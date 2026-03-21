@@ -231,12 +231,6 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   return (
     <Box className="ticketier-scanner-shell">
       <Box ref={containerRef} className="ticketier-scanner-surface" />
-      <Box className="ticketier-scan-frame" aria-hidden="true">
-        <span className="ticketier-scan-corner ticketier-scan-corner-tl" />
-        <span className="ticketier-scan-corner ticketier-scan-corner-tr" />
-        <span className="ticketier-scan-corner ticketier-scan-corner-bl" />
-        <span className="ticketier-scan-corner ticketier-scan-corner-br" />
-      </Box>
 
       <input
         ref={fileInputRef}
