@@ -183,7 +183,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
   useEffect(() => {
     let mounted = true;
-    let observer: MutationObserver | null = null;
+    let startTimer: number | null = null;
 
     void (async () => {
       const container = containerRef.current;
@@ -204,24 +204,12 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
           fps: 10,
           qrbox: { width: qrbox.width, height: qrbox.height },
           aspectRatio: 1,
-          rememberLastUsedCamera: true,
+          rememberLastUsedCamera: false,
+          videoConstraints: { facingMode: { ideal: "environment" } },
         },
         false
       ) as unknown as Html5QrCodeScannerInstance;
       scannerRef.current = scanner;
-
-      const hideDashboard = () => {
-        const dashboard = container.querySelector("#ticketier-qr-reader__dashboard") as HTMLElement | null;
-        if (dashboard) dashboard.style.display = "none";
-      };
-
-      const tryAutostart = () => {
-        const startBtn = container.querySelector("#html5-qrcode-button-camera-start") as HTMLButtonElement | null;
-        if (startBtn && !startBtn.disabled) {
-          startBtn.click();
-          window.setTimeout(hideDashboard, 500);
-        }
-      };
 
       try {
         scanner.render(
@@ -235,13 +223,22 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
           }
         );
 
-        window.setTimeout(tryAutostart, 80);
-        window.setTimeout(tryAutostart, 350);
+        startTimer = window.setTimeout(() => {
+          const cameraSelect = container.querySelector("#html5-qrcode-select-camera") as HTMLSelectElement | null;
+          if (cameraSelect) {
+            const options = Array.from(cameraSelect.options);
+            const rearOption = options.find((option) => /back|rear|environment|зад|основ/i.test(option.text));
+            if (rearOption) {
+              cameraSelect.value = rearOption.value;
+              cameraSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+          }
 
-        observer = new MutationObserver(() => {
-          tryAutostart();
-        });
-        observer.observe(container, { childList: true, subtree: true });
+          const startBtn = container.querySelector("#html5-qrcode-button-camera-start") as HTMLButtonElement | null;
+          if (startBtn && !startBtn.disabled) {
+            startBtn.click();
+          }
+        }, 220);
 
         if (mounted) setCameraError("");
       } catch (error) {
@@ -253,7 +250,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
     return () => {
       mounted = false;
-      if (observer) observer.disconnect();
+      if (startTimer) window.clearTimeout(startTimer);
       const scanner = scannerRef.current;
       if (scanner) {
         void scanner.clear().catch(() => {});
