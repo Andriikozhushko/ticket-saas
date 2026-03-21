@@ -144,9 +144,11 @@ export default function EventTicketsBlock({
     if (!TURNSTILE_SITEKEY) return;
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
-    const container = turnstileContainerRef.current;
+    let mountedContainer: HTMLDivElement | null = null;
     const tryRender = () => {
+      const container = turnstileContainerRef.current;
       if (!container || !window.turnstile || cancelled) return;
+      mountedContainer = container;
       if (turnstileWidgetIdRef.current != null) return;
       setTurnstileToken("");
       const id = window.turnstile.render(container, {
@@ -181,6 +183,7 @@ export default function EventTicketsBlock({
     return () => {
       cancelled = true;
       if (retryTimer) clearTimeout(retryTimer);
+      const container = mountedContainer;
       if (turnstileWidgetIdRef.current != null && window.turnstile && container && document.contains(container)) {
         try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch { /* ignore */ }
         turnstileWidgetIdRef.current = null;
