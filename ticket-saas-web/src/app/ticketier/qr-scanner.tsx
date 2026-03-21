@@ -25,76 +25,14 @@ type FeedbackState = {
   meta?: string;
 };
 
-type Html5QrCodeInstance = {
-  start: (
-    cameraConfig: unknown,
-    config: unknown,
-    onSuccess: (decodedText: string) => void,
-    onError?: (errorMessage: string) => void
-  ) => Promise<void>;
-  stop: () => Promise<void>;
-  scanFile: (file: File, showImage?: boolean) => Promise<string>;
+type Html5QrCodeScannerInstance = {
+  render: (onSuccess: (decodedText: string) => void, onError?: (errorMessage: string) => void) => void;
+  clear: () => Promise<void>;
 };
 
-function forceNativeSquareFrame(container: HTMLElement, size: number) {
-  const scanRegion = container.querySelector("#ticketier-qr-reader__scan_region") as HTMLElement | null;
-  const shadedRegion = container.querySelector("#qr-shaded-region") as HTMLElement | null;
-  if (!scanRegion || !shadedRegion) return;
-
-  scanRegion.style.position = "relative";
-
-  shadedRegion.style.position = "absolute";
-  shadedRegion.style.left = "50%";
-  shadedRegion.style.top = "50%";
-  shadedRegion.style.transform = "translate(-50%, -50%)";
-  shadedRegion.style.width = `${size}px`;
-  shadedRegion.style.height = `${size}px`;
-  shadedRegion.style.maxWidth = "92vw";
-  shadedRegion.style.maxHeight = "92vw";
-  shadedRegion.style.background = "transparent";
-  shadedRegion.style.border = "0";
-
-  const corners = Array.from(shadedRegion.children) as HTMLElement[];
-  if (corners.length >= 4) {
-    const edge = 30;
-    const borderWidth = 5;
-
-    corners.forEach((corner, index) => {
-      corner.style.position = "absolute";
-      corner.style.width = `${edge}px`;
-      corner.style.height = `${edge}px`;
-      corner.style.borderStyle = "solid";
-      corner.style.borderColor = "#ffffff";
-      corner.style.borderWidth = "0";
-      corner.style.borderRadius = "10px";
-
-      if (index === 0) {
-        corner.style.left = "0";
-        corner.style.top = "0";
-        corner.style.borderLeftWidth = `${borderWidth}px`;
-        corner.style.borderTopWidth = `${borderWidth}px`;
-      }
-      if (index === 1) {
-        corner.style.right = "0";
-        corner.style.top = "0";
-        corner.style.borderRightWidth = `${borderWidth}px`;
-        corner.style.borderTopWidth = `${borderWidth}px`;
-      }
-      if (index === 2) {
-        corner.style.left = "0";
-        corner.style.bottom = "0";
-        corner.style.borderLeftWidth = `${borderWidth}px`;
-        corner.style.borderBottomWidth = `${borderWidth}px`;
-      }
-      if (index === 3) {
-        corner.style.right = "0";
-        corner.style.bottom = "0";
-        corner.style.borderRightWidth = `${borderWidth}px`;
-        corner.style.borderBottomWidth = `${borderWidth}px`;
-      }
-    });
-  }
-}
+type Html5QrCodeForFile = {
+  scanFile: (file: File, showImage?: boolean) => Promise<string>;
+};
 
 function extractTicketIdFromUrl(url: string): string | null {
   try {
@@ -107,12 +45,9 @@ function extractTicketIdFromUrl(url: string): string | null {
 }
 
 function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 240, height: 240 };
-  const isPhone = window.matchMedia("(max-width: 768px)").matches;
+  if (typeof window === "undefined") return { width: 220, height: 220 };
   const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = isPhone
-    ? Math.max(190, Math.min(viewport - 170, 240))
-    : Math.max(220, Math.min(viewport - 180, 280));
+  const size = Math.max(190, Math.min(viewport - 170, 240));
   return { width: size, height: size };
 }
 
@@ -165,7 +100,7 @@ async function decodeImageFile(file: File): Promise<string | null> {
   document.body.appendChild(tempDiv);
 
   try {
-    const scanner = new Html5Qrcode(tempId) as unknown as Html5QrCodeInstance;
+    const scanner = new Html5Qrcode(tempId) as unknown as Html5QrCodeForFile;
     return await scanner.scanFile(file, false);
   } finally {
     tempDiv.remove();
@@ -179,7 +114,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [cameraError, setCameraError] = useState("");
   const scanningRef = useRef(false);
-  const scannerRef = useRef<Html5QrCodeInstance | null>(null);
+  const scannerRef = useRef<Html5QrCodeScannerInstance | null>(null);
   const onScanRef = useRef(onScan);
   onScanRef.current = onScan;
 
@@ -248,13 +183,13 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
   useEffect(() => {
     let mounted = true;
-    let resizeHandler: (() => void) | null = null;
+    let observer: MutationObserver | null = null;
 
     void (async () => {
       const container = containerRef.current;
       if (!container) return;
 
-      const { Html5Qrcode } = await import("html5-qrcode");
+      const { Html5QrcodeScanner } = await import("html5-qrcode");
       container.innerHTML = "";
       const div = document.createElement("div");
       div.id = SCANNER_DIV_ID;
@@ -262,14 +197,34 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       div.style.height = "100%";
       container.appendChild(div);
 
-      const scanner = new Html5Qrcode(SCANNER_DIV_ID) as unknown as Html5QrCodeInstance;
-      scannerRef.current = scanner;
       const qrbox = getQrBoxSize();
+      const scanner = new Html5QrcodeScanner(
+        SCANNER_DIV_ID,
+        {
+          fps: 10,
+          qrbox: { width: qrbox.width, height: qrbox.height },
+          aspectRatio: 1,
+          rememberLastUsedCamera: true,
+        },
+        false
+      ) as unknown as Html5QrCodeScannerInstance;
+      scannerRef.current = scanner;
+
+      const hideDashboard = () => {
+        const dashboard = container.querySelector("#ticketier-qr-reader__dashboard") as HTMLElement | null;
+        if (dashboard) dashboard.style.display = "none";
+      };
+
+      const tryAutostart = () => {
+        const startBtn = container.querySelector("#html5-qrcode-button-camera-start") as HTMLButtonElement | null;
+        if (startBtn && !startBtn.disabled) {
+          startBtn.click();
+          window.setTimeout(hideDashboard, 500);
+        }
+      };
 
       try {
-        await scanner.start(
-          { facingMode: "environment" },
-          { fps: 10, aspectRatio: 1, qrbox: { width: qrbox.width, height: qrbox.height } },
+        scanner.render(
           (decodedText) => {
             if (!mounted || scanningRef.current) return;
             void handleDecodedValue(decodedText);
@@ -279,14 +234,15 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
             setCameraError(typeof err === "string" ? err : "Немає доступу до камери");
           }
         );
-        forceNativeSquareFrame(container, qrbox.width);
-        window.setTimeout(() => forceNativeSquareFrame(container, qrbox.width), 120);
-        window.setTimeout(() => forceNativeSquareFrame(container, qrbox.width), 420);
-        resizeHandler = () => {
-          const next = getQrBoxSize();
-          forceNativeSquareFrame(container, next.width);
-        };
-        window.addEventListener("resize", resizeHandler);
+
+        window.setTimeout(tryAutostart, 80);
+        window.setTimeout(tryAutostart, 350);
+
+        observer = new MutationObserver(() => {
+          tryAutostart();
+        });
+        observer.observe(container, { childList: true, subtree: true });
+
         if (mounted) setCameraError("");
       } catch (error) {
         if (mounted) {
@@ -297,16 +253,10 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
     return () => {
       mounted = false;
-      if (resizeHandler) {
-        window.removeEventListener("resize", resizeHandler);
-      }
+      if (observer) observer.disconnect();
       const scanner = scannerRef.current;
       if (scanner) {
-        try {
-          void scanner.stop().catch(() => {});
-        } catch {
-          // scanner already stopped
-        }
+        void scanner.clear().catch(() => {});
       }
       scannerRef.current = null;
     };

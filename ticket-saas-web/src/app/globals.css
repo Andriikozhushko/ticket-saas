@@ -2574,12 +2574,6 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   height: 100%;
   background: #000;
-  --ticketier-native-scan-size: min(64vw, 240px);
-}
-@media (min-width: 480px) {
-  .ticketier-scanner-surface {
-    --ticketier-native-scan-size: min(52vw, 280px);
-  }
 }
 .ticketier-scanner-surface #ticketier-qr-reader {
   width: 100% !important;
@@ -2587,61 +2581,12 @@ a { color: inherit; text-decoration: none; }
   border: 0 !important;
   background: transparent !important;
 }
-.ticketier-scanner-surface #ticketier-qr-reader__dashboard {
-  display: none !important;
-}
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region {
   display: flex !important;
   align-items: center;
   justify-content: center;
-  position: relative !important;
   border: 0 !important;
   background: transparent !important;
-}
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region #qr-shaded-region {
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  width: var(--ticketier-native-scan-size) !important;
-  height: var(--ticketier-native-scan-size) !important;
-  max-width: 88vw !important;
-  max-height: 88vw !important;
-  border: 0 !important;
-  background: transparent !important;
-}
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region #qr-shaded-region > div {
-  position: absolute !important;
-  width: 30px !important;
-  height: 30px !important;
-  border-style: solid !important;
-  border-color: #ffffff !important;
-  border-width: 0 !important;
-  border-radius: 10px !important;
-}
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region #qr-shaded-region > div:nth-child(1) {
-  left: 0 !important;
-  top: 0 !important;
-  border-left-width: 5px !important;
-  border-top-width: 5px !important;
-}
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region #qr-shaded-region > div:nth-child(2) {
-  right: 0 !important;
-  top: 0 !important;
-  border-right-width: 5px !important;
-  border-top-width: 5px !important;
-}
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region #qr-shaded-region > div:nth-child(3) {
-  left: 0 !important;
-  bottom: 0 !important;
-  border-left-width: 5px !important;
-  border-bottom-width: 5px !important;
-}
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region #qr-shaded-region > div:nth-child(4) {
-  right: 0 !important;
-  bottom: 0 !important;
-  border-right-width: 5px !important;
-  border-bottom-width: 5px !important;
 }
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region video {
   width: min(100vw, 100%) !important;
