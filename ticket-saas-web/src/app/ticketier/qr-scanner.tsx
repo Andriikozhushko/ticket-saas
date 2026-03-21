@@ -39,7 +39,7 @@ type Html5QrCodeInstance = {
 function getQrBoxSize(): { width: number; height: number } {
   if (typeof window === "undefined") return { width: 200, height: 200 };
   const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(180, Math.min(viewport - 180, 250));
+  const size = Math.max(220, Math.min(viewport - 140, 320));
   return { width: size, height: size };
 }
 
@@ -196,7 +196,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       try {
         await scanner.start(
           { facingMode: "environment" },
-          { fps: 10, qrbox: { width: qrbox.width, height: qrbox.height } },
+          { fps: 12, qrbox: { width: qrbox.width, height: qrbox.height } },
           (decodedText) => {
             if (!mounted || scanningRef.current) return;
             void handleDecodedValue(decodedText);
