@@ -86,7 +86,7 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
       return;
     }
     let cancelled = false;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
     let rendered = false;
     const doRender = (container: HTMLDivElement) => {
       if (!window.turnstile || !container || cancelled) return;
@@ -114,27 +114,33 @@ export default function AuthBlock({ initialUser = null }: AuthBlockProps) {
     };
     const tryRender = () => {
       const container = step === "email" ? turnstileContainerRef.current : turnstileCodeContainerRef.current;
-      if (container) doRender(container);
+      if (!container) return false;
+      doRender(container);
+      return rendered || turnstileWidgetIdRef.current != null;
     };
-    timeoutId = setTimeout(() => {
-      timeoutId = null;
-      if (!cancelled) tryRender();
-    }, 250);
+    const retryRender = (attempt = 0) => {
+      if (cancelled) return;
+      const ok = tryRender();
+      if (ok) return;
+      if (attempt >= 40) return;
+      retryTimer = setTimeout(() => retryRender(attempt + 1), 150);
+    };
+
+    retryRender();
+
     if (!window.turnstile) {
       const existing = document.querySelector(`script[src="${TURNSTILE_SCRIPT_URL}"]`);
       if (!existing) {
         const script = document.createElement("script");
         script.src = TURNSTILE_SCRIPT_URL;
         script.async = true;
-        script.onload = () => {
-          if (!cancelled) tryRender();
-        };
+        script.onload = () => { if (!cancelled) retryRender(); };
         document.head.appendChild(script);
       }
     }
     return () => {
       cancelled = true;
-      if (timeoutId) clearTimeout(timeoutId);
+      if (retryTimer) clearTimeout(retryTimer);
       turnstileWidgetIdRef.current = null;
       setTurnstileToken("");
     };

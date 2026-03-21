@@ -143,6 +143,7 @@ export default function EventTicketsBlock({
     if (!open || !guestStep || guestStep !== "email" || emailFromSession) return;
     if (!TURNSTILE_SITEKEY) return;
     let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
     const container = turnstileContainerRef.current;
     const tryRender = () => {
       if (!container || !window.turnstile || cancelled) return;
@@ -156,20 +157,30 @@ export default function EventTicketsBlock({
       });
       turnstileWidgetIdRef.current = id;
     };
-    const t = setTimeout(() => tryRender(), 400);
+
+    const retryRender = (attempt = 0) => {
+      if (cancelled) return;
+      tryRender();
+      if (turnstileWidgetIdRef.current != null) return;
+      if (attempt >= 40) return;
+      retryTimer = setTimeout(() => retryRender(attempt + 1), 150);
+    };
+
+    retryRender();
+
     if (!window.turnstile) {
       const existing = document.querySelector(`script[src="${TURNSTILE_SCRIPT_URL}"]`);
       if (!existing) {
         const script = document.createElement("script");
         script.src = TURNSTILE_SCRIPT_URL;
         script.async = true;
-        script.onload = () => { if (!cancelled) tryRender(); };
+        script.onload = () => { if (!cancelled) retryRender(); };
         document.head.appendChild(script);
       }
     }
     return () => {
       cancelled = true;
-      clearTimeout(t);
+      if (retryTimer) clearTimeout(retryTimer);
       if (turnstileWidgetIdRef.current != null && window.turnstile && container && document.contains(container)) {
         try { window.turnstile.remove(turnstileWidgetIdRef.current); } catch { /* ignore */ }
         turnstileWidgetIdRef.current = null;
