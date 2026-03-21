@@ -234,6 +234,18 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       };
 
       try {
+        // Android-friendly preflight: trigger browser permission immediately on page open.
+        // Once granted, html5-qrcode scanner starts reliably without manual tap.
+        try {
+          const preflightStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" } },
+            audio: false,
+          });
+          preflightStream.getTracks().forEach((track) => track.stop());
+        } catch {
+          // Permission may still be requested by scanner flow below.
+        }
+
         scanner.render(
           (decodedText) => {
             if (!mounted || scanningRef.current) return;
