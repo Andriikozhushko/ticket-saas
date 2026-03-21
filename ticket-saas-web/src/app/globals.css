@@ -2599,17 +2599,6 @@ a { color: inherit; text-decoration: none; }
   border-radius: 28px;
   background: #000;
 }
-.ticketier-scanner-surface #qr-shaded-region {
-  background: transparent !important;
-  border: 0 !important;
-}
-.ticketier-scanner-surface #qr-shaded-region > div {
-  position: absolute !important;
-  border-style: solid !important;
-  border-color: #ffffff !important;
-  border-width: 12px 69px !important;
-  border-radius: 10px !important;
-}
 .ticketier-mobile-dock {
   position: absolute;
   left: 16px;
