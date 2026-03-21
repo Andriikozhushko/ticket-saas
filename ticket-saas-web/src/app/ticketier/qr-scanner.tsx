@@ -36,6 +36,13 @@ type Html5QrCodeInstance = {
   scanFile: (file: File, showImage?: boolean) => Promise<string>;
 };
 
+function getQrBoxSize(): { width: number; height: number } {
+  if (typeof window === "undefined") return { width: 200, height: 200 };
+  const viewport = Math.min(window.innerWidth, window.innerHeight);
+  const size = Math.max(170, Math.min(viewport - 160, 220));
+  return { width: size, height: size };
+}
+
 function extractTicketIdFromUrl(url: string): string | null {
   try {
     const path = new URL(url).pathname;
@@ -44,13 +51,6 @@ function extractTicketIdFromUrl(url: string): string | null {
   } catch {
     return null;
   }
-}
-
-function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 220, height: 220 };
-  const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(180, Math.min(viewport - 140, 240));
-  return { width: size, height: size };
 }
 
 function normalizeTicketId(decodedText: string): string | null {
@@ -125,68 +125,54 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
     scanningRef.current = false;
   }, []);
 
-  const resetFeedbackLater = useCallback((delayMs: number) => {
-    window.setTimeout(() => {
-      setFeedback(null);
-      scanningRef.current = false;
-    }, delayMs);
-  }, []);
+  const handleDecodedValue = useCallback(async (decodedText: string) => {
+    if (scanningRef.current) return;
 
-  const handleDecodedValue = useCallback(
-    async (decodedText: string) => {
-      if (scanningRef.current) return;
+    scanningRef.current = true;
+    const ticketId = normalizeTicketId(decodedText);
 
-      scanningRef.current = true;
-      const ticketId = normalizeTicketId(decodedText);
-
-      if (!ticketId) {
-        setFeedback({
-          tone: "error",
-          title: "Невірний QR-код",
-          subtitle: "Спробуйте навести камеру ще раз.",
-        });
-        resetFeedbackLater(2800);
-        return;
-      }
-
-      const result = await onScanRef.current(ticketId);
-
-      if (result.ok || result.state === "success") {
-        setFeedback({
-          tone: "success",
-          title: "Квиток підтверджено",
-          subtitle: result.ticketTypeName
-            ? `Вхід дозволено. Тип квитка: ${result.ticketTypeName}.`
-            : "Вхід дозволено. Гість може проходити.",
-          meta: result.buyerEmail ?? undefined,
-        });
-        resetFeedbackLater(3600);
-        return;
-      }
-
-      if (result.state === "already_used") {
-        const relative = formatRelativeUsedAt(result.usedAt);
-        setFeedback({
-          tone: "warning",
-          title: "Квиток уже сканували",
-          subtitle: relative
-            ? `Цей квиток уже використали ${relative}.`
-            : "Цей квиток уже використали раніше.",
-          meta: result.usedBy ? `Сканував: ${result.usedBy}` : result.buyerEmail ?? undefined,
-        });
-        resetFeedbackLater(4600);
-        return;
-      }
-
+    if (!ticketId) {
       setFeedback({
         tone: "error",
-        title: "Не вдалося підтвердити",
-        subtitle: result.error ?? "Сталася помилка під час сканування.",
+        title: "Невірний QR-код",
+        subtitle: "Спробуйте навести камеру ще раз.",
       });
-      resetFeedbackLater(3600);
-    },
-    [resetFeedbackLater]
-  );
+      return;
+    }
+
+    const result = await onScanRef.current(ticketId);
+
+    if (result.ok || result.state === "success") {
+      setFeedback({
+        tone: "success",
+        title: "Квиток підтверджено",
+        subtitle: result.ticketTypeName
+          ? `Вхід дозволено. Тип квитка: ${result.ticketTypeName}.`
+          : "Вхід дозволено. Гість може проходити.",
+        meta: result.buyerEmail ?? undefined,
+      });
+      return;
+    }
+
+    if (result.state === "already_used") {
+      const relative = formatRelativeUsedAt(result.usedAt);
+      setFeedback({
+        tone: "warning",
+        title: "Квиток уже сканували",
+        subtitle: relative
+          ? `Цей квиток уже використали ${relative}.`
+          : "Цей квиток уже використали раніше.",
+        meta: result.usedBy ? `Сканував: ${result.usedBy}` : result.buyerEmail ?? undefined,
+      });
+      return;
+    }
+
+    setFeedback({
+      tone: "error",
+      title: "Не вдалося підтвердити",
+      subtitle: result.error ?? "Сталася помилка під час сканування.",
+    });
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -264,7 +250,6 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
                   title: "QR не знайдено",
                   subtitle: "Спробуйте чіткіше фото або поверніться до камери.",
                 });
-                resetFeedbackLater(3000);
                 return;
               }
               await handleDecodedValue(decoded);
@@ -274,7 +259,6 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
                 title: "Не вдалося прочитати фото",
                 subtitle: "Спробуйте інше фото або поверніться до камери.",
               });
-              resetFeedbackLater(3000);
             } finally {
               if (fileInputRef.current) {
                 fileInputRef.current.value = "";
@@ -304,7 +288,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
             <Text className="ticketier-scan-result-title">{feedback.title}</Text>
             <Text className="ticketier-scan-result-subtitle">{feedback.subtitle}</Text>
             {feedback.meta ? <Text className="ticketier-scan-result-meta">{feedback.meta}</Text> : null}
-            <Button mt="lg" color="dark" variant="white" onClick={closeFeedback}>
+            <Button mt="lg" color="dark" variant="white" size="lg" radius="md" fullWidth onClick={closeFeedback}>
               OK
             </Button>
           </Box>

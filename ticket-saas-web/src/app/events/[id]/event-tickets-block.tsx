@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
@@ -82,11 +82,12 @@ export default function EventTicketsBlock({
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const narrow = useMediaQuery("(max-width: 420px)");
   const isMobile = useMediaQuery("(max-width: 560px)");
-  // Без реєстрації: спочатку email → надіслати код → ввести код → підтвердити
+  // Р‘РµР· СЂРµС”СЃС‚СЂР°С†С–С—: СЃРїРѕС‡Р°С‚РєСѓ email в†’ РЅР°РґС–СЃР»Р°С‚Рё РєРѕРґ в†’ РІРІРµСЃС‚Рё РєРѕРґ в†’ РїС–РґС‚РІРµСЂРґРёС‚Рё
   const [guestStep, setGuestStep] = useState<"email" | "code" | null>(null);
   const [guestCode, setGuestCode] = useState("");
   const [sendCodeLoading, setSendCodeLoading] = useState(false);
   const [verifyCodeLoading, setVerifyCodeLoading] = useState(false);
+  const [amountNoticeOpen, setAmountNoticeOpen] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetIdRef = useRef<string | null>(null);
@@ -97,7 +98,7 @@ export default function EventTicketsBlock({
 
   const getQty = (id: string) => quantities[id] ?? 1;
   const priceLabel = (cents: number) =>
-    narrow && currency === "UAH" ? `${(cents / 100).toFixed(0)} грн` : `${money(cents)} ${currency}`;
+    narrow && currency === "UAH" ? `${(cents / 100).toFixed(0)} РіСЂРЅ` : `${money(cents)} ${currency}`;
   const setQty = (id: string, n: number) => setQuantities((q) => ({ ...q, [id]: n }));
 
   const refreshSessionEmail = () => {
@@ -119,7 +120,7 @@ export default function EventTicketsBlock({
     refreshSessionEmail();
   }, []);
 
-  // Відкрили модалку без сесії — починаємо крок email
+  // Р’С–РґРєСЂРёР»Рё РјРѕРґР°Р»РєСѓ Р±РµР· СЃРµСЃС–С— вЂ” РїРѕС‡РёРЅР°С”РјРѕ РєСЂРѕРє email
   useEffect(() => {
     if (open && !emailFromSession && guestStep === null) setGuestStep("email");
     if (!open) {
@@ -137,7 +138,7 @@ export default function EventTicketsBlock({
     }
   }, [open, emailFromSession, guestStep]);
 
-  // Turnstile для кроку "надіслати код" — читаємо ref у callback, щоб контейнер вже був у DOM
+  // Turnstile РґР»СЏ РєСЂРѕРєСѓ "РЅР°РґС–СЃР»Р°С‚Рё РєРѕРґ" вЂ” С‡РёС‚Р°С”РјРѕ ref Сѓ callback, С‰РѕР± РєРѕРЅС‚РµР№РЅРµСЂ РІР¶Рµ Р±СѓРІ Сѓ DOM
   useEffect(() => {
     if (!open || !guestStep || guestStep !== "email" || emailFromSession) return;
     if (!TURNSTILE_SITEKEY) return;
@@ -203,11 +204,11 @@ export default function EventTicketsBlock({
   const handleSendCode = async () => {
     const em = email.trim();
     if (!em) {
-      setError("Вкажіть email");
+      setError("Р’РєР°Р¶С–С‚СЊ email");
       return;
     }
     if (process.env.NODE_ENV === "production" && !turnstileToken) {
-      setError("Підтвердіть капчу або зачекайте її завантаження");
+      setError("РџС–РґС‚РІРµСЂРґС–С‚СЊ РєР°РїС‡Сѓ Р°Р±Рѕ Р·Р°С‡РµРєР°Р№С‚Рµ С—С— Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ");
       return;
     }
     setError("");
@@ -220,7 +221,7 @@ export default function EventTicketsBlock({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError((data as { error?: string }).error ?? "Помилка. Спробуйте пізніше.");
+        setError((data as { error?: string }).error ?? "РџРѕРјРёР»РєР°. РЎРїСЂРѕР±СѓР№С‚Рµ РїС–Р·РЅС–С€Рµ.");
         return;
       }
       setTurnstileToken("");
@@ -245,7 +246,7 @@ export default function EventTicketsBlock({
     if (!em) return;
     const codeTrim = guestCode.replace(/\s/g, "").slice(0, 6);
     if (codeTrim.length !== 6) {
-      setError("Введіть 6 цифр коду");
+      setError("Р’РІРµРґС–С‚СЊ 6 С†РёС„СЂ РєРѕРґСѓ");
       return;
     }
     setError("");
@@ -258,7 +259,7 @@ export default function EventTicketsBlock({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError((data as { error?: string }).error ?? "Невірний код. Спробуйте ще раз.");
+        setError((data as { error?: string }).error ?? "РќРµРІС–СЂРЅРёР№ РєРѕРґ. РЎРїСЂРѕР±СѓР№С‚Рµ С‰Рµ СЂР°Р·.");
         return;
       }
       await refreshSessionEmail();
@@ -294,7 +295,7 @@ export default function EventTicketsBlock({
     codeRefs.current[nextIndex]?.focus();
   }, []);
 
-  const handleSubmit = async () => {
+    const performSubmit = async () => {
     if (!email.trim()) {
       setError("Вкажіть email");
       return;
@@ -336,28 +337,70 @@ export default function EventTicketsBlock({
     }
   };
 
+  const handleSubmit = async () => {
+    if (!email.trim()) {
+      setError("Вкажіть email");
+      return;
+    }
+    setAmountNoticeOpen(true);
+  };
+
+  const amountNoticeModal = (
+    <Modal
+      opened={amountNoticeOpen}
+      onClose={() => setAmountNoticeOpen(false)}
+      title="Увага до суми оплати"
+      centered
+      size="sm"
+      withCloseButton
+      overlayProps={{ backgroundOpacity: 0.72, blur: 10 }}
+      styles={ORDER_MODAL_STYLES}
+      closeButtonProps={{
+        "aria-label": "Закрити",
+        style: { width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: 12, color: "var(--muted)", backgroundColor: "transparent" },
+      }}
+    >
+      <Stack gap="lg">
+        <Text size="sm" c="dimmed">
+          Будь ласка, зверніть увагу: сума має бути сплачена точно, включно з копійками.
+        </Text>
+        <Button
+          fullWidth
+          size="lg"
+          className="auth-form-submit"
+          loading={loading}
+          onClick={async () => {
+            setAmountNoticeOpen(false);
+            await performSubmit();
+          }}
+        >
+          OK
+        </Button>
+      </Stack>
+    </Modal>
+  );
   if (ticketTypes.length === 0) {
     return (
       <>
         <Box className="event-tickets-section">
           <div className="event-tickets-header">
-            <span className="event-tickets-header-title">Квитки</span>
-            <span className="event-tickets-header-icon" aria-hidden>🎫</span>
+            <span className="event-tickets-header-title">РљРІРёС‚РєРё</span>
+            <span className="event-tickets-header-icon" aria-hidden>рџЋ«</span>
           </div>
           <Card withBorder={false} padding="lg" radius="lg" className="event-ticket-card">
             <Box className="event-ticket-card-inner" style={{ flexDirection: "column", alignItems: "stretch" }}>
-              <Text className="event-ticket-name">Один тип квитка</Text>
+              <Text className="event-ticket-name">РћРґРёРЅ С‚РёРї РєРІРёС‚РєР°</Text>
               <Text size="sm" c="dimmed" mt={4}>{money(eventPriceCents)} {currency}</Text>
               <Button
                 size="lg"
                 mt="md"
                 className="event-ticket-buy-btn"
                 onClick={() => {
-                  setActiveTicket({ ticketTypeId: "", name: "Квиток", priceCents: eventPriceCents, quantity: 1 });
+                  setActiveTicket({ ticketTypeId: "", name: "РљРІРёС‚РѕРє", priceCents: eventPriceCents, quantity: 1 });
                   setOpen(true);
                 }}
               >
-                Оформити
+                РћС„РѕСЂРјРёС‚Рё
               </Button>
             </Box>
           </Card>
@@ -365,14 +408,14 @@ export default function EventTicketsBlock({
         <Modal
           opened={open}
           onClose={() => { setOpen(false); setActiveTicket(null); }}
-          title="Оформити замовлення"
+          title="РћС„РѕСЂРјРёС‚Рё Р·Р°РјРѕРІР»РµРЅРЅСЏ"
           centered
           size="sm"
           withCloseButton
           className="auth-modal"
           overlayProps={{ backgroundOpacity: 0.75, blur: 12 }}
           styles={ORDER_MODAL_STYLES}
-          closeButtonProps={{ "aria-label": "Закрити", style: { width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: 12, color: "var(--muted)", backgroundColor: "transparent" } }}
+          closeButtonProps={{ "aria-label": "Р—Р°РєСЂРёС‚Рё", style: { width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: 12, color: "var(--muted)", backgroundColor: "transparent" } }}
         >
           <Stack gap="xl" className="auth-form-stack">
             {error && (
@@ -384,25 +427,25 @@ export default function EventTicketsBlock({
               <>
                 <Text size="sm" fw={500} style={{ color: "var(--text)" }}>
                   {activeTicket.quantity === 1
-                    ? `${activeTicket.name} — ${(activeTicket.priceCents / 100).toFixed(2)} ${currency}`
-                    : `${activeTicket.name}, ${activeTicket.quantity} шт. — ${(activeTicket.priceCents * activeTicket.quantity / 100).toFixed(2)} ${currency}`}
+                    ? `${activeTicket.name} вЂ” ${(activeTicket.priceCents / 100).toFixed(2)} ${currency}`
+                    : `${activeTicket.name}, ${activeTicket.quantity} С€С‚. вЂ” ${(activeTicket.priceCents * activeTicket.quantity / 100).toFixed(2)} ${currency}`}
                 </Text>
                 {emailFromSession && email ? (
                   <>
                     <Text size="sm" c="dimmed">
-                      Квиток надішлемо на <Text span fw={600} c="var(--text)">{email}</Text>
+                      РљРІРёС‚РѕРє РЅР°РґС–С€Р»РµРјРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text>
                     </Text>
                     <Button onClick={handleSubmit} loading={loading} fullWidth size="md" className="auth-form-submit">
-                      Підтвердити
+                      РџС–РґС‚РІРµСЂРґРёС‚Рё
                     </Button>
                   </>
                 ) : guestStep === "code" ? (
                   <>
                     <Text size="sm" c="dimmed">
-                      Код надіслано на <Text span fw={600} c="var(--text)">{email}</Text>
+                      РљРѕРґ РЅР°РґС–СЃР»Р°РЅРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text>
                     </Text>
                     <Box>
-                      <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Введіть 6 цифр</Text>
+                      <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Р’РІРµРґС–С‚СЊ 6 С†РёС„СЂ</Text>
                       <Group gap={8} justify="center" wrap="nowrap" onPaste={handleCodePaste} className="auth-code-row auth-code-desktop">
                         {Array.from({ length: CODE_LENGTH }, (_, i) => (
                           <input
@@ -416,7 +459,7 @@ export default function EventTicketsBlock({
                             onChange={(e) => setCodeChar(i, e.target.value.replace(/\D/g, ""))}
                             onKeyDown={(e) => handleCodeKeyDown(i, e)}
                             className="otp-cell auth-form-input"
-                            aria-label={`Цифра ${i + 1}`}
+                            aria-label={`Р¦РёС„СЂР° ${i + 1}`}
                             style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                           />
                         ))}
@@ -431,7 +474,7 @@ export default function EventTicketsBlock({
                           value={guestCode}
                           onChange={(e) => setGuestCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
                           className="auth-form-input otp-single"
-                          aria-label="Код з 6 цифр"
+                          aria-label="РљРѕРґ Р· 6 С†РёС„СЂ"
                           style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                         />
                       </Box>
@@ -444,13 +487,13 @@ export default function EventTicketsBlock({
                       size="md"
                       className="auth-form-submit"
                     >
-                      Підтвердити email
+                      РџС–РґС‚РІРµСЂРґРёС‚Рё email
                     </Button>
                   </>
                 ) : (
                   <>
                     <Box>
-                      <Text size="sm" fw={700} mb={10} style={{ letterSpacing: "0.04em", color: "var(--muted)" }}>Email для квитка</Text>
+                      <Text size="sm" fw={700} mb={10} style={{ letterSpacing: "0.04em", color: "var(--muted)" }}>Email РґР»СЏ РєРІРёС‚РєР°</Text>
                       <input
                         type="email"
                         placeholder="you@example.com"
@@ -471,7 +514,7 @@ export default function EventTicketsBlock({
                       size="md"
                       className="auth-form-submit"
                     >
-                      Надіслати код на пошту
+                      РќР°РґС–СЃР»Р°С‚Рё РєРѕРґ РЅР° РїРѕС€С‚Сѓ
                     </Button>
                   </>
                 )}
@@ -479,6 +522,7 @@ export default function EventTicketsBlock({
             )}
           </Stack>
         </Modal>
+        {amountNoticeModal}
       </>
     );
   }
@@ -487,8 +531,8 @@ export default function EventTicketsBlock({
     <>
       <Box className="event-tickets-section">
         <div className="event-tickets-header">
-          <span className="event-tickets-header-title">Квитки</span>
-          <span className="event-tickets-header-icon" aria-hidden>🎫</span>
+          <span className="event-tickets-header-title">РљРІРёС‚РєРё</span>
+          <span className="event-tickets-header-icon" aria-hidden>рџЋ«</span>
         </div>
         <Stack gap="md" className="event-tickets-list">
           {ticketTypes.map((t) => {
@@ -522,7 +566,7 @@ export default function EventTicketsBlock({
                       className="event-ticket-buy-btn event-ticket-buy-btn-in-card"
                       onClick={() => handleBuy(t, qty)}
                     >
-                      Оформити
+                      РћС„РѕСЂРјРёС‚Рё
                     </Button>
                   </Box>
                 </Box>
@@ -532,16 +576,16 @@ export default function EventTicketsBlock({
         </Stack>
 
         {mounted && isMobile && createPortal(
-            <div className="event-tickets-bar" role="region" aria-label="Підсумок замовлення">
+            <div className="event-tickets-bar" role="region" aria-label="РџС–РґСЃСѓРјРѕРє Р·Р°РјРѕРІР»РµРЅРЅСЏ">
               <div>
                 {selectedForBar.length === 0 ? (
-                  <span className="event-tickets-bar-total event-tickets-bar-total-empty">Оберіть квитки</span>
+                  <span className="event-tickets-bar-total event-tickets-bar-total-empty">РћР±РµСЂС–С‚СЊ РєРІРёС‚РєРё</span>
                 ) : (
                   <>
-                    <span className="event-tickets-bar-total">Разом</span>
+                    <span className="event-tickets-bar-total">Р Р°Р·РѕРј</span>
                     <span className="event-tickets-bar-total-amount">
                       {narrow && currency === "UAH"
-                        ? `${(totalCentsBar / 100).toFixed(0)} грн`
+                        ? `${(totalCentsBar / 100).toFixed(0)} РіСЂРЅ`
                         : `${(totalCentsBar / 100).toFixed(2)} ${currency}`}
                     </span>
                   </>
@@ -552,7 +596,7 @@ export default function EventTicketsBlock({
                 disabled={selectedForBar.length === 0}
                 onClick={openFromBar}
               >
-                Оформити
+                РћС„РѕСЂРјРёС‚Рё
               </Button>
             </div>,
             document.body
@@ -562,14 +606,14 @@ export default function EventTicketsBlock({
       <Modal
         opened={open}
         onClose={() => { setOpen(false); setActiveTicket(null); setActiveTicketsFromBar(null); }}
-        title="Оформити замовлення"
+        title="РћС„РѕСЂРјРёС‚Рё Р·Р°РјРѕРІР»РµРЅРЅСЏ"
         centered
         size="sm"
         withCloseButton
         className="auth-modal"
         overlayProps={{ backgroundOpacity: 0.75, blur: 12 }}
         styles={ORDER_MODAL_STYLES}
-        closeButtonProps={{ "aria-label": "Закрити", style: { width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: 12, color: "var(--muted)", backgroundColor: "transparent" } }}
+        closeButtonProps={{ "aria-label": "Р—Р°РєСЂРёС‚Рё", style: { width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: 12, color: "var(--muted)", backgroundColor: "transparent" } }}
       >
         <Stack gap="xl" className="auth-form-stack">
           {error && (
@@ -580,8 +624,8 @@ export default function EventTicketsBlock({
           {(activeTicketsFromBar?.length ? activeTicketsFromBar : activeTicket ? [activeTicket] : []).map((item) => (
             <Text key={item.ticketTypeId + item.quantity} size="sm" fw={500} style={{ color: "var(--text)" }}>
               {item.quantity === 1
-                ? `${item.name} — ${(item.priceCents / 100).toFixed(2)} ${currency}`
-                : `${item.name}, ${item.quantity} шт. — ${(item.priceCents * item.quantity / 100).toFixed(2)} ${currency}`}
+                ? `${item.name} вЂ” ${(item.priceCents / 100).toFixed(2)} ${currency}`
+                : `${item.name}, ${item.quantity} С€С‚. вЂ” ${(item.priceCents * item.quantity / 100).toFixed(2)} ${currency}`}
             </Text>
           ))}
           {((activeTicketsFromBar?.length ?? 0) > 0 || activeTicket) && (
@@ -589,19 +633,19 @@ export default function EventTicketsBlock({
               {emailFromSession && email ? (
                 <>
                   <Text size="sm" c="dimmed">
-                    Квиток надішлемо на <Text span fw={600} c="var(--text)">{email}</Text>
+                    РљРІРёС‚РѕРє РЅР°РґС–С€Р»РµРјРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text>
                   </Text>
                   <Button onClick={handleSubmit} loading={loading} fullWidth size="md" className="auth-form-submit">
-                    Підтвердити
+                    РџС–РґС‚РІРµСЂРґРёС‚Рё
                   </Button>
                 </>
               ) : guestStep === "code" ? (
                 <>
                   <Text size="sm" c="dimmed">
-                    Код надіслано на <Text span fw={600} c="var(--text)">{email}</Text>
+                    РљРѕРґ РЅР°РґС–СЃР»Р°РЅРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text>
                   </Text>
                   <Box>
-                    <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Введіть 6 цифр</Text>
+                    <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Р’РІРµРґС–С‚СЊ 6 С†РёС„СЂ</Text>
                     <Group gap={8} justify="center" wrap="nowrap" onPaste={handleCodePaste} className="auth-code-row auth-code-desktop">
                       {Array.from({ length: CODE_LENGTH }, (_, i) => (
                         <input
@@ -615,7 +659,7 @@ export default function EventTicketsBlock({
                           onChange={(e) => setCodeChar(i, e.target.value.replace(/\D/g, ""))}
                           onKeyDown={(e) => handleCodeKeyDown(i, e)}
                           className="otp-cell auth-form-input"
-                          aria-label={`Цифра ${i + 1}`}
+                          aria-label={`Р¦РёС„СЂР° ${i + 1}`}
                           style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                         />
                       ))}
@@ -630,7 +674,7 @@ export default function EventTicketsBlock({
                         value={guestCode}
                         onChange={(e) => setGuestCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
                         className="auth-form-input otp-single"
-                        aria-label="Код з 6 цифр"
+                        aria-label="РљРѕРґ Р· 6 С†РёС„СЂ"
                         style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                       />
                     </Box>
@@ -643,13 +687,13 @@ export default function EventTicketsBlock({
                     size="md"
                     className="auth-form-submit"
                   >
-                    Підтвердити email
+                    РџС–РґС‚РІРµСЂРґРёС‚Рё email
                   </Button>
                 </>
               ) : (
                 <>
                   <Box>
-                    <Text size="sm" fw={700} mb={10} style={{ letterSpacing: "0.04em", color: "var(--muted)" }}>Email для квитка(ів)</Text>
+                    <Text size="sm" fw={700} mb={10} style={{ letterSpacing: "0.04em", color: "var(--muted)" }}>Email РґР»СЏ РєРІРёС‚РєР°(С–РІ)</Text>
                     <input
                       type="email"
                       placeholder="you@example.com"
@@ -670,7 +714,7 @@ export default function EventTicketsBlock({
                     size="md"
                     className="auth-form-submit"
                   >
-                    Надіслати код на пошту
+                    РќР°РґС–СЃР»Р°С‚Рё РєРѕРґ РЅР° РїРѕС€С‚Сѓ
                   </Button>
                 </>
               )}
@@ -678,6 +722,9 @@ export default function EventTicketsBlock({
           )}
         </Stack>
       </Modal>
-    </>
+        {amountNoticeModal}
+      </>
   );
 }
+
+
