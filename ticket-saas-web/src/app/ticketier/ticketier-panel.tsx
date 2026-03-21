@@ -150,12 +150,13 @@ export default function TicketierPanel() {
   const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
   const scannedCount = tickets.filter((ticket) => ticket.usedAt).length;
   const activeCount = tickets.length - scannedCount;
-  const recentTickets = [...tickets]
+  const unscannedTickets = tickets
+    .filter((ticket) => !ticket.usedAt)
+    .sort((a, b) => a.buyerEmail.localeCompare(b.buyerEmail));
+  const recentUsedTickets = tickets
+    .filter((ticket) => !!ticket.usedAt)
     .sort((a, b) => {
-      if (a.usedAt && b.usedAt) return new Date(b.usedAt).getTime() - new Date(a.usedAt).getTime();
-      if (a.usedAt) return -1;
-      if (b.usedAt) return 1;
-      return a.buyerEmail.localeCompare(b.buyerEmail);
+      return new Date(b.usedAt as string).getTime() - new Date(a.usedAt as string).getTime();
     })
     .slice(0, 8);
 
@@ -221,7 +222,7 @@ export default function TicketierPanel() {
             <Card withBorder p="lg" className="ticketier-list-card">
               <Group justify="space-between" align="center" mb="md">
                 <Box>
-                  <Text fw={700}>Останні квитки</Text>
+                  <Text fw={700}>Квитки події</Text>
                   <Text size="sm" c="dimmed">
                     {tickets.length > 0 ? `Усього оплачено: ${tickets.length}` : "Список оновлюється після кожного скану"}
                   </Text>
@@ -241,30 +242,69 @@ export default function TicketierPanel() {
                 <Text size="sm" c="dimmed">
                   Завантаження квитків...
                 </Text>
-              ) : recentTickets.length === 0 ? (
+              ) : tickets.length === 0 ? (
                 <Text size="sm" c="dimmed">
                   Поки немає оплачених квитків.
                 </Text>
               ) : (
                 <Stack gap="sm">
-                  {recentTickets.map((ticket) => (
-                    <Box key={ticket.id} className="ticketier-ticket-row">
-                      <Box>
-                        <Text fw={600}>{ticket.buyerEmail}</Text>
-                        <Text size="sm" c="dimmed">
-                          {ticket.ticketTypeName ?? "Без окремого типу"}
-                        </Text>
-                      </Box>
-                      <Box ta="right">
-                        <Text size="sm" c={ticket.usedAt ? "yellow" : "green"} fw={700}>
-                          {ticket.usedAt ? "Використано" : "Активний"}
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                          {ticket.usedAt ? new Date(ticket.usedAt).toLocaleString("uk-UA") : "Ще не сканували"}
-                        </Text>
-                      </Box>
-                    </Box>
-                  ))}
+                  <Text fw={700}>Не відскановані ({unscannedTickets.length})</Text>
+                  {unscannedTickets.length === 0 ? (
+                    <Text size="sm" c="dimmed">
+                      Всі квитки вже відскановані.
+                    </Text>
+                  ) : (
+                    <Stack gap="sm">
+                      {unscannedTickets.map((ticket) => (
+                        <Box key={ticket.id} className="ticketier-ticket-row">
+                          <Box>
+                            <Text fw={600}>{ticket.buyerEmail}</Text>
+                            <Text size="sm" c="dimmed">
+                              {ticket.ticketTypeName ?? "Без окремого типу"}
+                            </Text>
+                          </Box>
+                          <Box ta="right">
+                            <Text size="sm" c="green" fw={700}>
+                              Активний
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              Ще не сканували
+                            </Text>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Stack>
+                  )}
+
+                  <Text fw={700} mt="sm">
+                    Останні сканування
+                  </Text>
+                  {recentUsedTickets.length === 0 ? (
+                    <Text size="sm" c="dimmed">
+                      Сканувань поки немає.
+                    </Text>
+                  ) : (
+                    <Stack gap="sm">
+                      {recentUsedTickets.map((ticket) => (
+                        <Box key={ticket.id} className="ticketier-ticket-row">
+                          <Box>
+                            <Text fw={600}>{ticket.buyerEmail}</Text>
+                            <Text size="sm" c="dimmed">
+                              {ticket.ticketTypeName ?? "Без окремого типу"}
+                            </Text>
+                          </Box>
+                          <Box ta="right">
+                            <Text size="sm" c="yellow" fw={700}>
+                              Використано
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              {ticket.usedAt ? new Date(ticket.usedAt).toLocaleString("uk-UA") : "-"}
+                            </Text>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Stack>
+                  )}
                 </Stack>
               )}
             </Card>
