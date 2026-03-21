@@ -37,26 +37,44 @@ type Html5QrCodeInstance = {
 };
 
 function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 220, height: 220 };
-  const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(170, Math.min(viewport - 180, 220));
+  if (typeof window === "undefined") return { width: 200, height: 200 };
+  const size = Math.max(170, Math.min(Math.round(window.innerWidth * 0.52), 220));
   return { width: size, height: size };
 }
 
 function extractTicketIdFromUrl(url: string): string | null {
   try {
     const path = new URL(url).pathname;
-    const match = path.match(/\/api\/public\/tickets\/verify\/([^/]+)$/);
+    const match = path.match(/\/api\/public\/tickets\/verify\/([^/?#]+)/);
     return match ? match[1] : null;
   } catch {
     return null;
   }
 }
 
+function isLikelyTicketId(value: string): boolean {
+  return /^[a-zA-Z0-9_-]{8,}$/.test(value);
+}
+
 function normalizeTicketId(decodedText: string): string | null {
   const value = decodedText.trim();
   if (!value) return null;
-  return extractTicketIdFromUrl(value) ?? value;
+  const fromUrl = extractTicketIdFromUrl(value);
+  if (fromUrl) return decodeURIComponent(fromUrl);
+
+  const rawPathMatch = value.match(/\/api\/public\/tickets\/verify\/([^/?#]+)/);
+  if (rawPathMatch?.[1]) return decodeURIComponent(rawPathMatch[1]);
+
+  if (value.includes("ticketId=")) {
+    const queryMatch = value.match(/[?&]ticketId=([^&#]+)/);
+    if (queryMatch?.[1]) return decodeURIComponent(queryMatch[1]);
+  }
+
+  if (!value.includes("/") && !value.includes("://") && isLikelyTicketId(value)) {
+    return value;
+  }
+
+  return null;
 }
 
 function isScanFailureOnly(err: unknown): boolean {
@@ -241,6 +259,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   return (
     <Box className="ticketier-scanner-shell">
       <Box ref={containerRef} className="ticketier-scanner-surface" />
+      <Box className="ticketier-scanner-focus" aria-hidden="true" />
 
       <input
         ref={fileInputRef}
