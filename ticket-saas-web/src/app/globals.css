@@ -2591,9 +2591,6 @@ a { color: inherit; text-decoration: none; }
   border: 0 !important;
   background: transparent !important;
 }
-.ticketier-scanner-surface #ticketier-qr-reader__scan_region > img {
-  display: none !important;
-}
 .ticketier-scanner-surface #ticketier-qr-reader__scan_region video {
   width: min(100vw, 100%) !important;
   max-width: 420px !important;
@@ -2601,42 +2598,6 @@ a { color: inherit; text-decoration: none; }
   max-height: 70svh !important;
   border-radius: 28px;
   background: #000;
-}
-.ticketier-scanner-focus {
-  position: absolute;
-  z-index: 2;
-  left: 50%;
-  top: 44%;
-  width: min(52vw, 210px);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  border-radius: 22px;
-  box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.42) inset,
-    0 0 0 999px rgba(0, 0, 0, 0.22);
-  pointer-events: none;
-}
-.ticketier-scanner-focus::before,
-.ticketier-scanner-focus::after {
-  content: "";
-  position: absolute;
-  width: 38px;
-  height: 38px;
-  border: 3px solid rgba(120, 255, 192, 0.9);
-}
-.ticketier-scanner-focus::before {
-  left: -1px;
-  top: -1px;
-  border-right: 0;
-  border-bottom: 0;
-  border-top-left-radius: 14px;
-}
-.ticketier-scanner-focus::after {
-  right: -1px;
-  bottom: -1px;
-  border-left: 0;
-  border-top: 0;
-  border-bottom-right-radius: 14px;
 }
 .ticketier-mobile-dock {
   position: absolute;
@@ -2847,9 +2808,6 @@ a { color: inherit; text-decoration: none; }
   .ticketier-mobile-dock {
     left: 12px;
     right: 12px;
-  }
-  .ticketier-scanner-focus {
-    width: min(56vw, 190px);
   }
   .ticketier-mobile-dock-actions {
     grid-template-columns: 1fr;

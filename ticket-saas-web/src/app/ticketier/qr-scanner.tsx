@@ -46,6 +46,13 @@ function extractTicketIdFromUrl(url: string): string | null {
   }
 }
 
+function getQrBoxSize(): { width: number; height: number } {
+  if (typeof window === "undefined") return { width: 280, height: 280 };
+  const viewport = Math.min(window.innerWidth, window.innerHeight);
+  const size = Math.max(240, Math.min(viewport - 90, 320));
+  return { width: size, height: size };
+}
+
 function normalizeTicketId(decodedText: string): string | null {
   const value = decodedText.trim();
   if (!value) return null;
@@ -193,11 +200,12 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
 
       const scanner = new Html5Qrcode(SCANNER_DIV_ID) as unknown as Html5QrCodeInstance;
       scannerRef.current = scanner;
+      const qrbox = getQrBoxSize();
 
       try {
         await scanner.start(
           { facingMode: "environment" },
-          { fps: 10 },
+          { fps: 10, qrbox: { width: qrbox.width, height: qrbox.height } },
           (decodedText) => {
             if (!mounted || scanningRef.current) return;
             void handleDecodedValue(decodedText);
@@ -232,7 +240,6 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
   return (
     <Box className="ticketier-scanner-shell">
       <Box ref={containerRef} className="ticketier-scanner-surface" />
-      <Box className="ticketier-scanner-focus" aria-hidden="true" />
 
       <input
         ref={fileInputRef}
