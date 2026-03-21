@@ -68,6 +68,9 @@ function isScanFailureOnly(err: unknown): boolean {
     lower.includes("nomultiformat") ||
     lower.includes("no multiformat") ||
     lower.includes("not found") ||
+    lower.includes("no barcode") ||
+    lower.includes("no qr code") ||
+    lower.includes("qr code detected") ||
     lower.includes("no code") ||
     lower.includes("unable to detect") ||
     lower.includes("multiformat readers")
