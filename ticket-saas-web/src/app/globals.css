@@ -139,6 +139,14 @@ body {
   0%, 100% { opacity: 0.35; }
   50% { opacity: 0.65; }
 }
+@keyframes finishedRibbonShift {
+  0% { background-position: 0 0; }
+  100% { background-position: 180px 0; }
+}
+@keyframes finishedRibbonShiftReverse {
+  0% { background-position: 0 0; }
+  100% { background-position: -220px 0; }
+}
 .home-animated-bg {
   position: fixed;
   inset: 0;

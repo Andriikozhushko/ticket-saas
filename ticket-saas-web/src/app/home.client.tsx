@@ -146,19 +146,25 @@ function EventCard({ e }: { e: EventVM }) {
               <Box
                 style={{
                   position: "absolute",
-                  top: 12,
-                  right: 12,
+                  top: "34%",
+                  left: "-24%",
+                  right: "-24%",
                   zIndex: 3,
-                  background: "rgba(26,26,26,0.72)",
-                  color: "white",
-                  padding: "7px 11px",
-                  borderRadius: 999,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: "0.07em",
+                  transform: "rotate(-17deg)",
+                  background:
+                    "repeating-linear-gradient(135deg, #111 0 12px, #f3c623 12px 24px)",
+                  color: "#0a0a0a",
+                  padding: "9px 0",
+                  borderRadius: 2,
+                  fontSize: 12,
+                  fontWeight: 900,
+                  letterSpacing: "0.1em",
                   textTransform: "uppercase",
-                  border: "1px solid rgba(255,255,255,0.22)",
-                  backdropFilter: "blur(3px)",
+                  textAlign: "center",
+                  borderTop: "1px solid rgba(0,0,0,0.65)",
+                  borderBottom: "1px solid rgba(0,0,0,0.65)",
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.35)",
+                  animation: "finishedRibbonShift 7s linear infinite",
                 }}
               >
                 Завершено
@@ -175,20 +181,25 @@ function EventCard({ e }: { e: EventVM }) {
               />
               <Box
                 style={{
-                  display: "none",
+                  display: "block",
                   position: "absolute",
-                  left: 14,
-                  right: 14,
-                  bottom: 14,
+                  top: "58%",
+                  left: "-22%",
+                  right: "-22%",
                   zIndex: 3,
-                  background: "rgba(28,28,28,0.72)",
-                  border: "1px solid rgba(255,255,255,0.14)",
-                  borderRadius: 10,
-                  padding: "10px 12px",
-                  backdropFilter: "blur(4px)",
+                  transform: "rotate(17deg)",
+                  background:
+                    "repeating-linear-gradient(135deg, #111 0 12px, #f3c623 12px 24px)",
+                  borderTop: "1px solid rgba(0,0,0,0.65)",
+                  borderBottom: "1px solid rgba(0,0,0,0.65)",
+                  borderRadius: 2,
+                  padding: "7px 0",
+                  textAlign: "center",
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.25)",
+                  animation: "finishedRibbonShiftReverse 8.5s linear infinite",
                 }}
               >
-                <Text size="sm" fw={600} style={{ color: "rgba(255,255,255,0.94)", letterSpacing: "0.01em" }}>
+                <Text size="xs" fw={900} style={{ color: "#0a0a0a", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                   Подія завершена
                 </Text>
               </Box>
@@ -266,11 +277,12 @@ function EventCard({ e }: { e: EventVM }) {
                   style={{
                     padding: "8px 14px",
                     borderRadius: 8,
-                    background: "rgba(26,26,26,0.5)",
-                    border: "1px solid rgba(255,255,255,0.2)",
+                    background:
+                      "repeating-linear-gradient(135deg, rgba(16,16,16,0.95) 0 8px, rgba(243,198,35,0.9) 8px 16px)",
+                    border: "1px solid rgba(0,0,0,0.45)",
                     fontWeight: 700,
                     letterSpacing: "0.03em",
-                    color: "rgba(255,255,255,0.9)",
+                    color: "#070707",
                   }}
                 >
                   Завершено
