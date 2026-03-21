@@ -204,6 +204,7 @@ export default function QRScanner({ onScan, fileInputRef }: Props) {
       const scanner = new Html5Qrcode(SCANNER_DIV_ID) as unknown as Html5QrCodeInstance;
       scannerRef.current = scanner;
       const qrbox = getQrBoxSize();
+      container.style.setProperty("--ticketier-qrbox-size", `${qrbox.width}px`);
 
       try {
         await scanner.start(

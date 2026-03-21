@@ -2574,6 +2574,7 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   height: 100%;
   background: #000;
+  --ticketier-qrbox-size: min(68vw, 240px);
 }
 .ticketier-scanner-surface #ticketier-qr-reader {
   width: 100% !important;
@@ -2591,9 +2592,10 @@ a { color: inherit; text-decoration: none; }
   display: flex !important;
   align-items: center;
   justify-content: center;
-  width: min(92vw, 420px) !important;
-  aspect-ratio: 1 / 1 !important;
-  max-height: min(66svh, 420px) !important;
+  width: var(--ticketier-qrbox-size) !important;
+  height: var(--ticketier-qrbox-size) !important;
+  max-width: 92vw !important;
+  max-height: 92vw !important;
   margin: 0 auto !important;
   border: 0 !important;
   background: transparent !important;
