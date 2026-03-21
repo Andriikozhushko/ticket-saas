@@ -47,9 +47,12 @@ function extractTicketIdFromUrl(url: string): string | null {
 }
 
 function getQrBoxSize(): { width: number; height: number } {
-  if (typeof window === "undefined") return { width: 280, height: 280 };
+  if (typeof window === "undefined") return { width: 240, height: 240 };
+  const isPhone = window.matchMedia("(max-width: 768px)").matches;
   const viewport = Math.min(window.innerWidth, window.innerHeight);
-  const size = Math.max(240, Math.min(viewport - 90, 320));
+  const size = isPhone
+    ? Math.max(190, Math.min(viewport - 170, 240))
+    : Math.max(220, Math.min(viewport - 180, 280));
   return { width: size, height: size };
 }
 
