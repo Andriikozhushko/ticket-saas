@@ -82,7 +82,7 @@ export default function EventTicketsBlock({
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const narrow = useMediaQuery("(max-width: 420px)");
   const isMobile = useMediaQuery("(max-width: 560px)");
-  // Р‘РµР· СЂРµС”СЃС‚СЂР°С†С–С—: СЃРїРѕС‡Р°С‚РєСѓ email в†’ РЅР°РґС–СЃР»Р°С‚Рё РєРѕРґ в†’ РІРІРµСЃС‚Рё РєРѕРґ в†’ РїС–РґС‚РІРµСЂРґРёС‚Рё
+  // Р‘РµР· СЂРµС”СЃС‚СЂР°С†С–С—: СЃРїРѕС‡Р°С‚ку email в†’ РЅР°РґС–СЃР»Р°С‚Рё РєРѕРґ в†’ РІРІРµСЃС‚Рё РєРѕРґ в†’ РїС–РґС‚РІРµСЂРґРёС‚Рё
   const [guestStep, setGuestStep] = useState<"email" | "code" | null>(null);
   const [guestCode, setGuestCode] = useState("");
   const [sendCodeLoading, setSendCodeLoading] = useState(false);
@@ -98,7 +98,7 @@ export default function EventTicketsBlock({
 
   const getQty = (id: string) => quantities[id] ?? 1;
   const priceLabel = (cents: number) =>
-    narrow && currency === "UAH" ? `${(cents / 100).toFixed(0)} РіСЂРЅ` : `${money(cents)} ${currency}`;
+    narrow && currency === "UAH" ? `${(cents / 100).toFixed(0)} грн` : `${money(cents)} ${currency}`;
   const setQty = (id: string, n: number) => setQuantities((q) => ({ ...q, [id]: n }));
 
   const refreshSessionEmail = () => {
@@ -120,7 +120,7 @@ export default function EventTicketsBlock({
     refreshSessionEmail();
   }, []);
 
-  // Р’С–РґРєСЂРёР»Рё РјРѕРґР°Р»РєСѓ Р±РµР· СЃРµСЃС–С— вЂ” РїРѕС‡РёРЅР°С”РјРѕ РєСЂРѕРє email
+  // Р’С–РґРєСЂРёР»Рё РјРѕРґР°Р»ку Р±РµР· СЃРµСЃС–С— вЂ” РїРѕС‡РёРЅР°С”РјРѕ крок email
   useEffect(() => {
     if (open && !emailFromSession && guestStep === null) setGuestStep("email");
     if (!open) {
@@ -138,7 +138,7 @@ export default function EventTicketsBlock({
     }
   }, [open, emailFromSession, guestStep]);
 
-  // Turnstile РґР»СЏ РєСЂРѕРєСѓ "РЅР°РґС–СЃР»Р°С‚Рё РєРѕРґ" вЂ” С‡РёС‚Р°С”РјРѕ ref Сѓ callback, С‰РѕР± РєРѕРЅС‚РµР№РЅРµСЂ РІР¶Рµ Р±СѓРІ Сѓ DOM
+  // Turnstile РґР»я кроку "РЅР°РґС–СЃР»Р°С‚Рё РєРѕРґ" вЂ” С‡РёС‚Р°С”РјРѕ ref Сѓ callback, С‰РѕР± РєРѕРЅС‚РµР№РЅРµСЂ РІР¶Рµ Р±ув Сѓ DOM
   useEffect(() => {
     if (!open || !guestStep || guestStep !== "email" || emailFromSession) return;
     if (!TURNSTILE_SITEKEY) return;
@@ -204,11 +204,11 @@ export default function EventTicketsBlock({
   const handleSendCode = async () => {
     const em = email.trim();
     if (!em) {
-      setError("Р’РєР°Р¶С–С‚СЊ email");
+      setError("Р’РєР°Р¶С–С‚ь email");
       return;
     }
     if (process.env.NODE_ENV === "production" && !turnstileToken) {
-      setError("РџС–РґС‚РІРµСЂРґС–С‚СЊ РєР°РїС‡Сѓ Р°Р±Рѕ Р·Р°С‡РµРєР°Р№С‚Рµ С—С— Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ");
+      setError("РџС–РґС‚РІРµСЂРґС–С‚ь РєР°РїС‡Сѓ Р°Р±Рѕ Р·Р°С‡РµРєР°Р№С‚Рµ С—С— Р·Р°РІР°РЅС‚Р°Р¶Рµння");
       return;
     }
     setError("");
@@ -246,7 +246,7 @@ export default function EventTicketsBlock({
     if (!em) return;
     const codeTrim = guestCode.replace(/\s/g, "").slice(0, 6);
     if (codeTrim.length !== 6) {
-      setError("Р’РІРµРґС–С‚СЊ 6 С†РёС„СЂ РєРѕРґСѓ");
+      setError("Р’РІРµРґС–С‚ь 6 С†РёС„СЂ коду");
       return;
     }
     setError("");
@@ -408,7 +408,7 @@ export default function EventTicketsBlock({
         <Modal
           opened={open}
           onClose={() => { setOpen(false); setActiveTicket(null); }}
-          title="РћС„РѕСЂРјРёС‚Рё Р·Р°РјРѕРІР»РµРЅРЅСЏ"
+          title="РћС„РѕСЂРјРёС‚Рё Р·Р°РјРѕРІР»Рµння"
           centered
           size="sm"
           withCloseButton
@@ -442,10 +442,10 @@ export default function EventTicketsBlock({
                 ) : guestStep === "code" ? (
                   <>
                     <Text size="sm" c="dimmed">
-                      РљРѕРґ РЅР°РґС–СЃР»Р°РЅРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text>
+                      Код РЅР°РґС–СЃР»Р°РЅРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text>
                     </Text>
                     <Box>
-                      <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Р’РІРµРґС–С‚СЊ 6 С†РёС„СЂ</Text>
+                      <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Р’РІРµРґС–С‚ь 6 С†РёС„СЂ</Text>
                       <Group gap={8} justify="center" wrap="nowrap" onPaste={handleCodePaste} className="auth-code-row auth-code-desktop">
                         {Array.from({ length: CODE_LENGTH }, (_, i) => (
                           <input
@@ -474,7 +474,7 @@ export default function EventTicketsBlock({
                           value={guestCode}
                           onChange={(e) => setGuestCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
                           className="auth-form-input otp-single"
-                          aria-label="РљРѕРґ Р· 6 С†РёС„СЂ"
+                          aria-label="Код Р· 6 С†РёС„СЂ"
                           style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                         />
                       </Box>
@@ -493,7 +493,7 @@ export default function EventTicketsBlock({
                 ) : (
                   <>
                     <Box>
-                      <Text size="sm" fw={700} mb={10} style={{ letterSpacing: "0.04em", color: "var(--muted)" }}>Email РґР»СЏ РєРІРёС‚РєР°</Text>
+                      <Text size="sm" fw={700} mb={10} style={{ letterSpacing: "0.04em", color: "var(--muted)" }}>Email РґР»я РєРІРёС‚РєР°</Text>
                       <input
                         type="email"
                         placeholder="you@example.com"
@@ -576,16 +576,16 @@ export default function EventTicketsBlock({
         </Stack>
 
         {mounted && isMobile && createPortal(
-            <div className="event-tickets-bar" role="region" aria-label="РџС–РґСЃСѓРјРѕРє Р·Р°РјРѕРІР»РµРЅРЅСЏ">
+            <div className="event-tickets-bar" role="region" aria-label="РџС–дсумок Р·Р°РјРѕРІР»Рµння">
               <div>
                 {selectedForBar.length === 0 ? (
-                  <span className="event-tickets-bar-total event-tickets-bar-total-empty">РћР±РµСЂС–С‚СЊ РєРІРёС‚РєРё</span>
+                  <span className="event-tickets-bar-total event-tickets-bar-total-empty">РћР±РµСЂС–С‚ь РєРІРёС‚РєРё</span>
                 ) : (
                   <>
                     <span className="event-tickets-bar-total">Р Р°Р·РѕРј</span>
                     <span className="event-tickets-bar-total-amount">
                       {narrow && currency === "UAH"
-                        ? `${(totalCentsBar / 100).toFixed(0)} РіСЂРЅ`
+                        ? `${(totalCentsBar / 100).toFixed(0)} грн`
                         : `${(totalCentsBar / 100).toFixed(2)} ${currency}`}
                     </span>
                   </>
@@ -606,7 +606,7 @@ export default function EventTicketsBlock({
       <Modal
         opened={open}
         onClose={() => { setOpen(false); setActiveTicket(null); setActiveTicketsFromBar(null); }}
-        title="РћС„РѕСЂРјРёС‚Рё Р·Р°РјРѕРІР»РµРЅРЅСЏ"
+        title="РћС„РѕСЂРјРёС‚Рё Р·Р°РјРѕРІР»Рµння"
         centered
         size="sm"
         withCloseButton
@@ -642,10 +642,10 @@ export default function EventTicketsBlock({
               ) : guestStep === "code" ? (
                 <>
                   <Text size="sm" c="dimmed">
-                    РљРѕРґ РЅР°РґС–СЃР»Р°РЅРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text>
+                    Код РЅР°РґС–СЃР»Р°РЅРѕ РЅР° <Text span fw={600} c="var(--text)">{email}</Text>
                   </Text>
                   <Box>
-                    <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Р’РІРµРґС–С‚СЊ 6 С†РёС„СЂ</Text>
+                    <Text size="sm" fw={600} mb={10} style={{ letterSpacing: "0.02em" }}>Р’РІРµРґС–С‚ь 6 С†РёС„СЂ</Text>
                     <Group gap={8} justify="center" wrap="nowrap" onPaste={handleCodePaste} className="auth-code-row auth-code-desktop">
                       {Array.from({ length: CODE_LENGTH }, (_, i) => (
                         <input
@@ -674,7 +674,7 @@ export default function EventTicketsBlock({
                         value={guestCode}
                         onChange={(e) => setGuestCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
                         className="auth-form-input otp-single"
-                        aria-label="РљРѕРґ Р· 6 С†РёС„СЂ"
+                        aria-label="Код Р· 6 С†РёС„СЂ"
                         style={{ color: "#f4f4f6", WebkitTextFillColor: "#f4f4f6" }}
                       />
                     </Box>
@@ -693,7 +693,7 @@ export default function EventTicketsBlock({
               ) : (
                 <>
                   <Box>
-                    <Text size="sm" fw={700} mb={10} style={{ letterSpacing: "0.04em", color: "var(--muted)" }}>Email РґР»СЏ РєРІРёС‚РєР°(С–РІ)</Text>
+                    <Text size="sm" fw={700} mb={10} style={{ letterSpacing: "0.04em", color: "var(--muted)" }}>Email РґР»я РєРІРёС‚РєР°(С–РІ)</Text>
                     <input
                       type="email"
                       placeholder="you@example.com"
@@ -726,5 +726,6 @@ export default function EventTicketsBlock({
       </>
   );
 }
+
 
 

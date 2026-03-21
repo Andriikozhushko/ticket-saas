@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -41,9 +41,9 @@ function toDatetimeLocal(iso: string) {
 }
 
 const STATUS_OPTIONS = [
-  { value: "awaiting_payment", label: "Очікує оплати" },
-  { value: "paid", label: "Оплачено" },
-  { value: "expired", label: "Час вийшов" },
+  { value: "awaiting_payment", label: "РћС‡С–РєСѓС” РѕРїР»Р°С‚Рё" },
+  { value: "paid", label: "РћРїР»Р°С‡РµРЅРѕ" },
+  { value: "expired", label: "Р§Р°СЃ РІРёР№С€РѕРІ" },
 ];
 
 export default function AdminOrdersClient({ initialOrders }: { initialOrders: OrderRow[] }) {
@@ -62,11 +62,11 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
         setOrders([]);
         return;
       }
-      if (!res.ok) throw new Error("Не вдалося завантажити");
+      if (!res.ok) throw new Error("РќРµ РІРґР°Р»ося Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё");
       const data = await res.json();
       setOrders(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Помилка");
+      setError(e instanceof Error ? e.message : "РџРѕРјРёР»РєР°");
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error((data as { error?: string }).error ?? "Помилка збереження");
+        throw new Error((data as { error?: string }).error ?? "РџРѕРјРёР»РєР° Р·Р±РµСЂРµР¶Рµння");
       }
       setEdits((prev) => {
         const next = { ...prev };
@@ -105,7 +105,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
       });
       await fetchOrders();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Помилка");
+      setError(err instanceof Error ? err.message : "РџРѕРјРёР»РєР°");
     } finally {
       setSavingId(null);
     }
@@ -114,9 +114,9 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
   if (orders.length === 0 && !loading) {
     return (
       <Box style={{ maxWidth: 1200, width: "100%" }}>
-        <Title order={2} mb="xl">Замовлення</Title>
+        <Title order={2} mb="xl">Р—Р°РјРѕРІР»Рµння</Title>
         <Paper p="xl" radius="lg" withBorder>
-          <Text c="dimmed">Замовлень немає або немає доступу.</Text>
+          <Text c="dimmed">Р—Р°РјРѕРІР»Рµнь РЅРµРјР°С” Р°Р±Рѕ РЅРµРјР°С” РґРѕСЃС‚упу.</Text>
         </Paper>
       </Box>
     );
@@ -125,9 +125,9 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
   return (
     <Box style={{ maxWidth: 1400, width: "100%", minWidth: 0 }}>
       <Group justify="space-between" mb="xl" wrap="wrap" gap="sm">
-        <Title order={2}>Замовлення</Title>
+        <Title order={2}>Р—Р°РјРѕРІР»Рµння</Title>
         <Button variant="light" size="sm" onClick={fetchOrders} loading={loading}>
-          Оновити
+          РћРЅРѕРІРёС‚Рё
         </Button>
       </Group>
       {error && (
@@ -140,13 +140,13 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Email</Table.Th>
-              <Table.Th>Подія / орг</Table.Th>
-              <Table.Th>Сума</Table.Th>
-              <Table.Th>Статус</Table.Th>
-              <Table.Th>Термін оплати</Table.Th>
-              <Table.Th>Створено</Table.Th>
-              <Table.Th>Оплата</Table.Th>
-              <Table.Th>Дії</Table.Th>
+              <Table.Th>РџРѕРґС–я / орг</Table.Th>
+              <Table.Th>РЎСѓРјР°</Table.Th>
+              <Table.Th>РЎС‚Р°С‚СѓСЃ</Table.Th>
+              <Table.Th>РўРµСЂРјС–РЅ РѕРїР»Р°С‚Рё</Table.Th>
+              <Table.Th>РЎС‚РІРѕСЂРµРЅРѕ</Table.Th>
+              <Table.Th>РћРїР»Р°С‚Р°</Table.Th>
+              <Table.Th>Р”С–С—</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -166,7 +166,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm">{(o.amountExpectedCents / 100).toFixed(2)} грн</Text>
-                    {o.quantity > 1 && <Text size="xs" c="dimmed">× {o.quantity}</Text>}
+                    {o.quantity > 1 && <Text size="xs" c="dimmed">Г— {o.quantity}</Text>}
                   </Table.Td>
                   <Table.Td>
                     <Select
@@ -197,12 +197,12 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                   </Table.Td>
                   <Table.Td>
                     {o.payment ? (
-                      <Badge size="sm" color="green">Оплата {(o.payment.amountCents / 100).toFixed(0)} грн</Badge>
+                      <Badge size="sm" color="green">РћРїР»Р°С‚Р° {(o.payment.amountCents / 100).toFixed(0)} грн</Badge>
                     ) : (
-                      <Text size="xs" c="dimmed">—</Text>
+                      <Text size="xs" c="dimmed">вЂ”</Text>
                     )}
                     {o.ticketsCount > 0 && (
-                      <Text size="xs" c="dimmed">Квитків: {o.ticketsCount}</Text>
+                      <Text size="xs" c="dimmed">РљРІРёС‚РєС–РІ: {o.ticketsCount}</Text>
                     )}
                   </Table.Td>
                   <Table.Td>
@@ -213,7 +213,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                       loading={savingId === o.id}
                       onClick={() => handleSave(o)}
                     >
-                      Зберегти
+                      Р—Р±РµСЂРµРіС‚Рё
                     </Button>
                   </Table.Td>
                 </Table.Tr>
@@ -225,3 +225,4 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
     </Box>
   );
 }
+

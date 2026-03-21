@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+﻿import { cookies } from "next/headers";
 import crypto from "crypto";
 import { prisma } from "./prisma";
 
@@ -80,18 +80,18 @@ export async function verifyAuthCode(
   });
 
   if (!record) {
-    return { ok: false, error: "Код не знайдено або він уже недійсний." };
+    return { ok: false, error: "Код РЅРµ Р·РЅР°Р№РґРµРЅРѕ Р°Р±Рѕ РІС–РЅ СѓР¶Рµ РЅРµРґС–Р№СЃРЅРёР№." };
   }
   if (record.expiresAt < new Date()) {
-    return { ok: false, error: "Код уже прострочений. Запросіть новий." };
+    return { ok: false, error: "Код СѓР¶Рµ РїСЂРѕСЃС‚СЂРѕС‡РµРЅРёР№. Р—Р°РїСЂРѕСЃС–С‚ь РЅРѕРІРёР№." };
   }
   if (record.attempts >= MAX_ATTEMPTS) {
-    return { ok: false, error: "Вичерпано 3 спроби. Запросіть новий код." };
+    return { ok: false, error: "Р’РёС‡РµСЂРїР°РЅРѕ 3 СЃРїСЂРѕР±Рё. Р—Р°РїСЂРѕСЃС–С‚ь РЅРѕРІРёР№ РєРѕРґ." };
   }
 
   const codeHash = hashCode(code);
   if (record.codeHash.length !== codeHash.length) {
-    return { ok: false, error: "Невірний код." };
+    return { ok: false, error: "РќРµРІС–СЂРЅРёР№ РєРѕРґ." };
   }
 
   const match = crypto.timingSafeEqual(
@@ -104,7 +104,7 @@ export async function verifyAuthCode(
       where: { id: record.id },
       data: { attempts: record.attempts + 1 },
     });
-    return { ok: false, error: "Невірний код." };
+    return { ok: false, error: "РќРµРІС–СЂРЅРёР№ РєРѕРґ." };
   }
 
   await prisma.authCode.deleteMany({ where: { email: normalizedEmail } });
@@ -267,3 +267,4 @@ export async function revokeTicketierSessionAndClearCookie(): Promise<void> {
   }
   store.delete(TICKETIER_SESSION_COOKIE);
 }
+

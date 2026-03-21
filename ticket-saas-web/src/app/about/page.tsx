@@ -1,8 +1,8 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export const metadata = {
-  title: "Про нас | Lizard.red",
-  description: "Контакти та інформація про Lizard.red — квитки на події без переплат",
+  title: "Про РЅР°СЃ | Lizard.red",
+  description: "РљРѕРЅС‚Р°РєС‚Рё С‚Р° С–РЅС„РѕСЂРјР°С†С–я про Lizard.red вЂ” РєРІРёС‚РєРё РЅР° РїРѕРґС–С— Р±РµР· РїРµСЂРµРїР»Р°С‚",
 };
 
 export default function AboutPage() {
@@ -14,20 +14,20 @@ export default function AboutPage() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          На головну
+          РќР° РіРѕР»овну
         </Link>
 
         <header className="about-header">
-          <h1 className="about-title">Про нас</h1>
+          <h1 className="about-title">Про РЅР°СЃ</h1>
           <p className="about-lead">
-            Lizard.red — платформа для продажу квитків на події. Купуй онлайн, швидко та безпечно.
+            Lizard.red вЂ” РїР»Р°С‚С„РѕСЂРјР° РґР»я РїСЂРѕРґР°Р¶Сѓ РєРІРёС‚РєС–РІ РЅР° РїРѕРґС–С—. РљСѓРїСѓР№ РѕРЅР»Р°Р№РЅ, С€РІРёРґРєРѕ С‚Р° Р±РµР·РїРµС‡РЅРѕ.
           </p>
         </header>
 
         <section className="about-section">
-          <h2 className="about-section-title">Контакти</h2>
+          <h2 className="about-section-title">РљРѕРЅС‚Р°РєС‚Рё</h2>
           <p className="about-text">
-            Пиши нам з будь-яких питань: замовлення квитків, співпраця, технічні питання.
+            РџРёС€Рё РЅР°Рј Р· Р±удь-СЏРєРёС… РїРёС‚Р°нь: Р·Р°РјРѕРІР»Рµння РєРІРёС‚РєС–РІ, СЃРїС–РІРїСЂР°С†я, С‚РµС…РЅС–С‡РЅС– РїРёС‚Р°ння.
           </p>
           <a href="mailto:hello@lizard.red" className="about-email">
             hello@lizard.red
@@ -35,7 +35,7 @@ export default function AboutPage() {
         </section>
 
         <section className="about-section">
-          <h2 className="about-section-title">Ми в соцмережах</h2>
+          <h2 className="about-section-title">Ми РІ СЃРѕС†РјРµСЂРµР¶Р°С…</h2>
           <div className="about-social">
             <a href="https://www.instagram.com/lizard.red.ua" target="_blank" rel="noopener noreferrer" className="about-social-link" aria-label="Instagram">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -49,12 +49,12 @@ export default function AboutPage() {
         </section>
 
         <section className="about-section">
-          <h2 className="about-section-title">Як це працює</h2>
+          <h2 className="about-section-title">РЇРє С†Рµ РїСЂР°С†СЋС”</h2>
           <ul className="about-list">
-            <li>Обирай подію на <Link href="/">афіші</Link> та натискай «Квитки».</li>
-            <li>Вкажи email — на нього надійде посилання на оплату та квиток після оплати.</li>
-            <li>Оплачуй через Monobank (банка організатора). Без комісій та переплат.</li>
-            <li>Квиток з QR-кодом зʼявиться у листі та в розділі <Link href="/my-tickets">Мої квитки</Link> після входу.</li>
+            <li>РћР±РёСЂР°Р№ РїРѕРґС–СЋ РЅР° <Link href="/">Р°С„С–С€С–</Link> С‚Р° РЅР°С‚РёСЃРєР°Р№ В«РљРІРёС‚РєРёВ».</li>
+            <li>Р’РєР°Р¶Рё email вЂ” РЅР° нього РЅР°РґС–Р№РґРµ РїРѕСЃРёР»Р°ння РЅР° РѕРїР»Р°С‚Сѓ С‚Р° РєРІРёС‚РѕРє РїС–СЃР»я РѕРїР»Р°С‚Рё.</li>
+            <li>РћРїР»Р°С‡СѓР№ С‡РµСЂРµР· Monobank (Р±Р°РЅРєР° РѕСЂРіР°РЅС–Р·Р°С‚РѕСЂР°). Р‘РµР· РєРѕРјС–СЃС–Р№ С‚Р° РїРµСЂРµРїР»Р°С‚.</li>
+            <li>РљРІРёС‚РѕРє Р· QR-РєРѕРґРѕРј Р·КјСЏРІРёС‚ься Сѓ Р»РёСЃС‚С– С‚Р° РІ СЂРѕР·РґС–Р»С– <Link href="/my-tickets">РњРѕС— РєРІРёС‚РєРё</Link> РїС–СЃР»я РІС…оду.</li>
           </ul>
         </section>
       </div>
@@ -62,3 +62,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

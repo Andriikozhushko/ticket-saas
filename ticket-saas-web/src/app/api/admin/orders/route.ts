@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-/** Список усіх замовлень (тільки повний адмін). */
+/** Список СѓСЃС–С… Р·Р°РјРѕРІР»Рµнь (С‚С–Р»ьки РїРѕРІРЅРёР№ Р°РґРјС–РЅ). */
 export async function GET() {
   const session = await getSessionFromCookie();
   if (!session?.isAdmin) {
@@ -35,3 +35,4 @@ export async function GET() {
     }))
   );
 }
+

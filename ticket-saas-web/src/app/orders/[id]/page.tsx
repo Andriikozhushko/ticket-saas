@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { headers } from "next/headers";
 import { Box, Button, Card, Stack, Text, Title } from "@mantine/core";
 import RefreshOrderButton from "./refresh-order-button";
@@ -52,18 +52,18 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
   let statusBg: string;
   let statusBorder: string;
   if (isAwaiting) {
-    statusLabel = "Очікує оплати";
-    instruction = "Оплатіть вказану суму кнопкою нижче. Після оплати квиток з’явиться на цій сторінці.";
+    statusLabel = "РћС‡С–РєСѓС” РѕРїР»Р°С‚Рё";
+    instruction = "РћРїР»Р°С‚С–С‚ь РІРєР°Р·Р°ну суму кнопкою РЅРёР¶С‡Рµ. РџС–СЃР»я РѕРїР»Р°С‚Рё РєРІРёС‚РѕРє Р·вЂ™СЏРІРёС‚ься РЅР° С†С–Р№ СЃС‚РѕСЂС–РЅС†С–.";
     statusBg = "rgba(239,68,68,0.12)";
     statusBorder = "rgba(239,68,68,0.35)";
   } else if (isPaid) {
-    statusLabel = "Оплачено";
-    instruction = "Оплачено. Квиток доступний нижче та в розділі «Мої квитки» після входу.";
+    statusLabel = "РћРїР»Р°С‡РµРЅРѕ";
+    instruction = "РћРїР»Р°С‡РµРЅРѕ. РљРІРёС‚РѕРє РґРѕСЃС‚СѓРїРЅРёР№ РЅРёР¶С‡Рµ С‚Р° РІ СЂРѕР·РґС–Р»С– В«РњРѕС— РєРІРёС‚РєРёВ» РїС–СЃР»я РІС…оду.";
     statusBg = "rgba(34,197,94,0.12)";
     statusBorder = "rgba(34,197,94,0.35)";
   } else {
-    statusLabel = "Час вийшов";
-    instruction = "Час на оплату минув.";
+    statusLabel = "Р§Р°СЃ РІРёР№С€РѕРІ";
+    instruction = "Р§Р°СЃ РЅР° РѕРїР»Р°С‚Сѓ минув.";
     statusBg = "rgba(239,68,68,0.12)";
     statusBorder = "rgba(239,68,68,0.35)";
   }
@@ -95,7 +95,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
               textDecoration: "none",
             }}
           >
-            ← На головну
+            в†ђ РќР° РіРѕР»овну
           </Link>
         </Box>
 
@@ -113,13 +113,13 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
         >
           <Stack gap="lg">
             <Box style={{ textAlign: "center" }}>
-              <Text size="xs" fw={700} tt="uppercase" c="dimmed" mb={8} style={{ letterSpacing: "0.05em" }}>Сума до сплати</Text>
+              <Text size="xs" fw={700} tt="uppercase" c="dimmed" mb={8} style={{ letterSpacing: "0.05em" }}>РЎСѓРјР° РґРѕ СЃРїР»Р°С‚Рё</Text>
               {order.amountHuman != null ? (
                 <Box style={{ display: "flex", justifyContent: "center" }}>
                   <CopyAmountButton amountHuman={order.amountHuman} currency="UAH" />
                 </Box>
               ) : (
-                <Title order={2} style={{ margin: 0, fontWeight: 800, color: "var(--text)" }}>—</Title>
+                <Title order={2} style={{ margin: 0, fontWeight: 800, color: "var(--text)" }}>вЂ”</Title>
               )}
             </Box>
 
@@ -162,10 +162,10 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                       boxShadow: "var(--shadow-glow), 0 4px 24px rgba(239,68,68,0.35)",
                     }}
                   >
-                    Оплатити
+                    РћРїР»Р°С‚РёС‚Рё
                   </Button>
                 ) : (
-                  <Text size="sm" c="dimmed">Посилання на оплату тимчасово недоступне. Звʼяжіться з організатором.</Text>
+                  <Text size="sm" c="dimmed">РџРѕСЃРёР»Р°ння РЅР° РѕРїР»Р°С‚Сѓ С‚РёРјС‡Р°сово РЅРµРґРѕСЃС‚СѓРїРЅРµ. Р—РІКјСЏР¶С–С‚ься Р· РѕСЂРіР°РЅС–Р·Р°С‚ором.</Text>
                 )}
                 <RefreshOrderButton orderId={id} />
               </Stack>
@@ -177,7 +177,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
             return (
               <Box pt="md" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", width: "100%", textAlign: "center" }}>
                 <Text size="xs" fw={600} c="dimmed" mb="md" style={{ letterSpacing: "0.05em" }}>
-                  Квитки для входу {tickets.length > 1 ? `(${tickets.length} шт.)` : ""}
+                  РљРІРёС‚РєРё РґР»я РІС…оду {tickets.length > 1 ? `(${tickets.length} С€С‚.)` : ""}
                 </Text>
                 <Box style={{ display: "flex", flexWrap: "wrap", gap: 20, justifyContent: "center" }}>
                   {tickets.map((ticket, i) => (
@@ -191,12 +191,12 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                       }}
                     >
                       {tickets.length > 1 && (
-                        <Text size="xs" fw={600} c="dimmed" mb="xs" style={{ color: "#374151" }}>Квиток {i + 1}</Text>
+                        <Text size="xs" fw={600} c="dimmed" mb="xs" style={{ color: "#374151" }}>РљРІРёС‚РѕРє {i + 1}</Text>
                       )}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={buildQrImageUrl(origin, `${origin}/api/public/tickets/verify/${ticket.id}`, 220)}
-                        alt={tickets.length > 1 ? `QR ${i + 1}` : "QR квитка"}
+                        alt={tickets.length > 1 ? `QR ${i + 1}` : "QR РєРІРёС‚РєР°"}
                         width={220}
                         height={220}
                         style={{ display: "block", borderRadius: 10 }}
@@ -204,7 +204,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                     </Box>
                   ))}
                 </Box>
-                <Text size="xs" c="dimmed" mt="xs">Покажіть QR на вході на подію</Text>
+                <Text size="xs" c="dimmed" mt="xs">РџРѕРєР°Р¶С–С‚ь QR РЅР° РІС…РѕРґС– РЅР° РїРѕРґС–СЋ</Text>
               </Box>
             );
           })()}
@@ -214,3 +214,4 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
     </Box>
   );
 }
+

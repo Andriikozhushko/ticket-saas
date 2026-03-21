@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,16 +23,17 @@ export default function OrderErrorState() {
             marginBottom: 24,
           }}
         >
-          ← На головну
+          в†ђ РќР° РіРѕР»овну
         </Link>
         <Card withBorder padding="xl" radius="lg" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(18,8,8,0.72)", backdropFilter: "blur(16px)" }}>
-          <Title order={2} mb="xs">Замовлення не знайдено</Title>
-          <Text size="sm" c="dimmed" mb="md">Перевірте посилання або спробуйте пізніше.</Text>
+          <Title order={2} mb="xs">Р—Р°РјРѕРІР»Рµння РЅРµ Р·РЅР°Р№РґРµРЅРѕ</Title>
+          <Text size="sm" c="dimmed" mb="md">РџРµСЂРµРІС–СЂС‚Рµ РїРѕСЃРёР»Р°ння Р°Р±Рѕ СЃРїСЂРѕР±СѓР№С‚Рµ РїС–Р·РЅС–С€Рµ.</Text>
           <Button variant="light" size="sm" onClick={() => router.refresh()}>
-            Повторити
+            РџРѕРІС‚РѕСЂРёС‚Рё
           </Button>
         </Card>
       </Box>
     </Box>
   );
 }
+

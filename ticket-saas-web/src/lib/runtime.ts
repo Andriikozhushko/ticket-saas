@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+﻿import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 
 type DependencyStatus = "ok" | "degraded" | "missing_config";
@@ -45,10 +45,10 @@ export function getMonobankHealth(): { status: DependencyStatus; detail: string 
 
 export function formatRouteError(error: unknown, fallbackMessage: string): { status: number; message: string } {
   if (error instanceof Prisma.PrismaClientInitializationError) {
-    return { status: 503, message: "Сервіс бази даних тимчасово недоступний. Спробуйте ще раз." };
+    return { status: 503, message: "РЎРµСЂРІС–СЃ Р±Р°Р·Рё РґР°РЅРёС… С‚РёРјС‡Р°сово РЅРµРґРѕСЃС‚СѓРїРЅРёР№. РЎРїСЂРѕР±СѓР№С‚Рµ С‰Рµ СЂР°Р·." };
   }
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    return { status: 500, message: `${fallbackMessage} Код помилки Prisma: ${error.code}.` };
+    return { status: 500, message: `${fallbackMessage} Код РїРѕРјРёР»РєРё Prisma: ${error.code}.` };
   }
   if (error instanceof Error) {
     return {
@@ -58,3 +58,4 @@ export function formatRouteError(error: unknown, fallbackMessage: string): { sta
   }
   return { status: 500, message: fallbackMessage };
 }
+

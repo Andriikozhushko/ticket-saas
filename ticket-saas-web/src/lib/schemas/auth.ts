@@ -1,6 +1,6 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 
-const emailSchema = z.string().trim().email("Невірний формат email.");
+const emailSchema = z.string().trim().email("РќРµРІС–СЂРЅРёР№ С„РѕСЂРјР°С‚ email.");
 
 export const sendCodeBodySchema = z.object({
   email: emailSchema,
@@ -9,8 +9,9 @@ export const sendCodeBodySchema = z.object({
 
 export const verifyBodySchema = z.object({
   email: emailSchema,
-  code: z.string().trim().min(1, "Вкажіть код."),
+  code: z.string().trim().min(1, "Р’РєР°Р¶С–С‚ь РєРѕРґ."),
 });
 
 export type SendCodeBody = z.infer<typeof sendCodeBodySchema>;
 export type VerifyBody = z.infer<typeof verifyBodySchema>;
+

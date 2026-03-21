@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getSessionFromCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -98,7 +98,7 @@ export async function PATCH(
     });
     return NextResponse.json(updated);
   } catch {
-    return NextResponse.json({ error: "Помилка оновлення" }, { status: 500 });
+    return NextResponse.json({ error: "РџРѕРјРёР»РєР° РѕРЅРѕРІР»Рµння" }, { status: 500 });
   }
 }
 
@@ -134,6 +134,7 @@ export async function DELETE(
     await prisma.$transaction(tx);
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ error: "Помилка видалення" }, { status: 500 });
+    return NextResponse.json({ error: "РџРѕРјРёР»РєР° РІРёРґР°Р»Рµння" }, { status: 500 });
   }
 }
+

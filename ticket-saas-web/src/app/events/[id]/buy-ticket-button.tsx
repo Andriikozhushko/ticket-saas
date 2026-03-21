@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Button, Modal, TextInput, Stack, Text, Select } from "@mantine/core";
@@ -26,7 +26,7 @@ export default function BuyTicketButton({
   const emailToSend = email.trim();
   const handleSubmit = async () => {
     if (!emailToSend) {
-      setError("Вкажіть email");
+      setError("Р’РєР°Р¶С–С‚ь email");
       return;
     }
     setError("");
@@ -41,7 +41,7 @@ export default function BuyTicketButton({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError((data as { error?: string }).error ?? "Помилка. Спробуйте пізніше.");
+        setError((data as { error?: string }).error ?? "РџРѕРјРёР»РєР°. РЎРїСЂРѕР±СѓР№С‚Рµ РїС–Р·РЅС–С€Рµ.");
         return;
       }
       const orderId = (data as { orderId?: string }).orderId;
@@ -49,10 +49,10 @@ export default function BuyTicketButton({
         setOpen(false);
         window.location.href = `/orders/${orderId}`;
       } else {
-        setError("Невірна відповідь сервера");
+        setError("РќРµРІС–СЂРЅР° РІС–РґРїРѕРІС–дь СЃРµСЂРІРµСЂР°");
       }
     } catch {
-      setError("Сервер недоступний. Спробуйте пізніше.");
+      setError("РЎРµСЂРІРµСЂ РЅРµРґРѕСЃС‚СѓРїРЅРёР№. РЎРїСЂРѕР±СѓР№С‚Рµ РїС–Р·РЅС–С€Рµ.");
     } finally {
       setLoading(false);
     }
@@ -84,12 +84,12 @@ export default function BuyTicketButton({
           boxShadow: "var(--shadow-glow), 0 6px 32px rgba(239,68,68,0.4)",
         }}
       >
-        Купити квиток
+        РљСѓРїРёС‚Рё РєРІРёС‚РѕРє
       </Button>
       <Modal
         opened={open}
         onClose={() => setOpen(false)}
-        title="Купити квиток"
+        title="РљСѓРїРёС‚Рё РєРІРёС‚РѕРє"
         centered
         styles={{
           header: { borderBottom: "1px solid var(--border)" },
@@ -100,19 +100,19 @@ export default function BuyTicketButton({
           {error && <Text size="sm" c="red">{error}</Text>}
           {ticketTypes.length > 1 && (
             <Select
-              label="Вид квитка"
-              data={ticketTypes.map((t) => ({ value: t.id, label: `${t.name} — ${(t.priceCents / 100).toFixed(0)} грн` }))}
+              label="Р’РёРґ РєРІРёС‚РєР°"
+              data={ticketTypes.map((t) => ({ value: t.id, label: `${t.name} вЂ” ${(t.priceCents / 100).toFixed(0)} грн` }))}
               value={ticketTypeId}
               onChange={(v) => setTicketTypeId(v)}
             />
           )}
           {email ? (
             <Text size="sm" c="dimmed">
-              Квиток надішлемо на <strong>{email}</strong>
+              РљРІРёС‚РѕРє РЅР°РґС–С€Р»РµРјРѕ РЅР° <strong>{email}</strong>
             </Text>
           ) : (
             <TextInput
-              label="Email для квитка"
+              label="Email РґР»я РєРІРёС‚РєР°"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.currentTarget.value)}
@@ -121,10 +121,11 @@ export default function BuyTicketButton({
             />
           )}
           <Button onClick={handleSubmit} loading={loading} color="blue" size="md" style={{ fontWeight: 600 }} disabled={!email.trim()}>
-            Створити замовлення
+            РЎС‚РІРѕСЂРёС‚Рё Р·Р°РјРѕРІР»Рµння
           </Button>
         </Stack>
       </Modal>
     </>
   );
 }
+

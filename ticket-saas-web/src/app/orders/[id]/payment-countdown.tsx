@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -53,7 +53,7 @@ export default function PaymentCountdown({ expiresAtIso }: Props) {
         }}
       >
         <Text size="sm" fw={600} style={{ color: "var(--red)" }}>
-          Час на оплату вийшов
+          Р§Р°СЃ РЅР° РѕРїР»Р°С‚Сѓ РІРёР№С€РѕРІ
         </Text>
       </Box>
     );
@@ -75,7 +75,7 @@ export default function PaymentCountdown({ expiresAtIso }: Props) {
     >
       <Box style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
         <Text size="xs" fw={600} c="dimmed" style={{ letterSpacing: "0.1em", textTransform: "uppercase" }}>
-          Залишилось до оплати
+          Р—Р°Р»РёС€РёР»ось РґРѕ РѕРїР»Р°С‚Рё
         </Text>
         <Box style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
           <Text
@@ -107,10 +107,10 @@ export default function PaymentCountdown({ expiresAtIso }: Props) {
           </Text>
         </Box>
         <Text size="xs" c="dimmed" style={{ letterSpacing: "0.04em" }}>
-          хв · сек
+          С…РІ В· СЃРµРє
         </Text>
       </Box>
-      {/* Лінійний прогрес-бар внизу */}
+      {/* Р›С–РЅС–Р№РЅРёР№ РїСЂРѕРіСЂРµСЃ-Р±Р°СЂ РІРЅРёР·Сѓ */}
       <Box
         style={{
           position: "absolute",
@@ -136,3 +136,4 @@ export default function PaymentCountdown({ expiresAtIso }: Props) {
     </Box>
   );
 }
+

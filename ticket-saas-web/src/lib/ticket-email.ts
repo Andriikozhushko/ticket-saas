@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/brevo";
 import { buildQrImageUrl } from "@/lib/qr";
 
@@ -16,27 +16,27 @@ function buildEmailCopy(reason: TicketEmailReason, eventTitle: string, myTickets
   switch (reason) {
     case "gift":
       return {
-        subject: `Вам подарували квиток на подію «${eventTitle}»`,
-        htmlIntro: `Вам подарували квиток(и) на подію <strong>${eventTitle}</strong>.`,
-        text: `Вам подарували квиток(и) на подію «${eventTitle}». Переглянути: ${myTicketsUrl}`,
+        subject: `Р’Р°Рј РїРѕРґР°СЂСѓРІР°Р»Рё РєРІРёС‚РѕРє РЅР° РїРѕРґС–СЋ В«${eventTitle}В»`,
+        htmlIntro: `Р’Р°Рј РїРѕРґР°СЂСѓРІР°Р»Рё РєРІРёС‚РѕРє(Рё) РЅР° РїРѕРґС–СЋ <strong>${eventTitle}</strong>.`,
+        text: `Р’Р°Рј РїРѕРґР°СЂСѓРІР°Р»Рё РєРІРёС‚РѕРє(Рё) РЅР° РїРѕРґС–СЋ В«${eventTitle}В». РџРµСЂРµРіР»СЏРЅСѓС‚Рё: ${myTicketsUrl}`,
       };
     case "issuance":
       return {
-        subject: `Вам видано квиток на подію «${eventTitle}»`,
-        htmlIntro: `Вам видано квиток(и) на подію <strong>${eventTitle}</strong>.`,
-        text: `Вам видано квиток(и) на подію «${eventTitle}». Переглянути: ${myTicketsUrl}`,
+        subject: `Р’Р°Рј РІРёРґР°РЅРѕ РєРІРёС‚РѕРє РЅР° РїРѕРґС–СЋ В«${eventTitle}В»`,
+        htmlIntro: `Р’Р°Рј РІРёРґР°РЅРѕ РєРІРёС‚РѕРє(Рё) РЅР° РїРѕРґС–СЋ <strong>${eventTitle}</strong>.`,
+        text: `Р’Р°Рј РІРёРґР°РЅРѕ РєРІРёС‚РѕРє(Рё) РЅР° РїРѕРґС–СЋ В«${eventTitle}В». РџРµСЂРµРіР»СЏРЅСѓС‚Рё: ${myTicketsUrl}`,
       };
     case "purchase":
       return {
-        subject: `Ваші квитки на подію «${eventTitle}»`,
-        htmlIntro: `Ваші квитки на подію <strong>${eventTitle}</strong> готові.`,
-        text: `Ваші квитки на подію «${eventTitle}» готові. Переглянути: ${myTicketsUrl}`,
+        subject: `Р’Р°С€С– РєРІРёС‚РєРё РЅР° РїРѕРґС–СЋ В«${eventTitle}В»`,
+        htmlIntro: `Р’Р°С€С– РєРІРёС‚РєРё РЅР° РїРѕРґС–СЋ <strong>${eventTitle}</strong> РіРѕС‚РѕРІС–.`,
+        text: `Р’Р°С€С– РєРІРёС‚РєРё РЅР° РїРѕРґС–СЋ В«${eventTitle}В» РіРѕС‚РѕРІС–. РџРµСЂРµРіР»СЏРЅСѓС‚Рё: ${myTicketsUrl}`,
       };
     default:
       return {
-        subject: `Ваш квиток — ${eventTitle}`,
-        htmlIntro: `Оплату отримано. Ваш квиток на подію <strong>${eventTitle}</strong> готовий.`,
-        text: `Оплату отримано. Квиток(и) на подію «${eventTitle}» готові. Переглянути: ${myTicketsUrl}`,
+        subject: `Р’Р°С€ РєРІРёС‚РѕРє вЂ” ${eventTitle}`,
+        htmlIntro: `РћРїР»Р°С‚Сѓ РѕС‚СЂРёРјР°РЅРѕ. Р’Р°С€ РєРІРёС‚РѕРє РЅР° РїРѕРґС–СЋ <strong>${eventTitle}</strong> РіРѕС‚РѕРІРёР№.`,
+        text: `РћРїР»Р°С‚Сѓ РѕС‚СЂРёРјР°РЅРѕ. РљРІРёС‚РѕРє(Рё) РЅР° РїРѕРґС–СЋ В«${eventTitle}В» РіРѕС‚РѕРІС–. РџРµСЂРµРіР»СЏРЅСѓС‚Рё: ${myTicketsUrl}`,
       };
   }
 }
@@ -51,7 +51,7 @@ export async function sendTicketsEmail(orderId: string, reason: TicketEmailReaso
     return;
   }
 
-  const eventTitle = order.event?.title ?? "Подія";
+  const eventTitle = order.event?.title ?? "РџРѕРґС–я";
   const myTicketsUrl = `${baseUrl}/my-tickets`;
   const qrSize = 240;
   const qrImages = order.tickets
@@ -61,7 +61,7 @@ export async function sendTicketsEmail(orderId: string, reason: TicketEmailReaso
       return `<div style="margin:16px 0;">
         <img
           src="${qrUrl}"
-          alt="QR-код квитка"
+          alt="QR-РєРѕРґ РєРІРёС‚РєР°"
           width="${qrSize}"
           height="${qrSize}"
           style="display:block;width:${qrSize}px;height:${qrSize}px;border-radius:12px;background:#ffffff;padding:8px;"
@@ -73,9 +73,9 @@ export async function sendTicketsEmail(orderId: string, reason: TicketEmailReaso
   const copy = buildEmailCopy(reason, eventTitle, myTicketsUrl);
   const htmlContent = `
     <p>${copy.htmlIntro}</p>
-    <p>QR-коди для входу:</p>
+    <p>QR-РєРѕРґРё РґР»я РІС…оду:</p>
     ${qrImages}
-    <p><a href="${myTicketsUrl}">Переглянути мої квитки</a> (увійдіть з email ${order.buyerEmail}).</p>
+    <p><a href="${myTicketsUrl}">РџРµСЂРµРіР»СЏРЅСѓС‚Рё РјРѕС— РєРІРёС‚РєРё</a> (СѓРІС–Р№РґС–С‚ь Р· email ${order.buyerEmail}).</p>
   `;
 
   await sendEmail({
@@ -85,3 +85,4 @@ export async function sendTicketsEmail(orderId: string, reason: TicketEmailReaso
     htmlContent,
   });
 }
+

@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+﻿import { headers } from "next/headers";
 import Link from "next/link";
 import { Box, Card, Stack, Text, Title, Group } from "@mantine/core";
 import { getSessionFromCookie } from "@/lib/auth";
@@ -49,11 +49,11 @@ export default async function MyTicketsPage() {
   if (!session?.email) {
     return (
       <Stack gap="xl">
-        <Title order={1} style={{ fontWeight: 800 }}>Мої квитки</Title>
+        <Title order={1} style={{ fontWeight: 800 }}>РњРѕС— РєРІРёС‚РєРё</Title>
         <Card withBorder padding="xl" radius="lg" style={{ borderColor: "var(--border)", background: "var(--gradient-card)" }}>
-          <Text c="dimmed" ta="center">Увійдіть, щоб переглянути свої квитки.</Text>
+          <Text c="dimmed" ta="center">РЈРІС–Р№РґС–С‚ь, С‰РѕР± РїРµСЂРµРіР»СЏРЅСѓС‚Рё СЃРІРѕС— РєРІРёС‚РєРё.</Text>
           <Text size="sm" c="dimmed" ta="center" mt="sm">
-            <Link href="/" style={{ color: "var(--accent)", textDecoration: "underline", fontWeight: 600 }}>На головну</Link>
+            <Link href="/" style={{ color: "var(--accent)", textDecoration: "underline", fontWeight: 600 }}>РќР° РіРѕР»овну</Link>
           </Text>
         </Card>
       </Stack>
@@ -64,15 +64,15 @@ export default async function MyTicketsPage() {
     <Box className="my-tickets-page" style={{ minHeight: "100%" }}>
       <Stack gap="xl" p="md" style={{ width: "100%", maxWidth: 960 }} mx="auto">
         <Box>
-          <Title order={1} mb="xs" style={{ fontWeight: 800 }}>Мої квитки</Title>
-          <Text size="sm" c="dimmed">Квитки, оплачені з {session.email}</Text>
+          <Title order={1} mb="xs" style={{ fontWeight: 800 }}>РњРѕС— РєРІРёС‚РєРё</Title>
+          <Text size="sm" c="dimmed">РљРІРёС‚РєРё, РѕРїР»Р°С‡РµРЅС– Р· {session.email}</Text>
         </Box>
 
         {orders.length === 0 ? (
           <Card withBorder padding="xl" radius="lg" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgb(18,18,24)" }}>
-            <Text c="dimmed" ta="center">У вас поки немає оплачених квитків.</Text>
+            <Text c="dimmed" ta="center">РЈ РІР°СЃ РїРѕРєРё РЅРµРјР°С” РѕРїР»Р°С‡РµРЅРёС… РєРІРёС‚РєС–РІ.</Text>
             <Text size="sm" c="dimmed" ta="center" mt="sm">
-              <Link href="/" style={{ color: "var(--accent)", textDecoration: "underline", fontWeight: 600 }}>Перейти до афіши</Link>
+              <Link href="/" style={{ color: "var(--accent)", textDecoration: "underline", fontWeight: 600 }}>РџРµСЂРµР№С‚Рё РґРѕ Р°С„С–С€Рё</Link>
             </Text>
           </Card>
         ) : (
@@ -89,9 +89,9 @@ export default async function MyTicketsPage() {
                   radius="lg"
                   style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgb(18,18,24)" }}
                 >
-                  {/* Блок події (дата, місце, час) — вище блоку квитків */}
+                  {/* Р‘Р»РѕРє РїРѕРґС–С— (РґР°С‚Р°, РјС–СЃС†Рµ, С‡Р°СЃ) вЂ” РІРёС‰Рµ Р±Р»оку РєРІРёС‚РєС–РІ */}
                   <Box mb="lg">
-                    <Text size="xs" fw={700} tt="uppercase" c="dimmed" mb="xs" style={{ letterSpacing: "0.05em" }}>Подія</Text>
+                    <Text size="xs" fw={700} tt="uppercase" c="dimmed" mb="xs" style={{ letterSpacing: "0.05em" }}>РџРѕРґС–я</Text>
                     <Title order={3} style={{ margin: 0, marginBottom: 12, fontWeight: 800 }}>
                       {event.title}
                     </Title>
@@ -131,7 +131,7 @@ export default async function MyTicketsPage() {
                         color: "rgba(255,255,255,0.95)",
                       }}
                     >
-                      Оплачено
+                      РћРїР»Р°С‡РµРЅРѕ
                     </Box>
                     <Box mt="sm">
                       <Link
@@ -143,14 +143,14 @@ export default async function MyTicketsPage() {
                           textDecoration: "underline",
                         }}
                       >
-                        Відкрити замовлення →
+                        Р’С–РґРєСЂРёС‚Рё Р·Р°РјРѕРІР»Рµння в†’
                       </Link>
                     </Box>
                   </Box>
 
-                  {/* Блок квитків (QR) — нижче; на вузьких екранах QR вміщується по ширині */}
+                  {/* Р‘Р»РѕРє РєРІРёС‚РєС–РІ (QR) вЂ” РЅРёР¶С‡Рµ; РЅР° РІСѓР·СЊРєРёС… РµРєСЂР°РЅР°С… QR РІРјС–С‰СѓС”С‚ься РїРѕ С€РёСЂРёРЅС– */}
                   <Box>
-                    <Text size="xs" fw={700} tt="uppercase" c="dimmed" mb="xs" style={{ letterSpacing: "0.05em" }}>Квитки</Text>
+                    <Text size="xs" fw={700} tt="uppercase" c="dimmed" mb="xs" style={{ letterSpacing: "0.05em" }}>РљРІРёС‚РєРё</Text>
                     {ticketList.length > 0 ? (
                       <Box style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
                         {ticketList.map((ticket, i) => {
@@ -171,12 +171,12 @@ export default async function MyTicketsPage() {
                               }}
                             >
                               {ticketList.length > 1 && (
-                                <Text size="xs" fw={600} c="dimmed" mb={4}>Квиток {i + 1}</Text>
+                                <Text size="xs" fw={600} c="dimmed" mb={4}>РљРІРёС‚РѕРє {i + 1}</Text>
                               )}
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={buildQrImageUrl(origin, verifyUrl, 200)}
-                                alt={ticketList.length > 1 ? `QR квитка ${i + 1}` : "QR квитка"}
+                                alt={ticketList.length > 1 ? `QR РєРІРёС‚РєР° ${i + 1}` : "QR РєРІРёС‚РєР°"}
                                 width={200}
                                 height={200}
                                 style={{
@@ -192,7 +192,7 @@ export default async function MyTicketsPage() {
                         })}
                       </Box>
                     ) : null}
-                    <Text size="xs" c="dimmed" mt="sm">Покажіть QR на вході на подію</Text>
+                    <Text size="xs" c="dimmed" mt="sm">РџРѕРєР°Р¶С–С‚ь QR РЅР° РІС…РѕРґС– РЅР° РїРѕРґС–СЋ</Text>
                   </Box>
                 </Card>
               );
@@ -203,3 +203,4 @@ export default async function MyTicketsPage() {
     </Box>
   );
 }
+

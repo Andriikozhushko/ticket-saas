@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { createAuthCode } from "@/lib/auth";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { checkLoginRateLimit, recordLoginAttempt, getClientIp } from "@/lib/rate-limit";
@@ -13,18 +13,18 @@ export async function POST(req: Request) {
     const parsed = sendCodeBodySchema.safeParse(raw);
 
     if (!parsed.success) {
-      const msg = parsed.error.issues[0]?.message ?? "Введіть коректний email.";
+      const msg = parsed.error.issues[0]?.message ?? "Р’РІРµРґС–С‚ь РєРѕСЂРµРєС‚РЅРёР№ email.";
       return NextResponse.json({ error: msg }, { status: 400 });
     }
 
     const { email, token } = parsed.data;
     if (!token?.trim() && process.env.NODE_ENV === "production") {
-      return NextResponse.json({ error: "Підтвердіть капчу." }, { status: 400 });
+      return NextResponse.json({ error: "РџС–РґС‚РІРµСЂРґС–С‚ь РєР°РїС‡Сѓ." }, { status: 400 });
     }
 
     const rate = checkLoginRateLimit(ip, email);
     if (!rate.allowed) {
-      return NextResponse.json({ error: rate.error ?? "Забагато спроб." }, { status: 429 });
+      return NextResponse.json({ error: rate.error ?? "Р—Р°Р±Р°РіР°С‚Рѕ СЃРїСЂРѕР±." }, { status: 429 });
     }
 
     const turnstile = await verifyTurnstile(token ?? "", ip);
@@ -33,8 +33,8 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error: isNotConfigured
-            ? "Капча не налаштована на сервері. Додайте TURNSTILE_SECRET_KEY у .env."
-            : "Перевірка капчі не пройшла.",
+            ? "РљР°РїС‡Р° РЅРµ РЅР°Р»Р°С€С‚РѕРІР°РЅР° РЅР° СЃРµСЂРІРµСЂС–. Р”РѕРґР°Р№С‚Рµ TURNSTILE_SECRET_KEY Сѓ .env."
+            : "РџРµСЂРµРІС–СЂРєР° РєР°РїС‡С– РЅРµ РїСЂРѕР№С€Р»Р°.",
         },
         { status: isNotConfigured ? 503 : 400 }
       );
@@ -45,14 +45,14 @@ export async function POST(req: Request) {
     const code = await createAuthCode(email);
     const sent = await sendEmail({
       to: email,
-      subject: "Код входу Lizard.red",
-      textContent: `Ваш код: ${code}. Діє 5 хвилин.`,
-      htmlContent: `<p>Ваш код входу: <strong>${code}</strong></p><p>Код дійсний 5 хвилин.</p>`,
+      subject: "Код РІС…оду Lizard.red",
+      textContent: `Р’Р°С€ РєРѕРґ: ${code}. Р”С–С” 5 С…РІРёР»РёРЅ.`,
+      htmlContent: `<p>Р’Р°С€ РєРѕРґ РІС…оду: <strong>${code}</strong></p><p>Код РґС–Р№СЃРЅРёР№ 5 С…РІРёР»РёРЅ.</p>`,
     });
 
     if (!sent.ok) {
       return NextResponse.json(
-        { error: "Не вдалося надіслати код. Спробуйте трохи пізніше." },
+        { error: "РќРµ РІРґР°Р»ося РЅР°РґС–СЃР»Р°С‚Рё РєРѕРґ. РЎРїСЂРѕР±СѓР№С‚Рµ С‚СЂРѕС…Рё РїС–Р·РЅС–С€Рµ." },
         { status: 500 }
       );
     }
@@ -60,7 +60,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[auth/send-code]", error);
-    const formatted = formatRouteError(error, "Помилка відправки коду.");
+    const formatted = formatRouteError(error, "РџРѕРјРёР»РєР° РІС–РґРїСЂР°РІРєРё коду.");
     return NextResponse.json({ error: formatted.message }, { status: formatted.status });
   }
 }
+

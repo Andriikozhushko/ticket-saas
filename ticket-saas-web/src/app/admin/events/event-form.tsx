@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -65,7 +65,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
   const [ticketRows, setTicketRows] = useState<TicketTypeRow[]>(
     event?.ticketTypes?.length
       ? event.ticketTypes.map((t) => ({ name: t.name, priceCents: String(t.priceCents / 100) }))
-      : [{ name: "Стандарт", priceCents: String((event?.priceCents ?? 10000) / 100) }]
+      : [{ name: "РЎС‚Р°РЅРґР°СЂС‚", priceCents: String((event?.priceCents ?? 10000) / 100) }]
   );
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [jars, setJars] = useState<Jar[]>([]);
@@ -108,27 +108,27 @@ export default function EventForm({ orgs, event }: EventFormProps) {
   const handleSubmit = async () => {
     setError("");
     if (!isEdit && (orgs.length === 0 || !orgId)) {
-      setError("Спочатку створіть організацію");
+      setError("РЎРїРѕС‡Р°С‚ку СЃС‚РІРѕСЂС–С‚ь РѕСЂРіР°РЅС–Р·Р°С†С–СЋ");
       return;
     }
     if (!title.trim()) {
-      setError("Введіть назву події");
+      setError("Р’РІРµРґС–С‚ь РЅР°Р·ву РїРѕРґС–С—");
       return;
     }
     if (!date || !time) {
-      setError("Вкажіть дату та час події");
+      setError("Р’РєР°Р¶С–С‚ь РґР°С‚Сѓ С‚Р° С‡Р°СЃ РїРѕРґС–С—");
       return;
     }
     if (!city.trim()) {
-      setError("Вкажіть місто");
+      setError("Р’РєР°Р¶С–С‚ь РјС–СЃС‚Рѕ");
       return;
     }
     if (!venue.trim()) {
-      setError("Вкажіть майданчик");
+      setError("Р’РєР°Р¶С–С‚ь РјР°Р№РґР°РЅС‡РёРє");
       return;
     }
     if (!description.trim()) {
-      setError("Вкажіть опис події");
+      setError("Р’РєР°Р¶С–С‚ь опис РїРѕРґС–С—");
       return;
     }
     const ticketTypes = ticketRows
@@ -138,22 +138,22 @@ export default function EventForm({ orgs, event }: EventFormProps) {
       }))
       .filter((t) => t.name && Number.isFinite(t.priceCents) && t.priceCents >= 0);
     if (ticketTypes.length === 0) {
-      setError("Додайте хоча б один вид квитка (назва та ціна)");
+      setError("Р”РѕРґР°Р№С‚Рµ С…РѕС‡Р° Р± РѕРґРёРЅ РІРёРґ РєРІРёС‚РєР° (РЅР°Р·РІР° С‚Р° С†С–РЅР°)");
       return;
     }
     if (!isEdit) {
       const selectedJar = jars.find((j) => j.id === jarId);
       if (!selectedJar) {
-        setError("Оберіть банку (Monobank) для прийому оплат за квитки");
+        setError("РћР±РµСЂС–С‚ь Р±Р°нку (Monobank) РґР»я РїСЂРёР№ому РѕРїР»Р°С‚ Р·Р° РєРІРёС‚РєРё");
         return;
       }
     }
     if (!isEdit && !posterFile) {
-      setError("Додайте фото для афіши (постер події)");
+      setError("Р”РѕРґР°Р№С‚Рµ С„РѕС‚Рѕ РґР»я Р°С„С–С€Рё (РїРѕСЃС‚РµСЂ РїРѕРґС–С—)");
       return;
     }
     if (posterFile && posterFile.size > POSTER_MAX_BYTES) {
-      setError(`Фото афіши: макс. ${POSTER_MAX_MB} МБ`);
+      setError(`Р¤РѕС‚Рѕ Р°С„С–С€Рё: РјР°кс. ${POSTER_MAX_MB} РњР‘`);
       return;
     }
     setLoading(true);
@@ -173,14 +173,14 @@ export default function EventForm({ orgs, event }: EventFormProps) {
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error((data as { error?: string }).error ?? "Помилка");
+          throw new Error((data as { error?: string }).error ?? "РџРѕРјРёР»РєР°");
         }
         router.push("/admin/events");
         router.refresh();
       } else {
         const selectedJar = jars.find((j) => j.id === jarId);
         if (!selectedJar) {
-          setError("Оберіть банку (Monobank) для прийому оплат");
+          setError("РћР±РµСЂС–С‚ь Р±Р°нку (Monobank) РґР»я РїСЂРёР№ому РѕРїР»Р°С‚");
           return;
         }
         const res = await fetch("/api/admin/events", {
@@ -199,7 +199,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
           }),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error((data as { error?: string }).error ?? "Помилка");
+        if (!res.ok) throw new Error((data as { error?: string }).error ?? "РџРѕРјРёР»РєР°");
         const newId = (data as { id?: string }).id;
         if (posterFile && newId) {
           const fd = new FormData();
@@ -207,14 +207,14 @@ export default function EventForm({ orgs, event }: EventFormProps) {
           const posterRes = await fetch(`/api/admin/events/${newId}/poster`, { method: "POST", body: fd });
           if (!posterRes.ok) {
             const errData = await posterRes.json().catch(() => ({}));
-            throw new Error((errData as { error?: string }).error ?? "Подію створено, але не вдалося завантажити постер");
+            throw new Error((errData as { error?: string }).error ?? "РџРѕРґС–СЋ СЃС‚РІРѕСЂРµРЅРѕ, Р°Р»Рµ РЅРµ РІРґР°Р»ося Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РїРѕСЃС‚РµСЂ");
           }
         }
         router.push("/admin/events");
         router.refresh();
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Помилка");
+      setError(e instanceof Error ? e.message : "РџРѕРјРёР»РєР°");
     } finally {
       setLoading(false);
     }
@@ -223,9 +223,9 @@ export default function EventForm({ orgs, event }: EventFormProps) {
   return (
     <Stack gap="lg" style={{ width: "100%", minWidth: 0 }}>
       <Group justify="space-between" wrap="wrap" gap="sm">
-        <Title order={2}>{isEdit ? "Редагувати подію" : "Нова подія"}</Title>
+        <Title order={2}>{isEdit ? "Р РµРґР°РіСѓРІР°С‚Рё РїРѕРґС–СЋ" : "РќРѕРІР° РїРѕРґС–я"}</Title>
         <Button component={Link} href="/admin/events" variant="subtle" size="xs">
-          ← До списку
+          в†ђ Р”Рѕ списку
         </Button>
       </Group>
       {error && <Text c="red" size="sm">{error}</Text>}
@@ -235,11 +235,11 @@ export default function EventForm({ orgs, event }: EventFormProps) {
             <>
               {orgs.length === 0 ? (
                 <Text size="sm" c="dimmed" py="sm">
-                  Спочатку створіть організацію. Перейдіть на головну адмін-панелі та додайте організацію.
+                  РЎРїРѕС‡Р°С‚ку СЃС‚РІРѕСЂС–С‚ь РѕСЂРіР°РЅС–Р·Р°С†С–СЋ. РџРµСЂРµР№РґС–С‚ь РЅР° РіРѕР»овну Р°РґРјС–РЅ-РїР°РЅРµР»С– С‚Р° РґРѕРґР°Р№С‚Рµ РѕСЂРіР°РЅС–Р·Р°С†С–СЋ.
                 </Text>
               ) : (
                 <Select
-                  label="Організація"
+                  label="РћСЂРіР°РЅС–Р·Р°С†С–я"
                   data={orgs.map((o) => ({ value: o.id, label: o.name }))}
                   value={orgId}
                   onChange={(v) => setOrgId(v ?? "")}
@@ -248,39 +248,39 @@ export default function EventForm({ orgs, event }: EventFormProps) {
               )}
               {orgs.length > 0 && (
                 <Select
-                  label="Банка для оплати (Monobank)"
-                  placeholder={jarsLoading ? "Завантаження…" : jars.length === 0 ? "Спочатку підключіть Monobank для організації в адмін-панелі" : "Оберіть банку"}
+                  label="Р‘Р°РЅРєР° РґР»я РѕРїР»Р°С‚Рё (Monobank)"
+                  placeholder={jarsLoading ? "Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏвЂ¦" : jars.length === 0 ? "РЎРїРѕС‡Р°С‚ку РїС–РґРєР»СЋС‡С–С‚ь Monobank РґР»я РѕСЂРіР°РЅС–Р·Р°С†С–С— РІ Р°РґРјС–РЅ-РїР°РЅРµР»С–" : "РћР±РµСЂС–С‚ь Р±Р°нку"}
                   data={jars.map((j) => ({ value: j.id, label: j.title }))}
                   value={jarId ?? ""}
                   onChange={(v) => setJarId(v ?? null)}
                   required
                   disabled={jarsLoading || jars.length === 0}
-                  description="Оплати за квитки надходитимуть на обрану банку"
+                  description="РћРїР»Р°С‚Рё Р·Р° РєРІРёС‚РєРё РЅР°РґС…РѕРґРёС‚РёРјСѓС‚ь РЅР° РѕР±СЂР°ну Р±Р°нку"
                 />
               )}
             </>
           )}
-          <TextInput label="Назва події" value={title} onChange={(e) => setTitle(e.currentTarget.value)} placeholder="Концерт" required />
+          <TextInput label="РќР°Р·РІР° РїРѕРґС–С—" value={title} onChange={(e) => setTitle(e.currentTarget.value)} placeholder="РљРѕРЅС†РµСЂС‚" required />
           <Group grow wrap="wrap" style={{ alignItems: "flex-end" }}>
-            <TextInput type="date" label="Дата концерту" value={date} onChange={(e) => setDate(e.currentTarget.value)} required style={{ minWidth: 0, flex: "1 1 140px" }} />
-            <TextInput type="time" label="Час початку (Київ)" value={time} onChange={(e) => setTime(e.currentTarget.value)} required style={{ minWidth: 0, flex: "1 1 100px" }} />
+            <TextInput type="date" label="Р”Р°С‚Р° РєРѕРЅС†РµСЂС‚Сѓ" value={date} onChange={(e) => setDate(e.currentTarget.value)} required style={{ minWidth: 0, flex: "1 1 140px" }} />
+            <TextInput type="time" label="Р§Р°СЃ РїРѕС‡Р°С‚ку (РљРёС—РІ)" value={time} onChange={(e) => setTime(e.currentTarget.value)} required style={{ minWidth: 0, flex: "1 1 100px" }} />
           </Group>
-          <Text size="xs" c="dimmed">Час вказується за київським часом</Text>
-          <TextInput label="Місто" value={city} onChange={(e) => setCity(e.currentTarget.value)} placeholder="Київ" required />
-          <TextInput label="Майданчик" value={venue} onChange={(e) => setVenue(e.currentTarget.value)} placeholder="Назва залу" required />
-          <Textarea label="Опис події" value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder="Короткий опис події для відображення на сторінці" minRows={8} autosize maxRows={20} style={{ minWidth: "100%" }} required />
+          <Text size="xs" c="dimmed">Р§Р°СЃ РІРєР°Р·СѓС”С‚ься Р·Р° РєРёС—вським С‡Р°сом</Text>
+          <TextInput label="РњС–СЃС‚Рѕ" value={city} onChange={(e) => setCity(e.currentTarget.value)} placeholder="РљРёС—РІ" required />
+          <TextInput label="РњР°Р№РґР°РЅС‡РёРє" value={venue} onChange={(e) => setVenue(e.currentTarget.value)} placeholder="РќР°Р·РІР° Р·Р°Р»Сѓ" required />
+          <Textarea label="Опис РїРѕРґС–С—" value={description} onChange={(e) => setDescription(e.currentTarget.value)} placeholder="РљРѕСЂРѕС‚РєРёР№ опис РїРѕРґС–С— РґР»я РІС–РґРѕР±СЂР°Р¶Рµння РЅР° СЃС‚РѕСЂС–РЅС†С–" minRows={8} autosize maxRows={20} style={{ minWidth: "100%" }} required />
           <Box>
             <Group justify="space-between" mb="xs">
-              <Text size="sm" fw={500}>Види квитків</Text>
+              <Text size="sm" fw={500}>Р’РёРґРё РєРІРёС‚РєС–РІ</Text>
               <Button size="xs" variant="light" onClick={addTicketRow}>
-                + Додати вид квитка
+                + Р”РѕРґР°С‚Рё РІРёРґ РєРІРёС‚РєР°
               </Button>
             </Group>
             <Stack gap="xs">
               {ticketRows.map((row, i) => (
                 <Group key={i} gap="xs" wrap="wrap" align="flex-end">
                   <TextInput
-                    placeholder="напр. VIP, Платинум"
+                    placeholder="РЅР°пр. VIP, РџР»Р°С‚инум"
                     value={row.name}
                     onChange={(e) => updateTicketRow(i, "name", e.currentTarget.value)}
                     style={{ flex: "1 1 120px", minWidth: 0 }}
@@ -289,13 +289,13 @@ export default function EventForm({ orgs, event }: EventFormProps) {
                     type="number"
                     min={0}
                     step={0.01}
-                    placeholder="ціна грн"
+                    placeholder="С†С–РЅР° грн"
                     value={row.priceCents}
                     onChange={(e) => updateTicketRow(i, "priceCents", e.currentTarget.value)}
                     style={{ width: 100, flexShrink: 0 }}
                   />
-                  <Button size="xs" variant="subtle" color="red" onClick={() => removeTicketRow(i)} aria-label="Видалити">
-                    ×
+                  <Button size="xs" variant="subtle" color="red" onClick={() => removeTicketRow(i)} aria-label="Р’РёРґР°Р»РёС‚Рё">
+                    Г—
                   </Button>
                 </Group>
               ))}
@@ -303,8 +303,8 @@ export default function EventForm({ orgs, event }: EventFormProps) {
           </Box>
           {!isEdit && (
             <Box>
-              <Text size="sm" fw={600} mb="xs">Фото для афіші (постер)</Text>
-              <Text size="xs" c="dimmed" mb={4}>JPEG, PNG або WebP, макс. {POSTER_MAX_MB} МБ</Text>
+              <Text size="sm" fw={600} mb="xs">Р¤РѕС‚Рѕ РґР»я Р°С„С–С€С– (РїРѕСЃС‚РµСЂ)</Text>
+              <Text size="xs" c="dimmed" mb={4}>JPEG, PNG Р°Р±Рѕ WebP, РјР°кс. {POSTER_MAX_MB} РњР‘</Text>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -312,7 +312,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
                   const f = ev.target.files?.[0];
                   if (!f) { setPosterFile(null); return; }
                   if (f.size > POSTER_MAX_BYTES) {
-                    setError(`Фото афіші: макс. ${POSTER_MAX_MB} МБ`);
+                    setError(`Р¤РѕС‚Рѕ Р°С„С–С€С–: РјР°кс. ${POSTER_MAX_MB} РњР‘`);
                     setPosterFile(null);
                     ev.target.value = "";
                     return;
@@ -326,7 +326,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
           )}
           {isEdit && event && (
             <Box pt="md" style={{ borderTop: "1px solid var(--mantine-color-dark-4)" }}>
-              <Text size="sm" fw={600} mb="xs">Постер та фото організатора</Text>
+              <Text size="sm" fw={600} mb="xs">РџРѕСЃС‚РµСЂ С‚Р° С„РѕС‚Рѕ РѕСЂРіР°РЅС–Р·Р°С‚РѕСЂР°</Text>
               <Group gap="md">
                 {event.posterUrl && (
                   <Box style={{ width: 56, height: 72, borderRadius: 8, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)" }}>
@@ -335,7 +335,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
                   </Box>
                 )}
                 <Box>
-                  <Text size="xs" c="dimmed" mb={4}>Постер</Text>
+                  <Text size="xs" c="dimmed" mb={4}>РџРѕСЃС‚РµСЂ</Text>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -351,16 +351,16 @@ export default function EventForm({ orgs, event }: EventFormProps) {
                         const r = await fetch(`/api/admin/events/${event.id}/poster`, { method: "POST", body: fd });
                         const data = await r.json().catch(() => ({}));
                         if (r.ok) router.refresh();
-                        else setUploadError((data as { error?: string }).error ?? "Не вдалося завантажити постер");
+                        else setUploadError((data as { error?: string }).error ?? "РќРµ РІРґР°Р»ося Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РїРѕСЃС‚РµСЂ");
                       } catch {
-                        setUploadError("Не вдалося завантажити постер");
+                        setUploadError("РќРµ РІРґР°Р»ося Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РїРѕСЃС‚РµСЂ");
                       } finally {
                         setUploadLoading(null);
                         ev.target.value = "";
                       }
                     }}
                   />
-                  {uploadLoading === "poster" && <Text size="xs" c="dimmed" mt="xs">Завантаження…</Text>}
+                  {uploadLoading === "poster" && <Text size="xs" c="dimmed" mt="xs">Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏвЂ¦</Text>}
                 </Box>
                 {event.organizerPhotoUrl && (
                   <Box style={{ width: 48, height: 48, borderRadius: "50%", overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)" }}>
@@ -369,8 +369,8 @@ export default function EventForm({ orgs, event }: EventFormProps) {
                   </Box>
                 )}
                 <Box>
-                  <Text size="xs" c="dimmed" mb={4}>Фото організатора</Text>
-                  <Text size="xs" c="dimmed" mb={4} style={{ display: "block" }}>Завантажте один раз — відображатиметься на сторінці події</Text>
+                  <Text size="xs" c="dimmed" mb={4}>Р¤РѕС‚Рѕ РѕСЂРіР°РЅС–Р·Р°С‚РѕСЂР°</Text>
+                  <Text size="xs" c="dimmed" mb={4} style={{ display: "block" }}>Р—Р°РІР°РЅС‚Р°Р¶С‚Рµ РѕРґРёРЅ СЂР°Р· вЂ” РІС–РґРѕР±СЂР°Р¶Р°С‚РёРјРµС‚ься РЅР° СЃС‚РѕСЂС–РЅС†С– РїРѕРґС–С—</Text>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -386,16 +386,16 @@ export default function EventForm({ orgs, event }: EventFormProps) {
                         const r = await fetch(`/api/admin/events/${event.id}/organizer-photo`, { method: "POST", body: fd });
                         const data = await r.json().catch(() => ({}));
                         if (r.ok) router.refresh();
-                        else setUploadError((data as { error?: string }).error ?? "Не вдалося завантажити фото");
+                        else setUploadError((data as { error?: string }).error ?? "РќРµ РІРґР°Р»ося Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё С„РѕС‚Рѕ");
                       } catch {
-                        setUploadError("Не вдалося завантажити фото");
+                        setUploadError("РќРµ РІРґР°Р»ося Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё С„РѕС‚Рѕ");
                       } finally {
                         setUploadLoading(null);
                         ev.target.value = "";
                       }
                     }}
                   />
-                  {uploadLoading === "organizer" && <Text size="xs" c="dimmed" mt="xs">Завантаження…</Text>}
+                  {uploadLoading === "organizer" && <Text size="xs" c="dimmed" mt="xs">Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏвЂ¦</Text>}
                 </Box>
               </Group>
               {uploadError && <Text size="xs" c="red" mt="xs">{uploadError}</Text>}
@@ -404,7 +404,7 @@ export default function EventForm({ orgs, event }: EventFormProps) {
 
           <Group>
             <Button onClick={handleSubmit} loading={loading}>
-              {isEdit ? "Зберегти" : "Створити подію"}
+              {isEdit ? "Р—Р±РµСЂРµРіС‚Рё" : "РЎС‚РІРѕСЂРёС‚Рё РїРѕРґС–СЋ"}
             </Button>
             {isEdit && event && (
               <DeleteEventButton eventId={event.id} eventTitle={event.title} redirectAfter="/admin/events" />
@@ -421,3 +421,4 @@ export default function EventForm({ orgs, event }: EventFormProps) {
     </Stack>
   );
 }
+

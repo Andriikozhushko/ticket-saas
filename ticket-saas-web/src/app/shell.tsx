@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -23,9 +23,9 @@ function ShellInner({ children, initialUser = null }: ShellProps) {
 
   const navLinks = (
     <>
-      <Link href="/" className={navLinkClass} onClick={close}>Афіша</Link>
-      <Link href="/my-tickets" className={navLinkClass} onClick={close}>Мої квитки</Link>
-      <Link href="/about" className={navLinkClass} onClick={close}>Про нас</Link>
+      <Link href="/" className={navLinkClass} onClick={close}>РђС„С–С€Р°</Link>
+      <Link href="/my-tickets" className={navLinkClass} onClick={close}>РњРѕС— РєРІРёС‚РєРё</Link>
+      <Link href="/about" className={navLinkClass} onClick={close}>Про РЅР°СЃ</Link>
       <AuthBlock initialUser={initialUser} />
     </>
   );
@@ -76,7 +76,7 @@ function ShellInner({ children, initialUser = null }: ShellProps) {
               {navLinks}
             </Group>
             <Box className="shell-nav-mobile">
-              <Burger opened={opened} onClick={toggle} size="sm" color="rgba(255,255,255,0.9)" aria-label="Меню" />
+              <Burger opened={opened} onClick={toggle} size="sm" color="rgba(255,255,255,0.9)" aria-label="РњРµню" />
             </Box>
           </Group>
         </Container>
@@ -93,7 +93,7 @@ function ShellInner({ children, initialUser = null }: ShellProps) {
           body: "shell-drawer-body",
           title: "shell-drawer-title",
         }}
-        title="Меню"
+        title="РњРµню"
         styles={{
           header: { borderBottom: "1px solid var(--border)" },
         }}
@@ -121,3 +121,4 @@ export default function Shell(props: ShellProps) {
     </AuthOpenProvider>
   );
 }
+
