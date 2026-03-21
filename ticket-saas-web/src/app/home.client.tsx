@@ -135,6 +135,7 @@ function EventCard({ e }: { e: EventVM }) {
     <Card
       withBorder
       padding={0}
+      className={`home-event-card${e.isFinished ? " home-event-card-finished" : ""}`}
       style={cardStyle}
       styles={cardStyles}
     >
