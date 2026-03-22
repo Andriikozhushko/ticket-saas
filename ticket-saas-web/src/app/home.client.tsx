@@ -145,27 +145,38 @@ function EventCard({ e }: { e: EventVM }) {
           {e.isFinished ? (
             <>
               <Box
+                className="home-finished-photo-fx"
                 style={{
                   position: "absolute",
                   inset: 0,
                   zIndex: 2,
-                  background:
-                    "linear-gradient(180deg, rgba(8,10,18,0.12) 0%, rgba(8,10,18,0.58) 100%), radial-gradient(80% 48% at 50% 0%, rgba(239,68,68,0.18) 0%, rgba(239,68,68,0) 100%)",
                   pointerEvents: "none",
                 }}
               />
               <Box
                 style={{
                   position: "absolute",
-                  right: 12,
-                  bottom: 12,
+                  inset: 0,
                   zIndex: 3,
-                  background: "rgba(239,68,68,0.2)",
-                  border: "1px solid rgba(239,68,68,0.5)",
-                  borderRadius: 999,
-                  padding: "6px 12px",
+                  background:
+                    "linear-gradient(180deg, rgba(8,10,18,0.12) 0%, rgba(8,10,18,0.58) 100%), radial-gradient(80% 48% at 50% 0%, rgba(239,68,68,0.18) 0%, rgba(239,68,68,0) 100%)",
+                  pointerEvents: "none",
+                }}
+              />
+              <Box
+                className="home-finished-ribbon"
+                style={{
+                  position: "absolute",
+                  left: "-10%",
+                  right: "-10%",
+                  top: "50%",
+                  zIndex: 4,
+                  transform: "translateY(-50%) rotate(-7deg)",
+                  padding: "10px 0",
                   textAlign: "center",
-                  boxShadow: "0 10px 22px rgba(0,0,0,0.22)",
+                  borderTop: "1px solid rgba(255,255,255,0.25)",
+                  borderBottom: "1px solid rgba(255,255,255,0.2)",
+                  boxShadow: "0 14px 34px rgba(0,0,0,0.32)",
                 }}
               >
                 <Text size="xs" fw={700} style={{ color: "#fee2e2", letterSpacing: "0.06em", textTransform: "uppercase" }}>
@@ -177,12 +188,13 @@ function EventCard({ e }: { e: EventVM }) {
           {e.posterUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              className={e.isFinished ? "home-finished-photo-img" : undefined}
               src={e.posterUrl}
               alt=""
               style={{ width: "100%", height: "auto", display: "block", verticalAlign: "top", maxHeight: 380, objectFit: "contain", objectPosition: "top", opacity: cardOpacity, filter: cardFilter }}
             />
           ) : (
-            <AspectRatio ratio={3 / 4} style={{ opacity: cardOpacity, filter: cardFilter }}>
+            <AspectRatio ratio={3 / 4} className={e.isFinished ? "home-finished-photo-img" : undefined} style={{ opacity: cardOpacity, filter: cardFilter }}>
               <PosterFallback seed={e.id} title={e.title} />
             </AspectRatio>
           )}

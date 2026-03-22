@@ -163,6 +163,52 @@ body {
     opacity: 0;
   }
 }
+@keyframes home-finished-orb-a {
+  0%, 100% {
+    transform: translate3d(-6%, -5%, 0) scale(1);
+    opacity: 0.16;
+  }
+  50% {
+    transform: translate3d(8%, 6%, 0) scale(1.08);
+    opacity: 0.26;
+  }
+}
+@keyframes home-finished-orb-b {
+  0%, 100% {
+    transform: translate3d(5%, 7%, 0) scale(1.02);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translate3d(-8%, -5%, 0) scale(1.1);
+    opacity: 0.2;
+  }
+}
+@keyframes home-finished-drift {
+  0%, 100% {
+    background-position: 0% 0%, 100% 100%;
+  }
+  50% {
+    background-position: 100% 0%, 0% 100%;
+  }
+}
+@keyframes home-finished-photo-breathe {
+  0%, 100% {
+    transform: scale(1);
+    filter: grayscale(0.34) saturate(0.84) brightness(0.9);
+  }
+  50% {
+    transform: scale(1.008);
+    filter: grayscale(0.28) saturate(0.9) brightness(0.94);
+  }
+}
+@keyframes home-finished-ribbon-glow {
+  0%, 100% {
+    box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+  }
+  50% {
+    box-shadow: 0 12px 30px rgba(148, 36, 36, 0.22);
+  }
+}
 .home-animated-bg {
   position: fixed;
   inset: 0;
@@ -234,9 +280,50 @@ body {
   z-index: 1;
   pointer-events: none;
   border-radius: 12px;
-  background: linear-gradient(90deg, rgba(239,68,68,0) 0%, rgba(248,113,113,0.18) 46%, rgba(239,68,68,0) 100%);
+  background: linear-gradient(90deg, rgba(239,68,68,0) 0%, rgba(248,113,113,0.1) 46%, rgba(239,68,68,0) 100%);
   mix-blend-mode: screen;
-  animation: home-finished-sheen 5.6s ease-in-out infinite;
+  animation: home-finished-sheen 8.8s ease-in-out infinite;
+}
+.home-finished-photo-fx {
+  overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 18% 20%, rgba(239, 68, 68, 0.14) 0%, rgba(239, 68, 68, 0) 80%),
+    radial-gradient(52% 45% at 82% 84%, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0) 78%);
+  background-size: 150% 150%, 150% 150%;
+  animation: home-finished-drift 14s ease-in-out infinite;
+}
+.home-finished-photo-fx::before,
+.home-finished-photo-fx::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(24px);
+  mix-blend-mode: screen;
+}
+.home-finished-photo-fx::before {
+  width: 56%;
+  height: 56%;
+  top: -20%;
+  left: -14%;
+  background: radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.34) 0%, rgba(239, 68, 68, 0) 72%);
+  animation: home-finished-orb-a 10.5s ease-in-out infinite;
+}
+.home-finished-photo-fx::after {
+  width: 60%;
+  height: 60%;
+  right: -18%;
+  bottom: -22%;
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.24) 0%, rgba(59, 130, 246, 0) 72%);
+  animation: home-finished-orb-b 12.5s ease-in-out infinite;
+}
+.home-finished-photo-img {
+  animation: home-finished-photo-breathe 12s ease-in-out infinite;
+  will-change: transform, filter;
+}
+.home-finished-ribbon {
+  background: linear-gradient(90deg, rgba(34, 18, 22, 0.84) 0%, rgba(84, 31, 40, 0.86) 48%, rgba(34, 18, 22, 0.84) 100%);
+  backdrop-filter: blur(4px);
+  animation: home-finished-ribbon-glow 9.6s ease-in-out infinite;
 }
 
 /* Шапка: навігація та бургер */
