@@ -147,28 +147,6 @@ function EventCard({ e }: { e: EventVM }) {
               <Box
                 style={{
                   position: "absolute",
-                  top: 12,
-                  left: 12,
-                  zIndex: 3,
-                  background: "rgba(9,11,18,0.86)",
-                  color: "#f8fafc",
-                  padding: "8px 12px",
-                  borderRadius: 10,
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  textAlign: "center",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  backdropFilter: "blur(8px)",
-                  boxShadow: "0 10px 26px rgba(0,0,0,0.32)",
-                }}
-              >
-                Завершено
-              </Box>
-              <Box
-                style={{
-                  position: "absolute",
                   inset: 0,
                   zIndex: 2,
                   background:
